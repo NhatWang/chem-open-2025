@@ -144,44 +144,6 @@
     <script>
       const socket = io();
     
-      // 🧃 Modal "Cảm ơn"
-      function showFinalThankYouModal() {
-        const modal = document.createElement("div");
-        modal.style.cssText = `
-          position: fixed;
-          top: 0; left: 0;
-          width: 100%; height: 100%;
-          background: rgba(0,0,0,0.6);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-        `;
-        modal.innerHTML = `
-          <div style="
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            max-width: 400px;
-          ">
-            <h2>🎉 Cảm ơn bạn đã đăng ký giải đấu!</h2>
-            <p>Chúng tôi đã ghi nhận thông tin và thanh toán của bạn.</p>
-            <button onclick="this.closest('div').parentElement.remove()" style="
-              margin-top: 20px;
-              padding: 8px 16px;
-              background: #007bff;
-              color: white;
-              border: none;
-              border-radius: 6px;
-              cursor: pointer;
-            ">Đóng</button>
-          </div>
-        `;
-        document.body.appendChild(modal);
-      }
-    
       socket.on("payment-updated", ({ mssv, status }) => {
         const rows = document.querySelectorAll("#dataTable tbody tr");
         rows.forEach(row => {

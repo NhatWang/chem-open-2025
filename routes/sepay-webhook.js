@@ -3,6 +3,7 @@ const router = express.Router();
 const Registration = require("../models/Registration");
 
 router.post("/sepay-webhook", async (req, res) => {
+  console.log("📦 Nhận webhook từ Sepay:", req.body); 
   const { amount, note } = req.body;
 
   const regex = /^(\d{8})/; // MSSV đầu chuỗi
