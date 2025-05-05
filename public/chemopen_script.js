@@ -194,7 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateBankQR(mssv, fullName, selected);
     document.getElementById("registrationSection").style.display = "none";
     document.getElementById("paymentSection").style.display = "block";
-    startPollingPaymentStatus(savedData.mssv);
 
     // ✅ Render lại PayPal button
     const paypalContainer = document.getElementById("paypal-button-container");
@@ -423,27 +422,3 @@ document.getElementById('prevPageBtn').addEventListener('click', () => {
   document.getElementById('nextPageBtn').style.display = 'inline-block';
 });
 })
-
-let pollingInterval;
-
-function startPollingPaymentStatus(mssv) {
-  if (pollingInterval) clearInterval(pollingInterval); // Clear nếu đã chạy trước đó
-
-  pollingInterval = setInterval(async () => {
-    try {
-      const res = await fetch(`/api/payment-status?mssv=${encodeURIComponent(mssv)}`);
-      const result = await res.json();
-
-      if (result.success && result.paymentStatus === "paid") {
-        clearInterval(pollingInterval); // Ngừng polling
-        showToast("🎉 Cảm ơn bạn đã đăng ký!", "success");
-
-        // Optional: cập nhật giao diện
-        const statusEl = document.getElementById("paymentStatusDisplay");
-        if (statusEl) statusEl.textContent = "Đã thanh toán";
-      }
-    } catch (error) {
-      console.error("❌ Lỗi kiểm tra trạng thái:", error);
-    }
-  }, 5000); // kiểm tra mỗi 5 giây
-}

@@ -2,35 +2,43 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const http = require("http");
+const path = require("path");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const server = http.createServer(app); // dùng http để tạo server
+
+// ⚡️ Khởi tạo socket.io
+const { Server } = require("socket.io");
+const io = new Server(server, {
+  cors: {
+    origin: "*", // hoặc cụ thể domain nếu deploy
+    methods: ["GET", "POST", "PUT", "DELETE"]
+  }
+});
+
+// Gắn io vào app để các route khác có thể dùng
+app.set("io", io);
 
 const PORT = process.env.PORT || 3001;
-const mongoURI = process.env.MONGODB_URI; // 👉 đúng biến tên
+const mongoURI = process.env.MONGODB_URI;
 
 mongoose.connect(mongoURI)
   .then(() => console.log("✅ Đã kết nối MongoDB Atlas"))
   .catch(err => console.error("❌ Lỗi MongoDB:", err));
 
-// Gắn routes
-const registerRoute = require("./routes/register");
-app.use("/api", registerRoute);
-const registrationsRoute = require("./routes/registrations");
-app.use("/api", registrationsRoute);
-const updatePaymentRoute = require("./routes/update-payment");
-app.use("/api", updatePaymentRoute);
-const paymentStatusRoute = require("./routes/payment-status");
-app.use("/api", paymentStatusRoute);
-const deleteRoute = require("./routes/delete-registration");
-app.use("/api", deleteRoute);
-const sepayWebhookRoute = require("./routes/sepay-webhook");
-app.use("/api", sepayWebhookRoute);
+app.use(cors());
+app.use(express.json());
 
-const path = require("path");
+// Gắn các routes
+app.use("/api", require("./routes/register"));
+app.use("/api", require("./routes/registrations"));
+app.use("/api", require("./routes/update-payment"));
+app.use("/api", require("./routes/payment-status"));
+app.use("/api", require("./routes/delete-registration"));
+app.use("/api", require("./routes/sepay-webhook")); // Webhook sẽ emit qua io
 
-// Phục vụ chemopen_index.html khi vào /
+// Phục vụ HTML
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chemopen_index.html"));
 });
@@ -39,8 +47,9 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chemopen_admin.html"));
 });
 
-// Sau đó mới cấu hình static
 app.use(express.static(path.join(__dirname, "public")));
 
-// Start server
-app.listen(PORT, () => console.log(`🚀 Server chạy tại http://localhost:${PORT}`));
+// 🚀 Start server + socket
+server.listen(PORT, () => {
+  console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
+});

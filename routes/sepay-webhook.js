@@ -1,45 +1,37 @@
 const express = require("express");
 const router = express.Router();
-const Registration = require("../models/Registration"); // Đảm bảo bạn đã có model này
+const Registration = require("../models/Registration");
 
 router.post("/sepay-webhook", async (req, res) => {
+  const { amount, note } = req.body;
+
+  const regex = /^(\d{8})/; // MSSV đầu chuỗi
+  const match = note?.match(regex);
+
+  if (!match) {
+    return res.json({ success: true, message: "Bỏ qua giao dịch không hợp lệ" });
+  }
+
+  const mssv = match[1];
+  const io = req.app.get("io"); // Lấy socket instance
+
   try {
-    const data = req.body;
+    const user = await Registration.findOne({ mssv });
 
-    // Chỉ xử lý giao dịch chuyển tiền vào
-    if (data.transferType !== "in") {
-      return res.status(200).json({ success: true, message: "Bỏ qua giao dịch không hợp lệ" });
+    if (!user) {
+      return res.json({ success: false, message: `Không tìm thấy MSSV: ${mssv}` });
     }
 
-    const note = data.content || "";
-    const mssv = note.split("_")[0]?.trim();
+    user.paymentStatus = "paid";
+    await user.save();
 
-    if (!mssv) {
-      return res.status(400).json({ success: false, message: "Thiếu MSSV trong nội dung chuyển khoản" });
-    }
+    // Gửi sự kiện tới tất cả client đang kết nối
+    io.emit("payment-updated", { mssv, status: "paid" });
 
-    const transferAmount = parseInt(data.transferAmount);
-
-    const registration = await Registration.findOne({ mssv });
-
-    if (!registration) {
-      return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký tương ứng" });
-    }
-
-    if (parseInt(registration.amount) !== transferAmount) {
-      return res.status(400).json({ success: false, message: "Số tiền không khớp với đăng ký" });
-    }
-
-    await Registration.updateOne(
-      { mssv },
-      { $set: { paymentStatus: "paid" } }
-    );
-
-    console.log(`✅ SePay: Đã cập nhật trạng thái "paid" cho MSSV: ${mssv}`);
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("❌ Lỗi xử lý webhook SePay:", error);
-    res.status(500).json({ success: false, message: "Lỗi server" });
+    return res.json({ success: true, message: `✅ Đã xác thực cho MSSV: ${mssv}` });
+  } catch (err) {
+    console.error("❌ Lỗi xử lý webhook:", err);
+    return res.status(500).json({ success: false, message: "Lỗi máy chủ" });
   }
 });
 
