@@ -151,6 +151,13 @@
         row.querySelector(".status").className = "status paid";
         row.querySelector(".action-buttons")?.remove();
         showToast(`🎉 MSSV ${mssv} đã thanh toán`, "success");
+      if (status === "paid") {
+        showFinalThankYouModal(); // 👈 thêm dòng này
+      }
+      } else if (row.children[1].textContent === mssv && status === "failed") {
+        row.querySelector(".status").textContent = "❌ Thất bại";
+        row.querySelector(".status").className = "status failed";
+        showToast(`❌ MSSV ${mssv} đã thất bại`, "error");
       }
     });
   });
