@@ -82,6 +82,21 @@
   from { opacity: 1; right: 20px }
   to   { opacity: 0; right: 0px }
 }
+#partnerTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+  background: #fff;
+}
+#partnerTable th, #partnerTable td {
+  padding: 10px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+#partnerTable th {
+  background-color: #28a745;
+  color: white;
+}
   </style>
 </head>
 <body>
@@ -94,6 +109,8 @@
         <th>Họ tên</th>
         <th>Email</th>
         <th>SĐT</th>
+        <th>Facebook</th>
+        <th>Khoa</th>
         <th>Lớp</th>
         <th>Nội dung thi đấu</th>
         <th>Phương thức thanh toán</th>
@@ -103,54 +120,109 @@
     </thead>
     <tbody></tbody>
   </table>
+  <h2>Thông Tin Người Đấu Cùng</h2>
+<table id="partnerTable">
+  <thead>
+    <tr>
+      <th>STT</th>
+      <th>MSSV Người Đăng Ký</th>
+      <th>Họ tên người đăng kí</th>
+      <th>MSSV Người Đấu Cùng</th>
+      <th>Họ tên người đấu cùng</th>
+      <th>Email</th>
+      <th>SĐT</th>
+      <th>Facebook</th>
+      <th>Khoa</th>
+      <th>Lớp</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
   <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
-  <script>
-document.addEventListener("DOMContentLoaded", () => {
-    const table = document.getElementById("dataTable");
-const tbody = table.querySelector("tbody");
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  const socket = io();
 
-// 1️⃣ Load danh sách thí sinh
-fetch("/api/registrations")
-  .then((res) => res.json())
-  .then((data) => {
-    data.forEach((reg, index) => {
-      const row = document.createElement("tr");
-
-      row.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${reg.mssv}</td>
-        <td>${reg.fullName}</td>
-        <td>${reg.email}</td>
-        <td>${reg.phone}</td>
-        <td>${reg.lop}</td>
-        <td>${reg.noidung?.join(" + ") || "-"}</td>
-        <td>${reg.paymentMethod === "paypal" ? "PayPal" : "Chuyển khoản"}</td>
-        <td class="status ${reg.paymentStatus}">
-          ${reg.paymentStatus === "paid"
-            ? "✅ Đã thanh toán"
-            : reg.paymentStatus === "failed"
-            ? "❌ Thất bại"
-            : "❌ Chưa thanh toán"}
-        </td>
-        <td>
-          ${reg.paymentMethod === "bank" && reg.paymentStatus !== "paid" && reg.paymentStatus !== "failed" ? `
-            <div class="action-buttons">
-              <button class="mark-paid" data-id="${reg.mssv}">Chuyển khoản thành công</button>
-              <button class="mark-failed" data-id="${reg.mssv}">Chuyển khoản thất bại</button>
-            </div>
-          ` : reg.paymentMethod === "paypal" && reg.paymentStatus === "pending" ? `
-            <span class="pending">Đang chờ PayPal xử lý</span>
-          ` : ``}
-
-          <div style="margin-top: 6px;">
-            <button class="delete-entry" data-id="${reg.mssv}" style="background-color: #6c757d;">Xoá đơn</button>
-          </div>
-        </td>
-      `;
-      tbody.appendChild(row);
+  socket.on("payment-updated", ({ mssv, status }) => {
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+    rows.forEach(row => {
+      if (row.children[1].textContent === mssv) {
+        row.querySelector(".status").textContent = "✅ Đã thanh toán";
+        row.querySelector(".status").className = "status paid";
+        row.querySelector(".action-buttons")?.remove();
+        showToast(`🎉 MSSV ${mssv} đã thanh toán`, "success");
+      }
     });
   });
+document.addEventListener("DOMContentLoaded", () => {
+    const table = document.getElementById("dataTable");
+    function loadTableData() {
+  const tbody = document.querySelector("tbody");
+  fetch("/api/registrations")
+    .then(res => res.json())
+    .then(data => {
+      tbody.innerHTML = ""; // Xoá dữ liệu cũ
+      data.forEach((reg, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${reg.mssv}</td>
+          <td>${reg.fullName}</td>
+          <td>${reg.email}</td>
+          <td>${reg.phone}</td>
+          <td>${reg.facebook}</td>
+          <td>${reg.khoa}</td>
+          <td>${reg.lop}</td>
+          <td>${reg.noidung?.join(" + ") || "-"}</td>
+          <td>${reg.paymentMethod === "paypal" ? "PayPal" : "Chuyển khoản"}</td>
+          <td class="status ${reg.paymentStatus}">
+            ${reg.paymentStatus === "paid"
+              ? "✅ Đã thanh toán"
+              : reg.paymentStatus === "failed"
+              ? "❌ Thất bại"
+              : "❌ Chưa thanh toán"}
+          </td>
+          <td>
+            ${reg.paymentMethod === "bank" && reg.paymentStatus !== "paid" && reg.paymentStatus !== "failed" ? `
+              <div class="action-buttons">
+                <button class="mark-paid" data-id="${reg.mssv}">Chuyển khoản thành công</button>
+                <button class="mark-failed" data-id="${reg.mssv}">Chuyển khoản thất bại</button>
+              </div>
+            ` : reg.paymentMethod === "paypal" && reg.paymentStatus === "pending" ? `
+              <span class="pending">Đang chờ PayPal xử lý</span>
+            ` : ``}
 
+            <div style="margin-top: 6px;">
+              <button class="delete-entry" data-id="${reg.mssv}" style="background-color: #6c757d;">Xoá đơn</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+      const partnerTbody = document.querySelector("#partnerTable tbody");
+      partnerTbody.innerHTML = "";
+
+      let partnerIndex = 1;
+      data.forEach((reg) => {
+        if (reg.partnerInfo && reg.partnerInfo.fullName) {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${partnerIndex++}</td>
+            <td>${reg.mssv}</td>
+            <td>${reg.fullName}</td>
+            <td>${reg.partnerInfo.mssv || "-"}</td>
+            <td>${reg.partnerInfo.fullName}</td>
+            <td>${reg.partnerInfo.email}</td>
+            <td>${reg.partnerInfo.phone}</td>
+            <td>${reg.partnerInfo.facebook}</td>
+            <td>${reg.partnerInfo.khoa}</td>
+            <td>${reg.partnerInfo.lop}</td>
+          `;
+          partnerTbody.appendChild(row);
+        }
+      });
+    });
+}
 // 2️⃣ Lắng nghe sự kiện cập nhật trạng thái
 
 document.addEventListener("click", (e) => {
