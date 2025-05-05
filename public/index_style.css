@@ -1,0 +1,322 @@
+@font-face {
+    font-family: 'UTM AVO';
+    src: url(fonts/UTM\ Avo.ttf) format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'UTM AVO';
+    src: url(fonts/UTM\ AvoBold.ttf) format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'UTM AVO';
+    src: url(fonts/UTM\ AvoItalic.ttf) format('truetype');
+    font-weight: 400;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'UTM AVO';
+    src: url(fonts/UTM\ AvoBold_Italic.ttf) format('truetype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+/* Define CSS variables for colors */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #0061D5;
+    --light-gray: #f1f1f1;
+    --dark-gray: #333;
+    --button-bg: rgba(0, 0, 0, 0.5);
+    --button-hover-bg: rgba(0, 0, 0, 0.7);
+    --item-bg: #ccc;
+    --text-color: #fff;
+}
+
+/* Thiết lập cho body */
+body {
+    margin: 0; 
+    font-family: 'UTM AVO', sans-serif;
+    background-color: #ffffff; 
+    color: #333; 
+    line-height: 1.6;
+}
+
+/* Thiết lập cho header */
+header.header {
+    position: fixed; 
+    background-color: #ffffff; 
+    padding: 10px 20px; 
+    width: 100%;
+    top: 0; 
+    left: 0; 
+    z-index: 1000; 
+    display: flex; 
+    align-items: center; 
+}
+
+/* Thiết lập cho logo */
+header .logo img {
+    width: 100px; 
+    height: auto;
+    display: block; 
+}
+
+/* Thiết lập cho tiêu đề */
+header .title {
+    font-size: 20px;
+    color: #0061D5;
+    font-family: 'UTM AVO', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-left: 20px; /* Đảm bảo khoảng cách giữa logo và tiêu đề */
+}
+
+header .subtitle {
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+    font-family: 'UTM AVO', sans-serif;
+}
+/* Thiết lập cho thanh menu ngang */
+ul.menu-list {
+    list-style-type: none; /* Loại bỏ dấu chấm */
+    margin: 120px 0 0 0;
+    padding: 0;
+    display: flex; /* Sử dụng flexbox để hiển thị danh sách theo hàng ngang */
+    justify-content: space-around; /* Đảm bảo các mục menu cách đều nhau */
+    background-color: #007bff; /* Màu nền cho menu */
+    align-items: center; /* Căn giữa các mục menu theo chiều dọc */
+    height: 50px; /* Chiều cao của menu */
+}
+
+/* Thiết lập cho các liên kết trong menu */
+ul.menu-list li a {
+    text-decoration: none; /* Loại bỏ gạch dưới của liên kết */
+    color: #ffffff; /* Màu chữ */
+    font-family: 'UTM AVO', sans-serif; /* Sử dụng font đã định nghĩa */
+    font-size: 18px;
+    font-weight: 600;
+    padding: 10px 15px; /* Khoảng cách giữa các mục */
+    letter-spacing: 1px; /* Khoảng cách giữa các chữ cái */
+    transition: background-color 0.3s ease; 
+}
+
+/* Thêm hiệu ứng khi hover */
+ul.menu-list li a:hover {
+    background-color: #0056b3; /* Màu nền khi hover */
+    border-radius: 3px; /* Bo tròn góc */
+}
+
+ul.menu-list li a i {
+    margin-right: 8px; /* Khoảng cách giữa icon và chữ */
+    font-size: 18px; /* Kích thước icon */
+}
+
+/*Container chung */
+.container {
+    display: flex; /* Sử dụng flexbox để căn chỉnh các phần tử bên trong */
+    height: auto; /* Chiều cao của container */
+    flex-direction: row;
+    align-items: center;
+    justify-content: center; 
+    padding-top: 60px;
+}
+
+/*Phần slideshow*/
+.slideshow-container {
+    flex: 1; /* Chiếm toàn bộ chiều rộng còn lại */
+    position: relative; /* Để có thể sử dụng absolute cho các phần tử con */
+    height: auto;
+    display: flex;
+    justify-content: center; /* Căn giữa các phần tử bên trong */
+    align-items: center; /* Căn giữa các phần tử bên trong */
+    padding: 20px;
+}
+
+/* Transition vendor prefixes for older browsers */
+.activity-items-container,
+button {
+    -webkit-transition: transform 0.5s ease;
+    -moz-transition: transform 0.5s ease;
+    -o-transition: transform 0.5s ease;
+    transition: transform 0.5s ease;
+}
+
+.mySlides {
+    opacity: 0;
+    position: absolute; 
+    width: 80%; 
+    height: auto;
+    transition: opacity 1s ease-in-out; 
+}
+
+/*Style cho ảnh*/
+.mySlides img {
+    width: 120%; /* Đảm bảo ảnh chiếm toàn bộ chiều rộng của slideshow */
+    height: auto; /* Đảm bảo ảnh tự động điều chỉnh chiều cao */    
+    border-radius: 10px; /* Bo tròn góc ảnh */ 
+    object-fit: cover;
+}
+
+.mySlides.active {
+    opacity: 1; 
+    display: block;
+}
+
+/*Phần content*/
+.content {
+    flex: 1; /* Chiếm toàn bộ chiều rộng còn lại */
+    padding: 20px; /* Khoảng cách padding cho nội dung */
+    overflow-y: auto; /* Cuộn dọc nếu nội dung vượt quá chiều cao */
+    color: #333; /* Màu chữ */
+    text-align: justify;
+    margin-top: -60px;
+}
+
+/*Style cho tiêu đề nội dung*/
+.content h2 {
+    font-size: 28px;
+    color: var(--secondary-color); /* Màu chữ */
+    font-family: 'UTM AVO', sans-serif; 
+    font-weight: 700; 
+}
+
+/*Style cho đoạn văn bản*/
+.content p {
+    font-size: 16px; /* Kích thước chữ */
+    line-height: 1.6; /* Khoảng cách giữa các dòng */
+    margin-bottom: 20px; /* Khoảng cách dưới đoạn văn bản */
+    font-family: 'UTM AVO', sans-serif; /* Sử dụng font đã định nghĩa */
+}
+
+/* Thiết lập footer */
+footer {
+    background-color:#007bff ; /* Màu nền cho footer */
+    padding: 20px; /* Khoảng cách trong footer */
+    text-align: center; /* Căn giữa nội dung */
+    color: #fff; /* Màu chữ */
+    font-weight: 600;
+    font-family: 'UTM AVO', sans-serif; /* Sử dụng font đã định nghĩa */
+    font-size: 16px; /* Kích thước chữ */
+    line-height: 1.6; /* Khoảng cách giữa các dòng */
+}
+
+/* Điều chỉnh cho đoạn văn bản */
+footer p {
+    margin: 10px 0; /* Khoảng cách trên và dưới đoạn văn bản */
+}
+
+/* Điều chỉnh kích thước cho năm hoặc các thông tin nhỏ */
+footer .footer-small {
+    font-size: 14px; /* Kích thước nhỏ hơn cho thông tin phụ */
+}
+
+/* Tiêu đề hoạt động */
+.slideshow-text {
+    font-size: 30px;
+    color: #0061D5;
+    font-family: 'UTM AVO', sans-serif;
+    font-weight: 700;
+    text-align: center; /* Căn giữa tiêu đề */
+    padding-top: 50px;
+}
+
+.swiper-container {
+    width: 100%;
+    height: auto; /* Chiều cao tự động */
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden; /* Ẩn các phần tử tràn ra ngoài */
+    display: flex; /* Sử dụng flexbox để căn giữa các phần tử bên trong */
+    justify-content: center; /* Căn giữa các phần tử bên trong */
+    background-color: var(--light-gray); /* Màu nền cho slideshow */
+}
+
+.swiper-slide {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.swiper-slide img {
+    width: 150%;
+    height: 150%;
+    border-radius: 10px;
+    object-fit: fill; /* Đảm bảo ảnh chiếm toàn bộ chiều rộng và chiều cao của slide */
+}
+
+.swiper-button-next, .swiper-button-prev {
+    color: white;
+    padding: 10px;
+    border-radius: 50%;
+    font-size: 15px;
+}
+
+.swiper-button-next {
+    right: 10px;
+}
+
+.swiper-button-prev {
+    left: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .swiper-container {
+        height: 300px;
+    }
+}
+.image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px; 
+}
+
+.image-container img {
+    width: 100%;
+    height: auto;
+    display: block; /* Đảm bảo ảnh không bị tràn ra ngoài */
+    object-fit: cover; /* Đảm bảo ảnh không bị méo */
+    border-radius: 10px; /* Bo tròn góc ảnh */
+    transition: transform 0.3s ease; /* Thêm chuyển động mượt mà */
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* Chiếm toàn bộ chiều rộng */
+    height: 100%; /* Chiều cao tự động */
+    background-color: rgba(0, 0, 0, 0.45); /* Đổi màu nền khi hover */
+    opacity: 0; /* Ẩn overlay khi chưa hover */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease; /* Hiệu ứng chuyển đổi */
+}
+
+.overlay-text {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.image-container:hover .overlay {
+    opacity: 1; /* Hiển thị overlay khi hover */
+}
+/* Khi rê chuột vào hình ảnh, thực hiện zoom nhẹ */
+.image-container:hover img {
+    transform: scale(1.1); /* Phóng to nhẹ */
+    transition: transform 0.3s ease; /* Hiệu ứng chuyển đổi */
+}
+
