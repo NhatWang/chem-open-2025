@@ -235,6 +235,11 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
           console.log("🔄 Cập nhật trạng thái thành công:", data);
           showToast("🎉 Cảm ơn bạn đã đăng ký!", "success");
+          showFinalThankYouModal();
+          // Đóng modal sau 5 giây
+          setTimeout(() => {
+            document.getElementById("resultModal").style.display = "none";
+          }, 5000);
         })
         .catch(err => {
           console.error("❌ Lỗi cập nhật trạng thái:", err);
@@ -422,3 +427,27 @@ document.getElementById('prevPageBtn').addEventListener('click', () => {
   document.getElementById('nextPageBtn').style.display = 'inline-block';
 });
 })
+function showFinalThankYouModal() {
+  const modal = document.createElement("div");
+  modal.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  `;
+  modal.innerHTML = `
+    <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+      <h2>🎉 Cảm ơn bạn đã đăng ký giải đấu!</h2>
+      <button id="closeThankYouModal" style="margin-top: 20px; padding: 10px 20px;">Đóng</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("closeThankYouModal").addEventListener("click", () => {
+    modal.remove();
+  });
+}
