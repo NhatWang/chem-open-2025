@@ -300,7 +300,7 @@ function updateBankQR(mssv, fullName, selectedOptions) {
   const amount = getPaymentAmountFromSelected(selectedOptions);
   const accountNumber = "VQRQACIDD7396"; // 👉 thay bằng số tài khoản của bạn
   const bankCode = "MB";              // 👉 mã ngân hàng (MB, VCB, ACB,...)
-  const note = `MSSV:${mssv}|NAME:${fullName}|ND:${selectedOptions.join("_")}`;
+  const note = `${mssv}|${fullName}|${selectedOptions.join("_")}`;
 
   const sepayQRUrl = `https://qr.sepay.vn/img?acc=${accountNumber}&bank=${bankCode}&amount=${amount}&des=${encodeURIComponent(note)}`;
 
