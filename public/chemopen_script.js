@@ -294,8 +294,12 @@ function getPaymentAmountFromSelected(options) {
 
 function updateBankQR(mssv, fullName, selectedOptions) {
   const amount = getPaymentAmountFromSelected(selectedOptions);
-  const note = `${mssv}_${fullName}_${selectedOptions.join("_")}`;
-  const sepayQRUrl = `https://api.sepay.vn/qrcode?amount=${amount}&note=${encodeURIComponent(note)}`;
+  const accountNumber = "VQRQACIDD7396"; // 👉 thay bằng số tài khoản của bạn
+  const bankCode = "MB";              // 👉 mã ngân hàng (MB, VCB, ACB,...)
+  const note = `MSSV:${mssv}|NAME:${fullName}|ND:${selectedOptions.join("_")}`;
+
+  const sepayQRUrl = `https://qr.sepay.vn/img?acc=${accountNumber}&bank=${bankCode}&amount=${amount}&des=${encodeURIComponent(note)}`;
+
   document.getElementById("bankQRImg").src = sepayQRUrl;
   document.getElementById("paymentAmountDisplay").textContent = `Số tiền cần thanh toán: ${amount.toLocaleString("vi-VN")}₫`;
 }
