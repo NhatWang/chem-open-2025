@@ -1,0 +1,313 @@
+@font-face {
+    font-family: 'UTM AVO';
+    src: url(fonts/UTM\ Avo.ttf) format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'UTM AVO';
+    src: url(fonts/UTM\ AvoBold.ttf) format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'UTM AVO';
+    src: url(fonts/UTM\ AvoItalic.ttf) format('truetype');
+    font-weight: 400;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'UTM AVO';
+    src: url(fonts/UTM\ AvoBold_Italic.ttf) format('truetype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'SVN-MissionX';
+    src: url(fonts/SVN-MissionX.otf) format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SVN-Bango';
+    src: url(fonts/SVN-Bango.otf) format('truetype');
+    font-style: normal;
+}
+
+/* Define CSS variables for colors */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #0061D5;
+    --light-gray: #f1f1f1;
+    --dark-gray: #333;
+    --button-bg: rgba(0, 0, 0, 0.5);
+    --button-hover-bg: rgba(0, 0, 0, 0.7);
+    --item-bg: #ccc;
+    --text-color: #fff;
+}
+
+/* Thiết lập cho body */
+body {
+    margin: 0; 
+    font-family: 'UTM AVO', sans-serif;
+    background-color: #f1f1f1;
+    color: #333; 
+    line-height: 1.6;
+    height: auto;
+    padding: 0;
+    overflow-y: auto;
+    width: 100%;
+}
+
+/* Thiết lập cho header */
+header.header {
+    position: fixed; 
+    background-color: #ffffff; 
+    padding: 10px 20px; 
+    width: 100%;
+    top: 0; 
+    left: 0; 
+    z-index: 1000; 
+    display: flex; 
+    align-items: center; 
+}
+
+/* Thiết lập cho logo */
+header .logo img {
+    width: 100px; 
+    height: auto;
+    display: block; 
+}
+
+/* Thiết lập cho tiêu đề */
+header .title {
+    font-size: 20px;
+    color: #0061D5;
+    font-family: 'UTM AVO', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-left: 20px; /* Đảm bảo khoảng cách giữa logo và tiêu đề */
+}
+
+header .subtitle {
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+    font-family: 'UTM AVO', sans-serif;
+}
+/* Thiết lập cho thanh menu ngang */
+ul.menu-list {
+    list-style-type: none; /* Loại bỏ dấu chấm */
+    margin: 120px 0 0 0;
+    padding: 0;
+    display: flex; /* Sử dụng flexbox để hiển thị danh sách theo hàng ngang */
+    justify-content: space-around; /* Đảm bảo các mục menu cách đều nhau */
+    background-color: #007bff; /* Màu nền cho menu */
+    align-items: center; /* Căn giữa các mục menu theo chiều dọc */
+    height: 50px; /* Chiều cao của menu */
+}
+
+/* Thiết lập cho các liên kết trong menu */
+ul.menu-list li a {
+    text-decoration: none; /* Loại bỏ gạch dưới của liên kết */
+    color: #ffffff; /* Màu chữ */
+    font-family: 'UTM AVO', sans-serif; /* Sử dụng font đã định nghĩa */
+    font-size: 18px;
+    font-weight: 600;
+    padding: 10px 15px; /* Khoảng cách giữa các mục */
+    letter-spacing: 1px; /* Khoảng cách giữa các chữ cái */
+    transition: background-color 0.3s ease; 
+}
+
+/* Thêm hiệu ứng khi hover */
+ul.menu-list li a:hover {
+    background-color: #0056b3; /* Màu nền khi hover */
+    border-radius: 3px; /* Bo tròn góc */
+}
+
+ul.menu-list li a i {
+    margin-right: 8px; /* Khoảng cách giữa icon và chữ */
+    font-size: 18px; /* Kích thước icon */
+}
+footer {
+    background-color:#007bff ; /* Màu nền cho footer */
+    padding: 20px; /* Khoảng cách trong footer */
+    text-align: center; /* Căn giữa nội dung */
+    color: #fff; /* Màu chữ */
+    font-weight: 600;
+    font-family: 'UTM AVO', sans-serif; /* Sử dụng font đã định nghĩa */
+    font-size: 16px; /* Kích thước chữ */
+    line-height: 1.6; /* Khoảng cách giữa các dòng */
+    margin: 0;
+}
+
+/* Điều chỉnh cho đoạn văn bản */
+footer p {
+    margin: 10px 0; /* Khoảng cách trên và dưới đoạn văn bản */
+}
+
+/* Điều chỉnh kích thước cho năm hoặc các thông tin nhỏ */
+footer .footer-small {
+    font-size: 14px; /* Kích thước nhỏ hơn cho thông tin phụ */
+}
+.banner {
+    width: 60%;
+    height: auto;
+    padding-bottom: 40px;
+}
+.profile-container {
+    display: flex;
+    justify-content: center;
+    background: url(images/Asset\ 1.png);
+    background-size: cover;
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    padding: 50px;
+}
+.row1, .row2, .row3 {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    padding: 10px;
+}
+.row4 {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    padding: 15px;
+    padding-bottom: 30px;
+}
+
+.profile {
+    padding: 15px;
+}
+
+.profile-info, .profile-info-1, .profile-info-2, .profile-info-3, .profile-info-4, .profile-info-5, .profile-info-6, .profile-info-7, .profile-info-8, .profile-info-9, .profile-info-10, .profile-info-11 {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    overflow: hidden;
+    width: 225px;
+    height: 220px;
+    position: relative;
+    border: 1px solid #4C8BF5;
+}
+
+.profile-info img {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.profile-info-1 img {
+    width: 80%;
+    height: 110%;;
+    align-items: center;
+    position: relative;
+    left: 20px;
+}
+.profile-info-2 img {
+    width: 80%;
+    height: 110%;
+    align-items: center;
+    position: relative;
+    left: 20px;
+}
+.profile-info-4 img {
+    width: 80%;
+    height: 110%;
+    align-items: center;
+    position: relative;
+    left: 20px;
+    top: -10px;
+}
+.profile-info-5 img {
+    width: 82%;
+    height: 100%;
+    align-items: center;
+    position: relative;
+    left: 20px;
+}
+.profile-info-3 img {
+    width: 73%;
+    height: 105%;
+    align-items: center;
+    position: relative;
+    left: 30px;
+}
+.profile-info-6 img {
+    width: 95%;
+    height: 150%;
+    align-items: center;
+    position: relative;
+}
+.profile-info-7 img {
+    width: 83%;
+    height: 120%;
+    align-items: center;
+    position: relative;
+    left: 20px;
+}
+.profile-info-8 img {
+    width: 90%;
+    height: 120%;
+    align-items: center;
+    position: relative;
+    left: 20px;
+}
+.profile-info-9 img {
+    width: 78%;
+    height: 115%;
+    align-items: center;
+    position: relative;
+    left: 20px;
+}
+.profile-info-10 img {
+    width: 100%;
+    height: 140%;
+    align-items: center;
+    position: relative;
+}
+.profile-info-11 img {
+    width: 90%;
+    height: 127%;
+    align-items: center;
+    position: relative;
+    left: 10px;
+}
+
+.highlight {
+    background-color: #4C8BF5; /* Nền xanh */
+    color: white;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    width: 225px;
+    height: 75px;
+    border: 1px solid #4C8BF5;
+}
+
+.highlight h5 {
+    font-size: 18px;
+    text-align: center;
+    position: relative;
+    top: -20px;
+    font-family: 'UTM AVO', sans-serif;
+    font-weight: 700;
+}
+
+
+.highlight p  {
+    font-size: 13px;
+    text-align: center;
+    position: relative;
+    top: -45px;
+    font-family: 'UTM AVO', sans-serif;
+    font-weight: 400;
+}
+
+
