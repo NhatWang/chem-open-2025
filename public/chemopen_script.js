@@ -451,3 +451,22 @@ function showFinalThankYouModal() {
     modal.remove();
   });
 }
+// 📡 Lắng nghe cập nhật trạng thái từ server khi có thay đổi
+const socket = io();
+
+socket.on("payment-updated", ({ mssv, status }) => {
+  const currentMSSV = savedData?.mssv || document.querySelector("#modalPage1")?.textContent?.match(/\d{8}/)?.[0];
+
+  if (mssv === currentMSSV && status === "paid") {
+    const statusElem = document.querySelector("#modalPage1");
+    if (statusElem) {
+      const statusLine = statusElem.querySelector("p:last-child");
+      if (statusLine) {
+        statusLine.innerHTML = `<strong>Trạng thái thanh toán:</strong> ✅ Đã thanh toán`;
+      }
+    }
+
+    savedData.paymentStatus = "paid"; // cập nhật local
+    showFinalThankYouModal();
+  }
+});
