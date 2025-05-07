@@ -4,7 +4,6 @@ const registrationSchema = new mongoose.Schema({
   fullName: String,
   email: String,
   phone: String,
-  facebook: String,
   khoa: String,
   lop: String,
   mssv: String,
@@ -16,7 +15,6 @@ const registrationSchema = new mongoose.Schema({
     fullName: String,
     email: String,
     phone: String,
-    facebook: String,
     khoa: String,
     lop: String,
     mssv: String

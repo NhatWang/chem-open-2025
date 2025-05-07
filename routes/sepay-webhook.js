@@ -3,18 +3,22 @@ const router = express.Router();
 const Registration = require("../models/Registration");
 
 router.post("/sepay-webhook", async (req, res) => {
-  console.log("📦 Nhận webhook từ Sepay:", req.body); 
-  const { amount, note } = req.body;
+  console.log("📦 Nhận webhook từ Sepay:", req.body);
 
-  const regex = /^(\d{8})/; // MSSV đầu chuỗi
-  const match = note?.match(regex);
+  const { description } = req.body;
 
-  if (!match) {
-    return res.json({ success: true, message: "Bỏ qua giao dịch không hợp lệ" });
-  }
+  // ✂️ Xoá phần đầu và cuối mặc định
+  const cleaned = description
+    .replace(/^BankAPINotify Qacidd7396 SEPAY\d+ 1 /, "") // bỏ đầu
+    .replace(/ FT\d+ Trace \d+$/, "");                    // bỏ cuối
 
-  const mssv = match[1];
-  const io = req.app.get("io"); // Lấy socket instance
+  console.log("🧹 Sau khi xử lý chuỗi:", cleaned);
+
+  const parts = cleaned.trim().split(" ");
+  const mssv = parts[0];
+  const noidung = parts.slice(-2).join(" "); // VD: "Don nam"
+
+  const io = req.app.get("io");
 
   try {
     const user = await Registration.findOne({ mssv });
@@ -23,17 +27,21 @@ router.post("/sepay-webhook", async (req, res) => {
       return res.json({ success: false, message: `Không tìm thấy MSSV: ${mssv}` });
     }
 
+    if (user.paymentStatus === "paid") {
+      return res.json({ success: true, message: "Đã thanh toán trước đó." });
+    }
+
     user.paymentStatus = "paid";
     await user.save();
 
-    // Gửi sự kiện tới tất cả client đang kết nối
     io.emit("payment-updated", { mssv, status: "paid" });
 
-    return res.json({ success: true, message: `✅ Đã xác thực cho MSSV: ${mssv}` });
+    return res.json({ success: true, message: `✅ Xác nhận thanh toán cho MSSV: ${mssv}, nội dung: ${noidung}` });
   } catch (err) {
     console.error("❌ Lỗi xử lý webhook:", err);
     return res.status(500).json({ success: false, message: "Lỗi máy chủ" });
   }
 });
 
+// ❗ Đừng quên export router ra
 module.exports = router;
