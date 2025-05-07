@@ -9,14 +9,14 @@ router.post("/sepay-webhook", async (req, res) => {
 
   // ✂️ Xoá phần đầu và cuối mặc định
   const cleaned = description
-    .replace(/^BankAPINotify Qacidd7396 SEPAY\d+ 1 /, "") // bỏ đầu
-    .replace(/ FT\d+ Trace \d+$/, "");                    // bỏ cuối
+  .replace(/^BankAPINotify\s+Qacidd7396\s+SEPAY\d+\s+1\s+/, "")
+  .replace(/\s+FT\d+\s+Trace\s+\d+$/, "");
 
-  console.log("🧹 Sau khi xử lý chuỗi:", cleaned);
+console.log("🧹 Chuỗi đã làm sạch:", cleaned);
 
-  const parts = cleaned.trim().split(" ");
-  const mssv = parts[0];
-  const noidung = parts.slice(-2).join(" "); // VD: "Don nam"
+const parts = cleaned.trim().split(/\s+/); // chia theo nhiều khoảng trắng
+const mssv = parts[0];
+const noidung = parts.slice(-2).join(" ");
 
   const io = req.app.get("io");
 
