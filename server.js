@@ -1,4 +1,6 @@
 require("dotenv").config();
+console.log("✅ MONGO_URI:", process.env.MONGODB_URI);
+console.log("🌍 ENV:", process.env.NODE_ENV || "development");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -23,9 +25,13 @@ app.set("io", io);
 const PORT = process.env.PORT || 3001;
 const mongoURI = process.env.MONGODB_URI;
 
-mongoose.connect(mongoURI)
-  .then(() => console.log("✅ Đã kết nối MongoDB Atlas"))
-  .catch(err => console.error("❌ Lỗi MongoDB:", err));
+mongoose.connect(mongoURI, {
+  dbName: "test", // Rất quan trọng nếu URI chưa rõ tên DB
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("✅ Đã kết nối MongoDB Atlas (database: test)"))
+.catch(err => console.error("❌ Lỗi kết nối MongoDB:", err));
 
 app.use(cors());
 app.use(express.json());
