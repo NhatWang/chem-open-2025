@@ -14,8 +14,8 @@ router.post("/sepay-webhook", async (req, res) => {
 
 console.log("🧹 Chuỗi đã làm sạch:", cleaned);
 
-const parts = cleaned.trim().split(/\s+/); // chia theo nhiều khoảng trắng
-const mssv = parts[0];
+const parts = cleaned.trim().split(/\s+/);
+const mssv = String(parts[0]).trim();
 const noidung = parts.slice(-2).join(" ");
 
   const io = req.app.get("io");
@@ -24,6 +24,8 @@ const noidung = parts.slice(-2).join(" ");
     const user = await Registration.findOne({ mssv });
 
     if (!user) {
+      const all = await Registration.find({});
+      console.log("🧐 Các MSSV hiện có:", all.map(u => u.mssv));
       return res.json({ success: false, message: `Không tìm thấy MSSV: ${mssv}` });
     }
 
