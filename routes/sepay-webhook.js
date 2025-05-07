@@ -24,8 +24,6 @@ const noidung = parts.slice(-2).join(" ");
     const user = await Registration.findOne({ mssv: mssv.toString() });
 
     if (!user) {
-      const all = await Registration.find({});
-      console.log("🧐 Các MSSV hiện có:", all.map(u => u.mssv));
       return res.json({ success: false, message: `Không tìm thấy MSSV: ${mssv}` });
     }
 
