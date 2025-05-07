@@ -21,7 +21,7 @@ const noidung = parts.slice(-2).join(" ");
   const io = req.app.get("io");
 
   try {
-    const user = await Registration.findOne({ mssv });
+    const user = await Registration.findOne({ mssv: mssv.toString() });
 
     if (!user) {
       const all = await Registration.find({});
