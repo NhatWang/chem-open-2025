@@ -140,7 +140,6 @@ document.addEventListener("DOMContentLoaded", () => {
         partnerName: formData.get("partnerName"),
         partnerEmail: formData.get("partnerEmail"),
         partnerPhone: formData.get("partnerPhone"),
-        partnerFacebook: formData.get("partnerFacebook"),
         partnerKhoa,
         partnerLop,
         partnerMSSV: formData.get("partnerMSSV")
@@ -164,7 +163,6 @@ document.addEventListener("DOMContentLoaded", () => {
     fullName,
     email,
     phone,
-    facebook: formData.get("facebook"),
     khoa,
     lop,
     mssv,
@@ -177,7 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
           fullName: formData.get("partnerName"),
           email: formData.get("partnerEmail"),
           phone: formData.get("partnerPhone"),
-          facebook: formData.get("partnerFacebook"),
           khoa: formData.get("partnerKhoa"),
           lop: formData.get("partnerKhoa") === "Hóa học"
             ? document.getElementById("partnerLopSelect").value
@@ -300,22 +297,12 @@ function updateBankQR(mssv, fullName, selectedOptions) {
   const amount = getPaymentAmountFromSelected(selectedOptions);
   const accountNumber = "VQRQACIDD7396"; // 👉 thay bằng số tài khoản của bạn
   const bankCode = "MB";              // 👉 mã ngân hàng (MB, VCB, ACB,...)
-  const note = `${mssv}|${fullName}|${selectedOptions.join("_")}`;
+  const note = `${mssv}%20${fullName}%20${selectedOptions.join("_")}`;
 
-  const sepayQRUrl = `https://qr.sepay.vn/img?acc=${accountNumber}&bank=${bankCode}&amount=${amount}&des=${encodeURIComponent(note)}`;
+  const sepayQRUrl = `https://qr.sepay.vn/img?acc=${accountNumber}&bank=${bankCode}&amount=${amount}&des=${note}`;
 
   document.getElementById("bankQRImg").src = sepayQRUrl;
   document.getElementById("paymentAmountDisplay").textContent = `Số tiền cần thanh toán: ${amount.toLocaleString("vi-VN")}₫`;
-}
-
-function showToast(message, type = "success") {
-  const container = document.getElementById("toast-container");
-  const toast = document.createElement("div");
-  toast.className = `toast ${type === "error" ? "error" : ""}`;
-  toast.innerHTML = `<div class="toast-message">${message}</div><div class="toast-progress"></div>`;
-  container.appendChild(toast);
-  setTimeout(() => toast.classList.add("exit"), 3000);
-  setTimeout(() => toast.remove(), 3500);
 }
 document.getElementById('confirm-payButton').addEventListener('click', async () => {
   const form = document.getElementById('registrationForm');
@@ -339,7 +326,6 @@ document.getElementById('confirm-payButton').addEventListener('click', async () 
     fullName: formData.get('partnerName'),
     email: formData.get('partnerEmail'),
     phone: formData.get('partnerPhone'),
-    facebook: formData.get('partnerFacebook'),
     khoa: formData.get('partnerKhoa'),
     lop: formData.get("partnerKhoa") === "Hóa học"
   ? document.getElementById("partnerLopSelect").value
@@ -359,6 +345,7 @@ document.getElementById('confirm-payButton').addEventListener('click', async () 
 
     const result = await res.json();
     if (result.success) {
+      savedData = result.data;
       showModal(result.data);
     } else {
       showToast("Lỗi khi gửi dữ liệu.", "error");
@@ -455,18 +442,47 @@ function showFinalThankYouModal() {
 const socket = io();
 
 socket.on("payment-updated", ({ mssv, status }) => {
+  console.log("📡 Đã nhận sự kiện từ server:", mssv, status);
   const currentMSSV = savedData?.mssv || document.querySelector("#modalPage1")?.textContent?.match(/\d{8}/)?.[0];
 
   if (mssv === currentMSSV && status === "paid") {
-    const statusElem = document.querySelector("#modalPage1");
-    if (statusElem) {
-      const statusLine = statusElem.querySelector("p:last-child");
-      if (statusLine) {
-        statusLine.innerHTML = `<strong>Trạng thái thanh toán:</strong> ✅ Đã thanh toán`;
-      }
+    savedData.paymentStatus = "paid"; // cập nhật local
+
+    // ✅ Nếu modal đang mở, cập nhật toàn bộ lại thông tin
+    const modal = document.getElementById("resultModal");
+    const page1 = document.getElementById("modalPage1");
+
+    if (modal && page1 && modal.style.display === "flex") {
+      page1.innerHTML = `
+        <p><strong>Họ và tên:</strong> ${savedData.fullName}</p>
+        <p><strong>Số điện thoại:</strong> ${savedData.phone}</p>
+        <p><strong>Email:</strong> ${savedData.email}</p>
+        <p><strong>MSSV:</strong> ${savedData.mssv}</p>
+        <p><strong>Khoa:</strong> ${savedData.khoa}</p>
+        <p><strong>Lớp:</strong> ${savedData.lop}</p>
+        <p><strong>Nội dung thi:</strong> ${savedData.noidung.join(", ")}</p>
+        <p><strong>Phương thức:</strong> ${savedData.paymentMethod === "bank" ? "Chuyển khoản" : "PayPal"}</p>
+        <p><strong>Trạng thái thanh toán:</strong> ✅ Đã thanh toán</p>
+      `;
     }
 
-    savedData.paymentStatus = "paid"; // cập nhật local
     showFinalThankYouModal();
   }
 });
+function showToast(message, type = "info") {
+  const toast = document.createElement("div");
+  toast.className = `custom-toast ${type}`;
+  toast.textContent = message;
+
+  document.body.appendChild(toast);
+
+  // Force reflow to trigger animation
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    toast.addEventListener("transitionend", () => toast.remove());
+  }, 3000);
+}
