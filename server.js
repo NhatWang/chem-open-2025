@@ -26,9 +26,6 @@ const PORT = process.env.PORT || 3001;
 const mongoURI = process.env.MONGODB_URI;
 
 mongoose.connect(mongoURI, {
-  dbName: "test", // Rất quan trọng nếu URI chưa rõ tên DB
-  useNewUrlParser: true,
-  useUnifiedTopology: true
 })
 .then(() => console.log("✅ Đã kết nối MongoDB Atlas (database: test)"))
 .catch(err => console.error("❌ Lỗi kết nối MongoDB:", err));

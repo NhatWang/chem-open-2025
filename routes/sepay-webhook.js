@@ -15,7 +15,7 @@ router.post("/sepay-webhook", async (req, res) => {
 console.log("🧹 Chuỗi đã làm sạch:", cleaned);
 
 const parts = cleaned.trim().split(/\s+/);
-const mssv = String(parts[0]).trim();
+const mssv = parts[0].trim().replace(/\r?\n|\r/g, "").replace(/\u200B/g, "");
 const noidung = parts.slice(-2).join(" ");
 
   const io = req.app.get("io");
