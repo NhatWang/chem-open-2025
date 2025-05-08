@@ -10,6 +10,7 @@ const registrationSchema = new mongoose.Schema({
   noidung: [String],
   amount: Number,
   paymentMethod: String,
+  paymentCode: String,
   paymentStatus: { type: String, default: "pending" },
   partnerInfo: {
     fullName: String,

@@ -152,13 +152,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     }
-    
+    function generatePaymentCode() {
+      const prefix = "CHEMO";
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let suffix = "";
+      for (let i = 0; i < 4; i++) {
+        suffix += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return prefix + suffix;
+    }
     // ✅ Lưu dữ liệu
   const khoa = formData.get("khoa");
   const lop = khoa === "Hóa học" 
     ? document.getElementById("lopSelect").value 
     : document.getElementById("lopInput").value;
-
+  const paymentCode = generatePaymentCode();
   savedData = {
     fullName,
     email,
@@ -169,6 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     noidung: selected,
     amount,
     paymentMethod: selectedPaymentMethod,
+    paymentCode,
     paymentStatus: "pending",
     partnerInfo: selected.includes("Đôi nam nữ")
       ? {
@@ -297,7 +306,7 @@ function updateBankQR(mssv, fullName, selectedOptions) {
   const amount = getPaymentAmountFromSelected(selectedOptions);
   const accountNumber = "VQRQACIDD7396"; // 👉 thay bằng số tài khoản của bạn
   const bankCode = "MB";              // 👉 mã ngân hàng (MB, VCB, ACB,...)
-  const note = `${mssv}%20${fullName}%20${selectedOptions.join("_")}`;
+  const note = `${mssv}%20${fullName}%20${selectedOptions.join("_")}%20${paymentCode}`;
 
   const sepayQRUrl = `https://qr.sepay.vn/img?acc=${accountNumber}&bank=${bankCode}&amount=${amount}&des=${note}`;
 
