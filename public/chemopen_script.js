@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Thông tin hợp lệ!", "success");
 
     // ✅ QR & Chuyển bước
-    updateBankQR(mssv, fullName, selected);
+    updateBankQR(mssv, fullName, selected, paymentCode);
     document.getElementById("registrationSection").style.display = "none";
     document.getElementById("paymentSection").style.display = "block";
 
@@ -302,7 +302,7 @@ function getPaymentAmountFromSelected(options) {
   return 0;
 }
 
-function updateBankQR(mssv, fullName, selectedOptions) {
+function updateBankQR(mssv, fullName, selectedOptions, paymentCode) {
   const amount = getPaymentAmountFromSelected(selectedOptions);
   const accountNumber = "VQRQACIDD7396"; // 👉 thay bằng số tài khoản của bạn
   const bankCode = "MB";              // 👉 mã ngân hàng (MB, VCB, ACB,...)
@@ -343,6 +343,7 @@ document.getElementById('confirm-payButton').addEventListener('click', async () 
   };
 
   data.paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'bank';
+  data.paymentCode = savedData.paymentCode;
   
   console.log("📤 Gửi dữ liệu:", data)
   try {
