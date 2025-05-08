@@ -22,21 +22,32 @@ const noidung = parts.slice(-2).join(" ");
 
   try {
     const user = await Registration.findOne({ mssv: mssv.toString() });
-
+  
     if (!user) {
       return res.json({ success: false, message: `Không tìm thấy MSSV: ${mssv}` });
     }
-
+  
+    // ⚠️ So sánh mssv từ chuyển khoản với mssv trong form
+    if (user.mssv !== mssv.toString()) {
+      return res.json({
+        success: false,
+        message: `MSSV không khớp: hệ thống nhận được ${mssv}, nhưng form ghi là ${user.mssv}`
+      });
+    }
+  
     if (user.paymentStatus === "paid") {
       return res.json({ success: true, message: "Đã thanh toán trước đó." });
     }
-
+  
     user.paymentStatus = "paid";
     await user.save();
-
+  
     io.emit("payment-updated", { mssv, status: "paid" });
-
-    return res.json({ success: true, message: `✅ Xác nhận thanh toán cho MSSV: ${mssv}, nội dung: ${noidung}` });
+  
+    return res.json({
+      success: true,
+      message: `✅ Xác nhận thanh toán cho MSSV: ${mssv}, nội dung: ${noidung}`
+    });
   } catch (err) {
     console.error("❌ Lỗi xử lý webhook:", err);
     return res.status(500).json({ success: false, message: "Lỗi máy chủ" });
