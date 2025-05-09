@@ -195,11 +195,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("✅ Dữ liệu:", savedData);
     showToast("Thông tin hợp lệ!", "success");
+    fetch("/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(savedData)
+    })
+    .then(res => res.json())
+    .then(result => {
+      if (result.success) {
+        console.log("✅ Đã lưu vào MongoDB:", result.data);
+        savedData = result.data; // cập nhật nếu MongoDB gán _id, expireAt,...
+      } else {
+        console.warn("⚠️ Lưu thất bại:", result.message);
+        showToast("Không thể lưu thông tin, vui lòng thử lại.", "error");
+      }
+    })
+    .catch(err => {
+      console.error("❌ Lỗi gửi dữ liệu:", err);
+      showToast("Không thể kết nối đến máy chủ.", "error");
+    });
 
     // ✅ QR & Chuyển bước
     updateBankQR(mssv, fullName, selected, paymentCode);
     document.getElementById("registrationSection").style.display = "none";
     document.getElementById("paymentSection").style.display = "block";
+    startCountdown(10);
 
     // ✅ Render lại PayPal button
     const paypalContainer = document.getElementById("paypal-button-container");
@@ -228,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("📦 Giao dịch thành công:", details);
       
           // Gửi yêu cầu cập nhật trạng thái thanh toán
-          return fetch("http://localhost:3001/api/update-payment", {
+          return fetch("/api/update-payment", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -495,4 +517,26 @@ function showToast(message, type = "info") {
     toast.classList.remove("show");
     toast.addEventListener("transitionend", () => toast.remove());
   }, 3000);
+}
+function startCountdown(minutes) {
+  const totalSeconds = minutes * 60;
+  let remaining = totalSeconds;
+  const box = document.getElementById("countdownBox");
+  const display = document.getElementById("countdown");
+
+  box.style.display = "block";
+
+  const interval = setInterval(() => {
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    display.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+
+    if (remaining <= 0) {
+      clearInterval(interval);
+      showModal("⏰ Đã hết thời gian giữ đơn, vui lòng đăng ký lại!");
+      window.location.reload(); // hoặc chuyển lại form
+    }
+
+    remaining--;
+  }, 1000);
 }

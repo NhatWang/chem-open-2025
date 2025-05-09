@@ -136,10 +136,13 @@
   </thead>
   <tbody></tbody>
 </table>
+<h2>Thống kê đơn đăng ký</h2>
+<canvas id="statsChart" width="400" height="200"></canvas>
   <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
       const socket = io();
     
       socket.on("payment-updated", ({ mssv, status }) => {
@@ -304,6 +307,30 @@
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
       }
+      fetch('/api/stats', {
+    headers: { 'x-admin-token': 'chemopen2025' } // nếu dùng middleware auth
+  })
+  .then(res => res.json())
+  .then(({ total, paid, pending }) => {
+    new Chart(document.getElementById("statsChart"), {
+      type: 'doughnut',
+      data: {
+        labels: ['Đã thanh toán', 'Chưa thanh toán'],
+        datasets: [{
+          label: 'Số lượt đăng ký',
+          data: [paid, pending],
+          backgroundColor: ['#4caf50', '#f44336']
+        }]
+      }
+    });
+  })
+  .catch(err => {
+    console.error("Lỗi tải thống kê:", err);
+    alert("Không thể tải dữ liệu thống kê.");
+  });
+  if (localStorage.getItem("adminToken") !== "lienchihoihoahoc") {
+    window.location.href = "/login.html";
+  }
     </script>
 </body>
 </html>
