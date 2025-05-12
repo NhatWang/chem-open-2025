@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { protect } = require('../middlewares/auth');
 const Registration = require("../models/Registration");
 
 router.delete("/delete-registration", async (req, res) => {

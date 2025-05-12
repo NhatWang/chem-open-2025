@@ -28,10 +28,18 @@ router.post("/sepay-webhook", async (req, res) => {
       return res.json({ success: true, message: "🔁 Đã thanh toán trước đó." });
     }
 
-    user.paymentStatus = "paid";
-    await user.save();
+    // ✅ Cập nhật trạng thái & xoá expireAt để không bị TTL xoá
+    const result = await Registration.updateOne(
+  { paymentCode },
+  {
+    $set: { paymentStatus: "paid" },
+    $unset: { expireAt: "" }
+  }
+);
 
-    io.emit("payment-updated", { mssv: user.mssv, status: "paid" });
+if (result.modifiedCount > 0) {
+  io.emit("payment-updated", { mssv: user.mssv, status: "paid" });
+}
 
     return res.json({ success: true, message: `✅ Đã xác nhận mã ${paymentCode}` });
   } catch (err) {
@@ -41,3 +49,4 @@ router.post("/sepay-webhook", async (req, res) => {
 });
 
 module.exports = router;
+

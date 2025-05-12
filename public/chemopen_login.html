@@ -1,56 +1,165 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <meta charset="UTF-8">
-  <title>Đăng nhập Admin - CHEM-OPEN</title>
+  <title>Đăng nhập quản trị</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    justify-content: center;
-    margin: 0;
-    background-image:url('images/CHEMOPENpng.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    align-items: center;
-    justify-content: center;
-  }
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-   backdrop-filter: blur(3px); /* chỉ làm mờ nền, không phủ màu trắng */
-    z-index: 0;
+    body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: url('images/CHEMOPENpng.png') no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  flex-direction: column;
 }
-    .login-box {
-      background: white;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      z-index: 1;
+
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(5px);
+  z-index: 0;
+}
+
+.login-container {
+  position: absolute;
+  top: 300px; /* Đặt modal dưới logo */
+  z-index: 1;
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  box-sizing: border-box;
+  margin: 0 16px;
+}
+
+    .login-container h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #333;
     }
-    input {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      margin: 15px 0;
+
+    .login-container h2 i {
+      margin-right: 8px;
+      color: #007bff;
+    }
+
+    .login-container input {
+      width: 85%;
+      padding: 12px 14px;
+      margin-bottom: 16px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
     }
-    button {
-      background: #4caf50;
+
+    .login-container button {
+      width: 70%;
+      padding: 12px;
+      background-color: #007bff;
       color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
       font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
     }
-    .title-container {
+
+    .login-container button:hover {
+      background-color: #0056b3;
+    }
+
+    @media (max-width: 500px) {
+      .login-container {
+        width: 90%;
+        margin: 0 10px;
+      }
+      .login-container h2 {
+        font-size: 18px;
+      }
+      .login-container input {
+        font-size: 14px;
+      }
+      .login-container button {
+        font-size: 14px;
+      }
+      .logo-container {
+        flex-direction: column;
+        gap: 20px; /* Khoảng cách giữa 2 logo */
+      }
+      .logo {
+        height: 80px; /* Giảm kích thước logo */
+      }
+    }
+    .***HIDDEN***-wrapper {
+  position: relative;
+}
+
+.***HIDDEN***-wrapper input {
+  width: 85%;
+  padding-right: 44px; /* để chừa chỗ cho icon 👁 */
+}
+
+.toggle-***HIDDEN*** {
+  position: absolute;
+  top: 50%;
+  right: 45px;
+  transform: 
+  translateY(-80%);
+  cursor: pointer;
+  font-size: 20px;
+  color: #666;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  gap: 50px; /* Khoảng cách giữa 2 logo */
+  padding-top: 20px;
+  margin-top: 20px; /* Thêm khoảng cách trên để logo không dính vào đầu trang */
+  border-radius: 12px;
+  position: absolute;
+  top: 10%; /* Đặt vị trí logo cách từ trên xuống */
+  left: 50%;
+  transform: translateX(-50%); /* Căn giữa theo chiều ngang */
+  z-index: 2;
+}
+.logo-box {
+  text-align: center;
+  width: auto;
+}
+.logo {
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 8px;
+}
+.logo-text {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      white-space: nowrap;       /* Không cho xuống dòng */
+      text-overflow: ellipsis; 
+}
+@media (max-width: 500px) {
+  .login-container {
+    top: 180px;
+  }
+}
+.title-container {
   display: flex;
   justify-content:center;
   align-items: center;
@@ -68,26 +177,95 @@ body::before {
   </style>
 </head>
 <body>
-    <div class="title-container">
-        <img src="images/Title.png" alt="Title" class="title-image">
-      </div>
-  <div class="login-box">
-    <h2>🔐 Admin Login</h2>
-    <input type="***HIDDEN***" id="***HIDDEN***" placeholder="Nhập mật khẩu admin..." required>
-    <button onclick="login()">Đăng nhập</button>
-    <p id="error" style="color: red;"></p>
+  <div class="title-container">
+    <img src="images/Title.png" alt="Title" class="title-image">
   </div>
+  <form class="login-container" id="loginForm">
+  <h2><i class="fa-solid fa-lock"></i> Đăng nhập quản trị</h2>
+  <input type="text" id="usernameInput" placeholder="Tên đăng nhập" required />
+  <div class="***HIDDEN***-wrapper">
+    <input type="***HIDDEN***" id="***HIDDEN***Input" placeholder="Mật khẩu" required autocomplete="off" />
+    <i class="fa-solid fa-eye toggle-***HIDDEN***" onclick="togglePassword()"></i>
+  </div>
+  <button type="submit">Đăng nhập</button>
+</form>
 
-  <script>
-    function login() {
-      const pw = document.getElementById("***HIDDEN***").value;
-      if (pw === "lienchihoihoahoc") {
-        localStorage.setItem("adminToken", pw);
-        window.location.href = "/admin";
-      } else {
-        document.getElementById("error").textContent = "❌ Sai mật khẩu. Vui lòng thử lại.";
-      }
+<script>
+  function togglePassword() {
+    const input = document.getElementById("***HIDDEN***Input");
+    const icon = document.querySelector(".toggle-***HIDDEN***");
+    input.type = input.type === "***HIDDEN***" ? "text" : "***HIDDEN***";
+    icon.classList.toggle("fa-eye-slash");
+    icon.classList.toggle("fa-eye");
+  }
+
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById("usernameInput").value;
+  const ***HIDDEN*** = document.getElementById("***HIDDEN***Input").value;
+
+  try {
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ username, ***HIDDEN*** }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      showToast("🎉 Đăng nhập thành công!", "success");
+      setTimeout(() => {
+        window.location.href = data.redirect;
+      }, 1000);
+    } else {
+      showToast(data.message || "❌ Đăng nhập thất bại!");
     }
-  </script>
+  } catch (error) {
+    showToast("🚫 Không thể kết nối đến máy chủ.");
+  }
+});
+  function showToast(message, type = "error") {
+  const container = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+
+  toast.style.cssText = `
+    min-width: 240px;
+    margin-bottom: 10px;
+    padding: 12px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: white;
+    background-color: ${type === "success" ? "#28a745" : "#dc3545"};
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    animation: fadein 0.5s, fadeout 0.5s 3s;
+  `;
+
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// Animation (nên thêm vào <style>)
+const style = document.createElement("style");
+style.innerHTML = `
+  @keyframes fadein {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeout {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(20px); }
+  }
+`;
+document.head.appendChild(style);
+
+</script>
+<div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+</div>
 </body>
 </html>
