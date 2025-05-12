@@ -1,15 +1,17 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Registration = require("../models/Registration");
+const { protect } = require('../middlewares/auth');
+const Registration = require('../models/Registration');
 
-// Trả về tất cả dữ liệu đăng ký
-router.get("/registrations", async (req, res) => {
+router.get('/registrations', protect, async (req, res) => {
   try {
-    const allRegs = await Registration.find();
-    res.json(allRegs);
+    const list = await Registration.find().sort({ createdAt: -1 });
+    res.json(list);
   } catch (err) {
-    res.status(500).json({ error: "Lỗi truy vấn dữ liệu!" });
+    console.error("❌ Lỗi khi lấy danh sách đăng ký:", err);
+    res.status(500).json({ success: false, message: "Lỗi server khi truy vấn dữ liệu." });
   }
 });
+
 
 module.exports = router;

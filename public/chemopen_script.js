@@ -198,8 +198,8 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch("/api/register", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
-      },
+    "Content-Type": "application/json"
+    },
       body: JSON.stringify(savedData)
     })
     .then(res => res.json())
@@ -221,7 +221,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateBankQR(mssv, fullName, selected, paymentCode);
     document.getElementById("registrationSection").style.display = "none";
     document.getElementById("paymentSection").style.display = "block";
-    startCountdown(10);
 
     // ✅ Render lại PayPal button
     const paypalContainer = document.getElementById("paypal-button-container");
@@ -264,11 +263,8 @@ document.addEventListener("DOMContentLoaded", () => {
           console.log("🔄 Cập nhật trạng thái thành công:", data);
           showToast("🎉 Cảm ơn bạn đã đăng ký!", "success");
           showFinalThankYouModal();
-          // Đóng modal sau 5 giây
-          setTimeout(() => {
-            document.getElementById("resultModal").style.display = "none";
-          }, 5000);
         })
+          // Đóng modal sau 5 giây
         .catch(err => {
           console.error("❌ Lỗi cập nhật trạng thái:", err);
         });
@@ -335,118 +331,154 @@ function updateBankQR(mssv, fullName, selectedOptions, paymentCode) {
   document.getElementById("bankQRImg").src = sepayQRUrl;
   document.getElementById("paymentAmountDisplay").textContent = `Số tiền cần thanh toán: ${amount.toLocaleString("vi-VN")}₫`;
 }
-document.getElementById('confirm-payButton').addEventListener('click', async () => {
-  const form = document.getElementById('registrationForm');
-  if (!form.checkValidity()) {
-    form.reportValidity();
+
+// 📡 Lắng nghe cập nhật trạng thái từ server khi có thay đổi
+const socket = io();
+console.log("🔌 Socket connected:", socket.connected);
+
+socket.on("connect", () => {
+  console.log("✅ Socket.IO connected!");
+});
+
+socket.on("disconnect", () => {
+  console.log("❌ Socket.IO disconnected");
+});
+
+socket.on("payment-updated", ({ mssv, status }) => {
+  console.log("📡 Đã nhận sự kiện từ server:", mssv, status);
+  const currentMSSV = savedData?.mssv || document.querySelector("#modalPage1")?.textContent?.match(/\d{8}/)?.[0];
+
+  console.log("📡 Đã nhận sự kiện từ server:", mssv, status);
+  console.log("🧾 MSSV hiện tại:", currentMSSV);
+
+  if (mssv === currentMSSV && status === "paid") {
+    // ✅ Cập nhật local
+    savedData.paymentStatus = "paid";
+
+    // ✅ Ẩn timer
+    document.getElementById("countdownBox").style.display = "none";
+
+    // ✅ Toast thành công
+    showToast("🎉 Thanh toán thành công!", "success");
+
+    // ✅ Hiện modal cảm ơn
+    showFinalThankYouModal();
+
+    // ✅ Gửi lại dữ liệu vào MongoDB (nếu chưa có _id hoặc bạn muốn update chắc chắn)
+    fetch("/api/update-payment", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mssv: savedData.mssv,
+        paymentStatus: "paid",
+        paymentCode: savedData.paymentCode
+      })
+    })
+      .then(res => res.json())
+      .then(result => {
+        console.log("✅ Đã xoá expireAt:", result);
+      })
+      .catch(err => {
+        console.error("❌ Lỗi khi lưu dữ liệu đã thanh toán:", err);
+      });
+  }
+});
+
+  const confirmBtn = document.getElementById("confirmInfoButton");
+  const resultModal = document.getElementById("resultModal");
+  const modalPage1 = document.getElementById("modalPage1");
+  const modalPage2 = document.getElementById("modalPage2");
+  const nextBtn = document.getElementById("nextPageBtn");
+  const prevBtn = document.getElementById("prevPageBtn");
+  const cancelBtn = document.getElementById("cancelBtn");
+  const finalBtn = document.getElementById("finalConfirmBtn");
+
+  if (!confirmBtn || !resultModal || !modalPage1) {
+    console.error("❌ Không tìm thấy phần tử modal hoặc nút xác nhận.");
     return;
   }
 
-  const formData = new FormData(form);
-  const data = Object.fromEntries(formData.entries());
-  const khoa = formData.get("khoa");
-  data.khoa = khoa;
-  data.lop = khoa === "Hóa học"
-  ? document.getElementById("lopSelect").value
-  : document.getElementById("lopInput").value;  
-  // checkbox multiple
-  data.noidung = formData.getAll('noidung');
+  confirmBtn.addEventListener("click", () => {
+    const form = document.getElementById("registrationForm");
+    const formData = new FormData(form);
 
-  // Partner info
-  data.partnerInfo = {
-    fullName: formData.get('partnerName'),
-    email: formData.get('partnerEmail'),
-    phone: formData.get('partnerPhone'),
-    khoa: formData.get('partnerKhoa'),
-    lop: formData.get("partnerKhoa") === "Hóa học"
-  ? document.getElementById("partnerLopSelect").value
-  : document.getElementById("partnerLopInput").value,
-    mssv: formData.get('partnerMSSV')
-  };
-
-  data.paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'bank';
-  data.paymentCode = savedData.paymentCode;
-  
-  console.log("📤 Gửi dữ liệu:", data)
-  try {
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-
-    const result = await res.json();
-    if (result.success) {
-      savedData = result.data;
-      showModal(result.data);
-    } else {
-      showToast("Lỗi khi gửi dữ liệu.", "error");
-    }
-  } catch (err) {
-    console.error(err);
-    showToast("Không thể kết nối đến máy chủ.", "error");
-  }
-});
-function showModal(data) {
-  const modal = document.getElementById('resultModal');
-  const page1 = document.getElementById('modalPage1');
-  const page2 = document.getElementById('modalPage2');
-  const nextBtn = document.getElementById('nextPageBtn');
-  const prevBtn = document.getElementById('prevPageBtn');
-
-  const hasPartner = data.partnerInfo && data.partnerInfo.fullName;
-
-  // Trang 1: Thông tin người đăng ký chính
-  page1.innerHTML = `
-    <p><strong>Họ và tên:</strong> ${data.fullName}</p>
-    <p><strong>Số điện thoại:</strong> ${data.phone}</p>
-    <p><strong>Email:</strong> ${data.email}</p>
-    <p><strong>MSSV:</strong> ${data.mssv}</p>
-    <p><strong>Khoa:</strong> ${data.khoa}</p>
-    <p><strong>Lớp:</strong> ${data.lop}</p>
-    <p><strong>Nội dung thi:</strong> ${(data.noidung && data.noidung.length) ? data.noidung.join(", ") : "Không có"}</p>
-    <p><strong>Phương thức:</strong> ${data.paymentMethod === "bank" ? "Chuyển khoản" : "PayPal"}</p>
-    <p><strong>Trạng thái thanh toán:</strong> ${data.paymentStatus === "pending" ? "Đang xử lý" : data.paymentStatus}</p>
-  `;
-
-  // Trang 2: Người thi đấu cùng
-  if (hasPartner) {
-    page2.innerHTML = `
-      <p><strong>Họ và tên đồng đội:</strong> ${data.partnerInfo.fullName}</p>
-      <p><strong>Số điện thoại:</strong> ${data.partnerInfo.phone}</p>
-      <p><strong>Email:</strong> ${data.partnerInfo.email}</p>
-      <p><strong>Khoa:</strong> ${data.partnerInfo.khoa}</p>
-      <p><strong>Lớp:</strong> ${data.partnerInfo.lop}</p>
-      <p><strong>MSSV:</strong> ${data.partnerInfo.mssv}</p>
+    modalPage1.innerHTML = `
+      <h3>Thông tin cá nhân</h3>
+      <p><strong>Họ tên:</strong> ${formData.get("fullName")}</p>
+      <p><strong>Email:</strong> ${formData.get("email")}</p>
+      <p><strong>SĐT:</strong> ${formData.get("phone")}</p>
+      <p><strong>Khoa:</strong> ${formData.get("khoa")}</p>
+      <p><strong>Lớp:</strong> ${formData.get("lop")}</p>
+      <p><strong>MSSV:</strong> ${formData.get("mssv")}</p>
+      <p><strong>Nội dung:</strong> ${(formData.getAll("noidung") || []).join(" + ")}</p>
     `;
+
+    modalPage2.innerHTML = `
+      <h3>Thông tin đồng đội</h3>
+      <p><strong>Họ tên:</strong> ${formData.get("partnerName") || "Không có"}</p>
+      <p><strong>Email:</strong> ${formData.get("partnerEmail") || "Không có"}</p>
+      <p><strong>SĐT:</strong> ${formData.get("partnerPhone") || "Không có"}</p>
+      <p><strong>Khoa:</strong> ${formData.get("partnerKhoa") || "Không có"}</p>
+      <p><strong>Lớp:</strong> ${formData.get("partnerLop") || "Không có"}</p>
+      <p><strong>MSSV:</strong> ${formData.get("partnerMSSV") || "Không có"}</p>
+    `;
+
+    resultModal.classList.add("show");
+    modalPage1.style.display = "block";
+    modalPage2.style.display = "none";
     nextBtn.style.display = "inline-block";
-  } else {
-    page2.innerHTML = "";
+    prevBtn.style.display = "none";
+    cancelBtn.style.display = "none";
+    finalBtn.style.display = "none";
+  });
+
+  nextBtn.addEventListener("click", () => {
+    modalPage1.style.display = "none";
+    modalPage2.style.display = "block";
     nextBtn.style.display = "none";
-  }
+    prevBtn.style.display = "inline-block";
+    cancelBtn.style.display = "inline-block";
+    finalBtn.style.display = "inline-block";
+  });
 
-  // Reset lại view
-  page1.style.display = "block";
-  page2.style.display = "none";
-  prevBtn.style.display = "none";
+  prevBtn.addEventListener("click", () => {
+    modalPage1.style.display = "block";
+    modalPage2.style.display = "none";
+    nextBtn.style.display = "inline-block";
+    prevBtn.style.display = "none";
+    finalBtn.style.display = "none";
+  });
 
-  modal.style.display = "flex";
-}
-document.getElementById('nextPageBtn').addEventListener('click', () => {
-  document.getElementById('modalPage1').style.display = 'none';
-  document.getElementById('modalPage2').style.display = 'block';
-  document.getElementById('prevPageBtn').style.display = 'inline-block';
-  document.getElementById('nextPageBtn').style.display = 'none';
+  finalBtn.addEventListener("click", () => {
+    resultModal.classList.remove("show");
+    document.getElementById("registrationSection").style.display = "none";
+    document.getElementById("paymentSection").style.display = "block";
+    startCountdown(10);
+  });
+
+  document.getElementById("cancelBtn").addEventListener("click", () => {
+  // Ẩn modal
+  document.getElementById("resultModal").classList.remove("show");
+
+  // Hiện lại form đăng ký
+  document.getElementById("registrationSection").style.display = "block";
+
+  // Ẩn phần thanh toán nếu đang mở
+  document.getElementById("paymentSection").style.display = "none";
+
+  // Reset modal về trạng thái ban đầu
+  document.getElementById("modalPage1").style.display = "block";
+  document.getElementById("modalPage2").style.display = "none";
+  document.getElementById("nextPageBtn").style.display = "inline-block";
+  document.getElementById("prevPageBtn").style.display = "none";
+  document.getElementById("finalConfirmBtn").style.display = "none";
+
+  // Nếu QR đã hiển thị thì xoá ảnh và text
+  document.getElementById("bankQRImg").src = "";
+  document.getElementById("paymentAmountDisplay").textContent = "";
 });
-
-document.getElementById('prevPageBtn').addEventListener('click', () => {
-  document.getElementById('modalPage1').style.display = 'block';
-  document.getElementById('modalPage2').style.display = 'none';
-  document.getElementById('prevPageBtn').style.display = 'none';
-  document.getElementById('nextPageBtn').style.display = 'inline-block';
 });
-})
-function showFinalThankYouModal() {
+window.showFinalThankYouModal = function () {
   const modal = document.createElement("div");
   modal.style.cssText = `
     position: fixed;
@@ -470,37 +502,6 @@ function showFinalThankYouModal() {
     modal.remove();
   });
 }
-// 📡 Lắng nghe cập nhật trạng thái từ server khi có thay đổi
-const socket = io();
-
-socket.on("payment-updated", ({ mssv, status }) => {
-  console.log("📡 Đã nhận sự kiện từ server:", mssv, status);
-  const currentMSSV = savedData?.mssv || document.querySelector("#modalPage1")?.textContent?.match(/\d{8}/)?.[0];
-
-  if (mssv === currentMSSV && status === "paid") {
-    savedData.paymentStatus = "paid"; // cập nhật local
-
-    // ✅ Nếu modal đang mở, cập nhật toàn bộ lại thông tin
-    const modal = document.getElementById("resultModal");
-    const page1 = document.getElementById("modalPage1");
-
-    if (modal && page1 && modal.style.display === "flex") {
-      page1.innerHTML = `
-        <p><strong>Họ và tên:</strong> ${savedData.fullName}</p>
-        <p><strong>Số điện thoại:</strong> ${savedData.phone}</p>
-        <p><strong>Email:</strong> ${savedData.email}</p>
-        <p><strong>MSSV:</strong> ${savedData.mssv}</p>
-        <p><strong>Khoa:</strong> ${savedData.khoa}</p>
-        <p><strong>Lớp:</strong> ${savedData.lop}</p>
-        <p><strong>Nội dung thi:</strong> ${savedData.noidung.join(", ")}</p>
-        <p><strong>Phương thức:</strong> ${savedData.paymentMethod === "bank" ? "Chuyển khoản" : "PayPal"}</p>
-        <p><strong>Trạng thái thanh toán:</strong> ✅ Đã thanh toán</p>
-      `;
-    }
-
-    showFinalThankYouModal();
-  }
-});
 function showToast(message, type = "info") {
   const toast = document.createElement("div");
   toast.className = `custom-toast ${type}`;

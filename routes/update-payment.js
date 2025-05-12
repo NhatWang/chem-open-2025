@@ -1,31 +1,38 @@
 const express = require("express");
 const router = express.Router();
+const { protect } = require('../middlewares/auth');
 const Registration = require("../models/Registration");
 
-// PUT /api/update-payment
 router.put("/update-payment", async (req, res) => {
-  const { mssv, paymentStatus } = req.body;
+  const { paymentStatus, paymentCode } = req.body;
 
-  if (!mssv || !paymentStatus) {
-    return res.status(400).json({ error: "Thiếu MSSV hoặc trạng thái" });
+  // ⚠️ Validate đầu vào
+  if (!paymentCode) {
+    return res.status(400).json({ success: false, message: "Thiếu mã thanh toán." });
   }
 
   try {
-    const updated = await Registration.findOneAndUpdate(
-      { mssv },
-      { paymentStatus },
-      { new: true }
+    const result = await Registration.updateOne(
+      { paymentCode },
+      {
+        $set: { paymentStatus },
+        $unset: { expireAt: "" }
+      }
     );
 
-    if (!updated) {
-      return res.status(404).json({ error: "Không tìm thấy sinh viên" });
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy hoặc không có thay đổi." });
     }
 
-    res.json({ message: "Cập nhật thành công", updated });
+    return res.json({ success: true, message: "✅ Cập nhật trạng thái thành công." });
   } catch (err) {
-    console.error("❌ MongoDB update error:", err);
-    res.status(500).json({ error: "Lỗi server" });
+    console.error("❌ Lỗi khi cập nhật:", err);
+    return res.status(500).json({ success: false, message: "Lỗi máy chủ." });
   }
 });
+  const validStatuses = ["pending", "paid", "failed"];
+if (!validStatuses.includes(paymentStatus)) {
+  return res.status(400).json({ success: false, message: "Trạng thái không hợp lệ." });
+}
 
 module.exports = router;

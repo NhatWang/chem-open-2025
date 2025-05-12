@@ -3,20 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quản lý đăng ký thi đấu</title>
+  <title>Dashboard Quản lý Đăng ký</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f4f4f4;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      background-size: cover;
+      color: #333;
+
     }
-    h1 {
-      text-align: center;
+    .stat-card {
+      border-radius: 12px;
+      padding: 20px;
+      color: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
+    .bg-paid { background-color: #28a745; }
+    .bg-pending { background-color: #ffc107; color: #333; }
+    .bg-failed { background-color: #dc3545; }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 10px;
       background: #fff;
     }
     th, td {
@@ -28,309 +44,128 @@
       background-color: #007bff;
       color: white;
     }
-    .pending {
-      color: orange;
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    canvas {
+      max-height: 300px !important;
+    }
+    .nav-tabs .nav-link.active {
       font-weight: bold;
+      color: #007bff;
     }
-    .paid {
-      color: green;
-      font-weight: bold;
-    }
-    .failed {
-  color: red;
-  font-weight: bold;
-    }
-    .action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: center;
-}
-  button.mark-paid {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    width: 100%;
-    white-space: nowrap;
-  }
-
-  button.mark-failed {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    width: 100%;
-  }
-
-  button.mark-paid:hover {
-    background-color: #218838;
-  }
-
-  button.mark-failed:hover {
-    background-color: #c82333;
-  }
-  @keyframes fadein {
-  from { opacity: 0; right: 0px }
-  to   { opacity: 1; right: 20px }
-}
-@keyframes fadeout {
-  from { opacity: 1; right: 20px }
-  to   { opacity: 0; right: 0px }
-}
-#partnerTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 30px;
-  background: #fff;
-}
-#partnerTable th, #partnerTable td {
-  padding: 10px;
-  border: 1px solid #ccc;
-  text-align: center;
-}
-#partnerTable th {
-  background-color: #28a745;
-  color: white;
-}
   </style>
 </head>
 <body>
-  <h1>Trang Quản Lý Thí Sinh Đăng Ký</h1>
-  <table id="dataTable">
-    <thead>
-      <tr>
-        <th>STT</th>
-        <th>MSSV</th>
-        <th>Họ tên</th>
-        <th>Email</th>
-        <th>SĐT</th>
-        <th>Khoa</th>
-        <th>Lớp</th>
-        <th>Nội dung thi đấu</th>
-        <th>Phương thức thanh toán</th>
-        <th>Trạng thái thanh toán</th>
-        <th>Thao tác</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <h2>Thông Tin Người Đấu Cùng</h2>
-<table id="partnerTable">
-  <thead>
-    <tr>
-      <th>STT</th>
-      <th>MSSV Người Đăng Ký</th>
-      <th>Họ tên người đăng kí</th>
-      <th>MSSV Người Đấu Cùng</th>
-      <th>Họ tên người đấu cùng</th>
-      <th>Email</th>
-      <th>SĐT</th>
-      <th>Khoa</th>
-      <th>Lớp</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-<h2>Thống kê đơn đăng ký</h2>
-<canvas id="statsChart" width="400" height="200"></canvas>
-  <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-      const socket = io();
-    
-      socket.on("payment-updated", ({ mssv, status }) => {
-        const rows = document.querySelectorAll("#dataTable tbody tr");
-        rows.forEach(row => {
-          if (row.children[1].textContent === mssv) {
-            const statusCell = row.querySelector(".status");
-            const actions = row.querySelector(".action-buttons");
-            if (status === "paid") {
-              statusCell.textContent = "✅ Đã thanh toán";
-              statusCell.className = "status paid";
-              actions?.remove();
-              showToast(`🎉 MSSV ${mssv} đã thanh toán`, "success");
-              showFinalThankYouModal();
-            } else if (status === "failed") {
-              statusCell.textContent = "❌ Thất bại";
-              statusCell.className = "status failed";
-              showToast(`❌ MSSV ${mssv} đã thất bại`, "error");
-            }
-          }
-        });
-      });
-    
-      document.addEventListener("DOMContentLoaded", () => {
-        const table = document.getElementById("dataTable");
-    
-        function loadTableData() {
-          const tbody = document.querySelector("tbody");
-          fetch("/api/registrations")
-            .then(res => res.json())
-            .then(data => {
-              tbody.innerHTML = "";
-              data.forEach((reg, index) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                  <td>${index + 1}</td>
-                  <td>${reg.mssv}</td>
-                  <td>${reg.fullName}</td>
-                  <td>${reg.email}</td>
-                  <td>${reg.phone}</td>
-                  <td>${reg.khoa}</td>
-                  <td>${reg.lop}</td>
-                  <td>${reg.noidung?.join(" + ") || "-"}</td>
-                  <td>${reg.paymentMethod === "paypal" ? "PayPal" : "Chuyển khoản"}</td>
-                  <td class="status ${reg.paymentStatus}">
-                    ${reg.paymentStatus === "paid"
-                      ? "✅ Đã thanh toán"
-                      : reg.paymentStatus === "failed"
-                      ? "❌ Thất bại"
-                      : "❌ Chưa thanh toán"}
-                  </td>
-                  <td>
-                    ${reg.paymentMethod === "bank" && reg.paymentStatus === "pending" ? `
-                      <div class="action-buttons">
-                        <button class="mark-paid" data-id="${reg.mssv}">Chuyển khoản thành công</button>
-                        <button class="mark-failed" data-id="${reg.mssv}">Chuyển khoản thất bại</button>
-                      </div>` : reg.paymentMethod === "paypal" && reg.paymentStatus === "pending" ? `
-                      <span class="pending">Đang chờ PayPal xử lý</span>` : ``}
-                    <div style="margin-top: 6px;">
-                      <button class="delete-entry" data-id="${reg.mssv}" style="background-color: #6c757d;">Xoá đơn</button>
-                    </div>
-                  </td>
-                `;
-                tbody.appendChild(row);
-              });
-    
-              const partnerTbody = document.querySelector("#partnerTable tbody");
-              partnerTbody.innerHTML = "";
-              let partnerIndex = 1;
-              data.forEach((reg) => {
-                if (reg.partnerInfo && reg.partnerInfo.fullName) {
-                  const row = document.createElement("tr");
-                  row.innerHTML = `
-                    <td>${partnerIndex++}</td>
-                    <td>${reg.mssv}</td>
-                    <td>${reg.fullName}</td>
-                    <td>${reg.partnerInfo.mssv || "-"}</td>
-                    <td>${reg.partnerInfo.fullName}</td>
-                    <td>${reg.partnerInfo.email}</td>
-                    <td>${reg.partnerInfo.phone}</td>
-                    <td>${reg.partnerInfo.khoa}</td>
-                    <td>${reg.partnerInfo.lop}</td>
-                  `;
-                  partnerTbody.appendChild(row);
-                }
-              });
-            });
-        }
-    
-        // ⚡ GỌI KHI VỪA VÀO TRANG
-        loadTableData();
-    
-        // 🧾 Click thao tác cập nhật & xoá
-        document.addEventListener("click", (e) => {
-          const isPaid = e.target.classList.contains("mark-paid");
-          const isFailed = e.target.classList.contains("mark-failed");
-          const isDelete = e.target.classList.contains("delete-entry");
-    
-          if (isPaid || isFailed) {
-            const mssv = e.target.getAttribute("data-id");
-            const newStatus = isPaid ? "paid" : "failed";
-            const confirmText = isPaid
-              ? `Xác nhận CHUYỂN KHOẢN THÀNH CÔNG cho MSSV: ${mssv}?`
-              : `Xác nhận CHUYỂN KHOẢN THẤT BẠI cho MSSV: ${mssv}?`;
-    
-            if (!confirm(confirmText)) return;
-    
-            fetch("/api/update-payment", {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ mssv, paymentStatus: newStatus })
-            })
-              .then((res) => res.json())
-              .then(() => {
-                showToast("✅ Đã cập nhật trạng thái!", "success");
-                setTimeout(() => location.reload(), 1500);
-              })
-              .catch((err) => {
-                console.error("Lỗi cập nhật trạng thái:", err);
-                showToast("❌ Có lỗi xảy ra!", "error");
-              });
-          }
-    
-          if (isDelete) {
-            const mssv = e.target.getAttribute("data-id");
-            if (!confirm(`Bạn chắc chắn muốn xoá đơn đăng ký của MSSV: ${mssv}?`)) return;
-    
-            fetch(`/api/delete-registration?mssv=${encodeURIComponent(mssv)}`, {
-              method: "DELETE"
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                if (data.success) {
-                  showToast("🗑️ Đã xoá đơn đăng ký!", "success");
-                  setTimeout(() => location.reload(), 1000);
-                } else {
-                  showToast("❌ Không xoá được đơn.", "error");
-                }
-              })
-              .catch((err) => {
-                console.error("❌ Lỗi xoá đơn:", err);
-                showToast("❌ Có lỗi xảy ra!", "error");
-              });
-          }
-        });
-      });
-    
-      function showToast(message, type = "success") {
-        const container = document.getElementById("toast-container");
-        const toast = document.createElement("div");
-        toast.className = `toast ${type}`;
-        toast.style.cssText = `
-          background-color: ${type === "error" ? "#dc3545" : "#28a745"};
-          color: white;
-          padding: 12px 18px;
-          margin-bottom: 10px;
-          border-radius: 6px;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-          animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        `;
-        toast.textContent = message;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-      }
-      fetch('/api/stats', {
-    headers: { 'x-admin-token': 'chemopen2025' } // nếu dùng middleware auth
-  })
-  .then(res => res.json())
-  .then(({ total, paid, pending }) => {
-    new Chart(document.getElementById("statsChart"), {
-      type: 'doughnut',
-      data: {
-        labels: ['Đã thanh toán', 'Chưa thanh toán'],
-        datasets: [{
-          label: 'Số lượt đăng ký',
-          data: [paid, pending],
-          backgroundColor: ['#4caf50', '#f44336']
-        }]
-      }
-    });
-  })
-  .catch(err => {
-    console.error("Lỗi tải thống kê:", err);
-    alert("Không thể tải dữ liệu thống kê.");
-  });
-  if (localStorage.getItem("adminToken") !== "lienchihoihoahoc") {
-    window.location.href = "/login.html";
-  }
-    </script>
+  <div class="container-fluid">
+    <div class="row min-vh-100">
+        <div class="col p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+  <ul class="nav nav-tabs" id="adminTabs">
+    <li class="nav-item">
+      <a class="nav-link active" data-bs-toggle="tab" href="#overview">TỔNG QUAN</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="#list">DANH SÁCH ĐĂNG KÝ</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="#partner">DANH SÁCH ĐỒNG ĐỘI</a>
+    </li>
+  </ul>
+  <button class="btn btn-outline-danger ms-3" onclick="logout()">
+    <i class="fa-solid fa-right-from-bracket me-1"></i> Đăng xuất
+  </button>
+</div>
+
+        <div class="tab-content">
+          <!-- Tổng quan -->
+          <div id="overview" class="tab-pane fade show active">
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <div class="stat-card bg-paid">
+                  <h5>Đã thanh toán</h5>
+                  <h3 id="paidCount">0</h3>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="stat-card bg-pending">
+                  <h5>Chờ thanh toán</h5>
+                  <h3 id="pendingCount">0</h3>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="stat-card bg-failed">
+                  <h5>Thanh toán thất bại</h5>
+                  <h3 id="failedCount">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="card mb-4">
+              <div class="card-body">
+                <canvas id="paymentChart"></canvas>
+              </div>
+            </div>
+            <div class="card mt-4">
+              <div class="card-body">
+                <h5 class="card-title">Biểu đồ nội dung thi đấu</h5>
+                <canvas id="eventChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danh sách -->
+          <div id="list" class="tab-pane fade">
+            <div class="d-flex justify-content-between mb-2">
+              <input type="text" id="searchInput" class="form-control w-25" placeholder="Tìm MSSV, họ tên...">
+              <select id="statusFilter" class="form-select w-25">
+                <option value="">-- Lọc theo trạng thái --</option>
+                <option value="paid">Đã thanh toán</option>
+                <option value="pending">Chờ thanh toán</option>
+                <option value="failed">Thất bại</option>
+              </select>
+            </div>
+            <table id="dataTable">
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>MSSV</th>
+                  <th>Họ tên</th>
+                  <th>Email</th>
+                  <th>SĐT</th>
+                  <th>Khoa</th>
+                  <th>Lớp</th>
+                  <th>Nội dung</th>
+                  <th>Phương thức</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <!-- Danh sách đồng đội -->
+          <div id="partner" class="tab-pane fade">
+          <table id="partnerTable" class="table table-bordered table-striped">
+            <thead class="table-primary">
+              <tr>
+                <th>STT</th>
+                <th>Họ tên người đăng ký</th>
+                <th>Họ tên đồng đội</th>
+                <th>MSSV</th>
+                <th>Email</th>
+                <th>SĐT</th>
+                <th>Khoa</th>
+                <th>Lớp</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="admin-dashboard.js"></script>
 </body>
 </html>
