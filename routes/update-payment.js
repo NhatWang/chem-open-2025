@@ -11,6 +11,11 @@ router.put("/update-payment", async (req, res) => {
     return res.status(400).json({ success: false, message: "Thiếu mã thanh toán." });
   }
 
+  const validStatuses = ["pending", "paid", "failed"];
+  if (!validStatuses.includes(paymentStatus)) {
+    return res.status(400).json({ success: false, message: "Trạng thái không hợp lệ." });
+  }
+
   try {
     const result = await Registration.updateOne(
       { paymentCode },
@@ -30,9 +35,5 @@ router.put("/update-payment", async (req, res) => {
     return res.status(500).json({ success: false, message: "Lỗi máy chủ." });
   }
 });
-  const validStatuses = ["pending", "paid", "failed"];
-if (!validStatuses.includes(paymentStatus)) {
-  return res.status(400).json({ success: false, message: "Trạng thái không hợp lệ." });
-}
 
 module.exports = router;
