@@ -7,7 +7,7 @@
   <title>Đăng nhập quản trị</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
+  body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
   background: url('images/CHEMOPENpng.png') no-repeat center center fixed;
@@ -16,8 +16,6 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  position: relative;
-  overflow: hidden;
   flex-direction: column;
 }
 
@@ -30,18 +28,16 @@ body::before {
 }
 
 .login-container {
-  position: absolute;
-  top: 300px; /* Đặt modal dưới logo */
-  z-index: 1;
-  background: white;
-  padding: 32px;
+ background-color: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 32px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   width: 90%;
   max-width: 500px;
   text-align: center;
   box-sizing: border-box;
   margin: 0 16px;
+  z-index: 1;
 }
 
     .login-container h2 {
@@ -86,6 +82,10 @@ body::before {
       .login-container {
         width: 90%;
         margin: 0 10px;
+        top: 55%;
+      }
+      .title-container {
+        top: 3%;
       }
       .login-container h2 {
         font-size: 18px;
@@ -96,15 +96,9 @@ body::before {
       .login-container button {
         font-size: 14px;
       }
-      .logo-container {
-        flex-direction: column;
-        gap: 20px; /* Khoảng cách giữa 2 logo */
-      }
-      .logo {
-        height: 80px; /* Giảm kích thước logo */
-      }
     }
-    .***HIDDEN***-wrapper {
+
+.***HIDDEN***-wrapper {
   position: relative;
 }
 
@@ -123,42 +117,6 @@ body::before {
   font-size: 20px;
   color: #666;
 }
-
-.logo-container {
-  display: flex;
-  justify-content: center; /* Căn giữa theo chiều ngang */
-  align-items: center; /* Căn giữa theo chiều dọc */
-  gap: 50px; /* Khoảng cách giữa 2 logo */
-  padding-top: 20px;
-  margin-top: 20px; /* Thêm khoảng cách trên để logo không dính vào đầu trang */
-  border-radius: 12px;
-  position: absolute;
-  top: 10%; /* Đặt vị trí logo cách từ trên xuống */
-  left: 50%;
-  transform: translateX(-50%); /* Căn giữa theo chiều ngang */
-  z-index: 2;
-}
-.logo-box {
-  text-align: center;
-  width: auto;
-}
-.logo {
-      height: 100px;
-      object-fit: contain;
-      margin-bottom: 8px;
-}
-.logo-text {
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      white-space: nowrap;       /* Không cho xuống dòng */
-      text-overflow: ellipsis; 
-}
-@media (max-width: 500px) {
-  .login-container {
-    top: 180px;
-  }
-}
 .title-container {
   display: flex;
   justify-content:center;
@@ -173,6 +131,16 @@ body::before {
   max-width: 95%;
   height: auto;
   display: block;
+}
+.footer {
+    position: relative;        
+    z-index: 2;                
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    padding: 20px 10px;
+    margin-top: 15px;
+    color: #ffffff;
 }
   </style>
 </head>
@@ -267,5 +235,9 @@ document.head.appendChild(style);
 </script>
 <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
 </div>
+<footer class="footer">
+    <strong>© 2025 Liên chi Hội khoa Hoá học,<br>
+    Trường Đại học Khoa học tự nhiên, ĐHQG-HCM</strong>
+  </footer>
 </body>
 </html>
