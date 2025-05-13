@@ -1,3 +1,32 @@
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    const overlay = document.getElementById("loadingOverlay");
+    if (overlay) {
+      overlay.classList.add("fade-out");
+      setTimeout(() => {
+        overlay.style.display = "none";
+      }, 1000); // 1s khớp với thời gian fade
+    }
+  }, 10000); // ⏱️ đợi 8 giây rồi mới bắt đầu fade
+});
+
+const tips = [
+  "Chào mừng bạn đến với Chem-Open 2025!",
+  "Đây là một hoạt động của Liên chi Hội khoa Hoá học",
+  "Đợi một chút nhé! Chúng mình đang chuẩn bị mọi thứ",
+  "Xong rồi nè! Bắt đầu thôii"
+];
+
+let index = 0;
+  const text = document.querySelector(".loading-text");
+  if (text) {
+    text.textContent = tips[0];
+    setInterval(() => {
+      index = (index + 1) % tips.length;
+      text.textContent = tips[index];
+    }, 2500);
+  }
+
 let savedData = null;
 let selectedPaymentMethod = "bank"; // mặc định là bank
 
@@ -328,9 +357,17 @@ function updateBankQR(mssv, fullName, selectedOptions, paymentCode) {
 
   const sepayQRUrl = `https://qr.sepay.vn/img?acc=${accountNumber}&bank=${bankCode}&amount=${amount}&des=${note}`;
 
-  document.getElementById("bankQRImg").src = sepayQRUrl;
+  const qrImg = document.getElementById("bankQRImg").src 
+  qrImg.src = sepayQRUrl;
   document.getElementById("paymentAmountDisplay").textContent = `Số tiền cần thanh toán: ${amount.toLocaleString("vi-VN")}₫`;
+  setTimeout(() => {
+    qrImg.src = "";
+    document.getElementById("paymentAmountDisplay").textContent =
+      "⏰ Mã QR đã hết hạn. Vui lòng tải lại form để nhận mã mới.";
+    showToast("Mã QR đã hết hạn. Vui lòng đăng ký lại!", "error");
+  }, 600000); // 10 phút
 }
+
 
 // 📡 Lắng nghe cập nhật trạng thái từ server khi có thay đổi
 const socket = io();
@@ -353,7 +390,8 @@ socket.on("payment-updated", ({ mssv, status }) => {
 
   if (mssv === currentMSSV && status === "paid") {
     // ✅ Cập nhật local
-    savedData.paymentStatus = "paid";
+    if (!savedData) savedData = {};
+  savedData.paymentStatus = "paid";
 
     // ✅ Ẩn timer
     document.getElementById("countdownBox").style.display = "none";
@@ -363,7 +401,8 @@ socket.on("payment-updated", ({ mssv, status }) => {
 
     // ✅ Hiện modal cảm ơn
     showFinalThankYouModal();
-
+    setTimeout(() => window.location.href = "/", 3000);
+  
     // ✅ Gửi lại dữ liệu vào MongoDB (nếu chưa có _id hoặc bạn muốn update chắc chắn)
     fetch("/api/update-payment", {
       method: "PUT",
