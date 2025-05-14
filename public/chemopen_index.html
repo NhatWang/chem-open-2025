@@ -6,6 +6,7 @@
   <title>GIẢI CẦU LÔNG CHEM-OPEN LẦN I NĂM 2025</title>
   <link rel="icon" href="images/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="chemopen_style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
   <div id="loadingOverlay">
@@ -32,6 +33,13 @@
 
       <label>Số điện thoại</label>
       <input type="tel" name="phone" placeholder="0123456789" required>
+
+      <label>Giới tính</label>
+      <select name="gender" required>
+        <option disabled selected value="">-- Chọn giới tính --</option>
+        <option value="Nam">Nam</option>
+        <option value="Nữ">Nữ</option>
+      </select>
 
       <label>Đến từ khoa nào</label>
       <select name="khoa" required>
@@ -111,9 +119,13 @@
         <label><input type="checkbox" name="noidung" value="Đôi nam nữ"> Đôi nam nữ</label>
       </div>
       <p class="note-text" style="font-size: 0.9em; color: #555; margin-top: 5px; padding-top: 5px;">
-        - Chỉ được chọn <strong>tối đa 2 nội dung</strong> thi đấu:<br>
-        - Nếu chọn <strong>Đơn nam</strong> hoặc <strong>Đơn nữ</strong>, chỉ được đăng ký thêm <strong>Đôi nam nữ</strong>.<br>
-        - Không được chọn cả <strong>Đơn nam</strong> và <strong>Đơn nữ</strong>.
+        <p style="color: 	#B22222; font-size: 1.5em; text-align: center;"><strong><i class="fas fa-exclamation-triangle"></i> LƯU Ý <i class="fas fa-exclamation-triangle"></i></strong></p>
+        - Chỉ được chọn <strong>TỐI ĐA 2 NỘI DUNG</strong> thi đấu tại cùng 1 thời điểm.<br>
+        - Nếu chọn <strong>Đơn nam</strong>, chỉ được đăng ký thêm <strong>Đôi nam</strong> hoặc <strong>Đôi nam nữ</strong>.<br>
+        - Nếu chọn <strong>Đơn nữ</strong>, chỉ được đăng ký thêm <strong>Đôi nữ</strong> hoặc <strong>Đôi nam nữ</strong>.<br>
+        - Không thể chọn cả <strong>Đơn nam</strong> và <strong>Đơn nữ</strong>.<br>
+        - Không thể chọn cả <strong>Đôi nam nữ</strong> và <strong>Đôi nam</strong> hoặc <strong>Đôi nam nữ</strong> và <strong>Đôi nữ</strong> cùng 1 thời điểm.<br>
+        <i><strong>(Nếu có nhu cầu đăng ký cả đôi nam nữ và đôi nam hoặc đôi nam nữ và đôi nữ, vui lòng điền đơn đăng ký 2 lần)</strong></i>
       </p>
       <div id="partnerInfo" style="display: none; margin-top: 20px;">
         <h1>THÔNG TIN NGƯỜI THI ĐẤU CÙNG</h1>
@@ -126,9 +138,15 @@
       <label>Số điện thoại</label>
       <input type="tel" name="partnerPhone" placeholder="0123456789" id="partnerPhone">
 
+      <label>Giới tính</label>
+      <select name="partnerGender" id="partnerGender">
+        <option disabled selected value="">-- Chọn giới tính --</option>
+        <option value="Nam">Nam</option>
+        <option value="Nữ">Nữ</option>
+      </select>
+
       <label>Đến từ khoa nào</label>
-      <select name="partnerKhoa" id="partnerKhoa">
-        <option disabled selected value="">-- Vui lòng chọn khoa --</option>
+      <select name="partnerKhoa" id="partnerKhoa" disabled>
         <option value="Hóa học">Khoa Hóa học</option>
         <option value="Sinh học">Khoa Sinh học - Công nghệ sinh học</option>
         <option value="Vật lý - Vật lý kỹ thuật">Khoa Vật lý - Vật lý kỹ thuật</option>
@@ -139,6 +157,7 @@
         <option value="Khoa học và vật liệu">Khoa Khoa học & Công nghệ vật liệu</option>
         <option value="Điện tử viễn thông">Khoa Điện tử - Viễn thông</option>
       </select>
+      <input type="hidden" name="partnerKhoaHidden" id="partnerKhoaHidden">
 
       <label>Lớp</label>
       <select name="partnerLop" id="partnerLopSelect" style="display: none;">
