@@ -10,21 +10,13 @@
   body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: url(images/CHEMOPEN.webp) no-repeat center center fixed;
+  background: url(images/chemopen/CHEMOPEN.webp) no-repeat center center fixed;
   background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   flex-direction: column;
-}
-
-body::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(5px);
-  z-index: 0;
 }
 
 .login-container {
@@ -128,7 +120,7 @@ body::before {
 }
 
 .title-image {
-  max-width: 95%;
+  max-width: 45%;
   height: auto;
   display: block;
 }
@@ -136,17 +128,17 @@ body::before {
     position: relative;        
     z-index: 2;                
     text-align: center;
-    font-size: 14px;
-    color: #333;
+    font-size: 15px;
     padding: 20px 10px;
     margin-top: 15px;
-    color: #ffffff;
+    color: #000000;
+    font-weight: 500;
 }
   </style>
 </head>
 <body>
   <div class="title-container">
-    <img src="images/Title.png" alt="Title" class="title-image">
+    <img src="images/chemopen/Title.webp" alt="Title" class="title-image">
   </div>
   <form class="login-container" id="loginForm">
   <h2><i class="fa-solid fa-lock"></i> Đăng nhập quản trị</h2>

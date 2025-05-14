@@ -7,7 +7,7 @@ window.addEventListener("load", () => {
         overlay.style.display = "none";
       }, 1000); // 1s khớp với thời gian fade
     }
-  }, 10000); // ⏱️ đợi 8 giây rồi mới bắt đầu fade
+  }, 10000); // ⏱️ đợi 10 giây rồi mới bắt đầu fade
 });
 
 const tips = [
