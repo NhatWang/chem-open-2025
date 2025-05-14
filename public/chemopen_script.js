@@ -43,85 +43,167 @@ function isValidPhone(phone) {
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registrationForm");
   const checkboxes = document.querySelectorAll('input[name="noidung"]');
-  const doiNamNuCheckbox = document.querySelector('input[value="Đôi nam nữ"]');
   const partnerInfoSection = document.getElementById("partnerInfo");
   const partnerFields = partnerInfoSection.querySelectorAll("input, select");
-  const khoaSelect = document.querySelector('select[name="khoa"]');
   const lopSelect = document.getElementById('lopSelect');
   const lopInput = document.getElementById('lopInput');
+  const khoaSelect = document.querySelector('select[name="khoa"]');
+  const partnerKhoaHidden = document.getElementById("partnerKhoaHidden");
 
   khoaSelect.addEventListener('change', function () {
-    if (this.value === "Hóa học") {
-      lopSelect.style.display = "block";
-      lopSelect.required = true;
+  const selectedKhoa = this.value;
 
-      lopInput.style.display = "none";
-      lopInput.required = false;
-    } else {
-      lopSelect.style.display = "none";
-      lopSelect.required = false;
+  if (selectedKhoa === "Hóa học") {
+    lopSelect.style.display = "block";
+    lopSelect.required = true;
+    lopInput.style.display = "none";
+    lopInput.required = false;
+  } else {
+    lopSelect.style.display = "none";
+    lopSelect.required = false;
+    lopInput.style.display = "block";
+    lopInput.required = true;
+  }
+  if (partnerKhoaHidden) {
+    partnerKhoaHidden.value = selectedKhoa;
+  }
+  const partnerKhoaSelect = document.getElementById("partnerKhoa");
+  if (partnerKhoaSelect) {
+    partnerKhoaSelect.value = selectedKhoa;
+  }
+  const partnerLopSelect = document.getElementById("partnerLopSelect");
+  const partnerLopInput = document.getElementById("partnerLopInput");
 
-      lopInput.style.display = "block";
-      lopInput.required = true;
-    }
-  });
+  if (selectedKhoa === "Hóa học") {
+    partnerLopSelect.style.display = "block";
+    partnerLopSelect.required = true;
+    partnerLopInput.style.display = "none";
+    partnerLopInput.required = false;
+  } else {
+    partnerLopSelect.style.display = "none";
+    partnerLopSelect.required = false;
+    partnerLopInput.style.display = "block";
+    partnerLopInput.required = true;
+  }
+})
 
   // Phần người thi cùng
-  const partnerKhoaSelect = document.getElementById('partnerKhoa');
   const partnerLopSelect = document.getElementById('partnerLopSelect');
   const partnerLopInput = document.getElementById('partnerLopInput');
-  
-  partnerKhoaSelect.addEventListener('change', function () {
-    const isHoaHoc = this.value === "Hóa học";
-  
-    // Hiển thị select nếu Hóa học, ngược lại thì input text
-    partnerLopSelect.style.display = isHoaHoc ? "block" : "none";
-    partnerLopSelect.required = isHoaHoc;
-  
-    partnerLopInput.style.display = isHoaHoc ? "none" : "block";
-    partnerLopInput.required = !isHoaHoc;
-  
-    // ⚠️ Xoá giá trị nếu bị ẩn để tránh xung đột khi submit
-    if (!isHoaHoc) {
-      partnerLopSelect.removeAttribute("required");
-      partnerLopSelect.value = "";
-      partnerLopInput.setAttribute("required", "true");
-    } else {
-      partnerLopInput.removeAttribute("required");
-      partnerLopInput.value = "";
-      partnerLopSelect.setAttribute("required", "true");
-    }
-  });
-  // ✅ Hiện/ẩn thông tin người thứ 2
-  doiNamNuCheckbox.addEventListener("change", () => {
-    if (doiNamNuCheckbox.checked) {
-      partnerInfoSection.style.display = "block";
-      partnerFields.forEach(input => {
-        if (input.style.display !== "none") {
-          input.setAttribute("required", "true");
-        } else {
-          input.removeAttribute("required");
-        }
-      });
-    } else {
-      partnerInfoSection.style.display = "none";
-      partnerFields.forEach(input => input.removeAttribute("required"));
-    }
-  });
+  const partnerGenderSelect = document.querySelector('select[name="partnerGender"]');
 
   // ✅ Xử lý chọn checkbox giới hạn
-  checkboxes.forEach(checkbox => {
-    checkbox.addEventListener("change", () => {
-      const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
-      if (selected.length === 3) {
-        showToast("Đăng ký nội thi đấu không hợp lệ.", "error");
-        checkbox.checked = false;
-      } else if (selected.includes("Đơn nam") && selected.includes("Đơn nữ")) {
-        showToast("Chỉ được chọn 1 nội dung là Đơn nam hoặc Đơn nữ.", "error");
-        checkbox.checked = false;
+  const genderSelect = document.querySelector('select[name="gender"]');
+
+// ❗ Khoá tất cả checkbox ngay từ đầu
+checkboxes.forEach(cb => {
+  cb.disabled = true;
+  cb.parentElement.style.opacity = "0.5";
+});
+
+// ✅ Khi chọn giới tính
+genderSelect.addEventListener("change", () => {
+  const gender = genderSelect.value;
+
+  const allowed = gender === "Nam"
+    ? ["Đơn nam", "Đôi nam", "Đôi nam nữ"]
+    : gender === "Nữ"
+    ? ["Đơn nữ", "Đôi nữ", "Đôi nam nữ"]
+    : [];
+
+  checkboxes.forEach(cb => {
+    const isAllowed = allowed.includes(cb.value);
+    cb.disabled = !isAllowed;
+    cb.checked = false;
+    cb.parentElement.style.opacity = isAllowed ? "1" : "0.5";
+  });
+
+  // Reset phần đồng đội nếu giới tính thay đổi
+  partnerGenderSelect.value = "";
+  partnerInfoSection.style.display = "none";
+});
+
+// ✅ Bắt sự kiện thay đổi nội dung thi đấu
+checkboxes.forEach(checkbox => {
+  checkbox.addEventListener("change", () => {
+    const gender = genderSelect.value;
+    if (!gender) {
+      checkbox.checked = false;
+      showToast("Vui lòng chọn giới tính trước.", "error");
+      return;
+    }
+
+    const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+    const doi1 = gender === "Nam" ? "Đôi nam" : "Đôi nữ";
+    const doi2 = "Đôi nam nữ";
+
+    // ✅ Reset disable
+    checkboxes.forEach(cb => {
+      if ([doi1, doi2].includes(cb.value)) cb.disabled = false;
+    });
+
+    // ✅ Không được chọn cả Đơn nam và Đơn nữ
+    if (selected.includes("Đơn nam") && selected.includes("Đơn nữ")) {
+      checkbox.checked = false;
+      showToast("Chỉ được chọn 1 nội dung đơn.", "error");
+      return;
+    }
+
+    // ✅ Không được chọn quá 2 nội dung
+    if (selected.length > 2) {
+      checkbox.checked = false;
+      showToast("Chỉ được chọn tối đa 2 nội dung gồm 1 đơn và 1 đôi.", "error");
+      return;
+    }
+
+    // ✅ Không được chọn cả đôi cùng giới và đôi nam nữ
+    if (selected.includes(doi1) && selected.includes(doi2)) {
+      checkbox.checked = false;
+      showToast(`Không được chọn cả ${doi1} và Đôi nam nữ.`, "error");
+      return;
+    }
+
+    // ✅ Nếu đã chọn 1 trong 2, disable cái còn lại
+    checkboxes.forEach(cb => {
+      if (cb.value === doi1) {
+        cb.disabled = selected.includes(doi2);
+        if (selected.includes(doi2)) cb.checked = false;
+      }
+      if (cb.value === doi2) {
+        cb.disabled = selected.includes(doi1);
+        if (selected.includes(doi1)) cb.checked = false;
       }
     });
+
+    // ✅ Hiện phần người thi đấu cùng nếu là đôi
+    const needPartner = [doi1, doi2].some(item => selected.includes(item));
+    partnerInfoSection.style.display = needPartner ? "block" : "none";
+    partnerFields.forEach(input => {
+      if (input.style.display !== "none" && needPartner) {
+        input.setAttribute("required", "true");
+      } else {
+        input.removeAttribute("required");
+      }
+    });
+    // ✅ Auto set giới tính người chơi cùng nếu chọn đôi cụ thể
+    if (partnerGenderSelect) {
+      if (selected.includes("Đôi nam nữ")) {
+        partnerGenderSelect.value = gender === "Nam" ? "Nữ" : "Nam";
+        partnerGenderSelect.disabled = true;
+      } else if (selected.includes("Đôi nam")) {
+        partnerGenderSelect.value = "Nam";
+        partnerGenderSelect.disabled = true;
+      } else if (selected.includes("Đôi nữ")) {
+        partnerGenderSelect.value = "Nữ";
+        partnerGenderSelect.disabled = true;
+      } else {
+        partnerGenderSelect.value = "";
+        partnerGenderSelect.disabled = false;
+      }
+    }
   });
+});
+
 
   // ✅ Xử lý submit
   form.addEventListener("submit", function (e) {
@@ -132,6 +214,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const mssv = formData.get("mssv");
     const selected = Array.from(document.querySelectorAll('input[name="noidung"]:checked')).map(cb => cb.value);
     const amount = getPaymentAmountFromSelected(selected);
+    if (amount === 0) {
+      showToast("Lỗi thanh toán, vui lòng kiểm tra lại nội dung thi.", "error");
+      return;
+    }
+    if (!selectedPaymentMethod) {
+      showToast("Vui lòng chọn phương thức thanh toán.", "error");
+      return;
+    }
     const phone = formData.get("phone");
     const email = formData.get("email");
 
@@ -145,21 +235,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     
-
-    // Kiểm tra hợp lệ
-    const isValid = (
-      (selected.length === 1 && (selected.includes("Đơn nam") || selected.includes("Đơn nữ"))) ||
-      (selected.length === 1 && selected.includes("Đôi nam nữ")) ||
-      (selected.length === 2 && selected.includes("Đôi nam nữ") && (selected.includes("Đơn nam") || selected.includes("Đơn nữ")))
-    );
-
-    if (!isValid) {
-      showToast("Chọn nội dung không hợp lệ.", "error");
-      return;
-    }
     // Nếu chọn Đôi nam nữ thì bắt buộc kiểm tra thông tin người thứ 2
-    if (selected.includes("Đôi nam nữ")) {
-      const partnerKhoa = formData.get("partnerKhoa");
+    if (["Đôi nam", "Đôi nữ", "Đôi nam nữ"].some(nd => selected.includes(nd))) {
+      const partnerKhoa = formData.get("partnerKhoaHidden");
     
       const partnerLop = partnerKhoa === "Hóa học"
         ? document.getElementById("partnerLopSelect").value
@@ -200,6 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fullName,
     email,
     phone,
+    gender: formData.get("gender"),
     khoa,
     lop,
     mssv,
@@ -208,13 +287,14 @@ document.addEventListener("DOMContentLoaded", () => {
     paymentMethod: selectedPaymentMethod,
     paymentCode,
     paymentStatus: "pending",
-    partnerInfo: selected.includes("Đôi nam nữ")
+    partnerInfo: ["Đôi nam", "Đôi nữ", "Đôi nam nữ"].some(nd => selected.includes(nd))
       ? {
           fullName: formData.get("partnerName"),
           email: formData.get("partnerEmail"),
           phone: formData.get("partnerPhone"),
-          khoa: formData.get("partnerKhoa"),
-          lop: formData.get("partnerKhoa") === "Hóa học"
+          khoa: formData.get("partnerKhoaHidden"),
+          gender: formData.get("partnerGender"),
+          lop: formData.get("partnerKhoaHidden") === "Hóa học"
             ? document.getElementById("partnerLopSelect").value
             : document.getElementById("partnerLopInput").value,
           mssv: formData.get("partnerMSSV")
@@ -268,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
               value: usd,
               currency_code: "USD"
             },
-            description: `Phí đăng ký thi đấu: ${savedData.fullName} - ${savedData.mssv}`
+            description: `Đăng ký Chem-Open: ${savedData.fullName} (${savedData.mssv})`
           }]
         });
       },
@@ -343,10 +423,17 @@ backButton.addEventListener("click", () => {
 // ✅ Hàm phụ trợ
 
 function getPaymentAmountFromSelected(options) {
-  if (options.length === 1 && (options.includes("Đơn nam") || options.includes("Đơn nữ"))) return 70000;
-  if (options.length === 1 && options.includes("Đôi nam nữ")) return 150000;
-  if (options.length === 2 && options.includes("Đôi nam nữ") && (options.includes("Đơn nam") || options.includes("Đơn nữ"))) return 220000;
-  return 0;
+  const singles = ["Đơn nam", "Đơn nữ"];
+  const doubles = ["Đôi nam", "Đôi nữ", "Đôi nam nữ"];
+
+  const hasSingle = options.some(opt => singles.includes(opt));
+  const hasDouble = options.some(opt => doubles.includes(opt));
+
+  if (options.length === 1 && hasSingle) return 70000;
+  if (options.length === 1 && hasDouble) return 150000;
+  if (options.length === 2 && hasSingle && hasDouble) return 220000;
+
+  return 0; // Không hợp lệ hoặc nhiều hơn 2 nội dung
 }
 
 function updateBankQR(mssv, fullName, selectedOptions, paymentCode) {
@@ -357,7 +444,7 @@ function updateBankQR(mssv, fullName, selectedOptions, paymentCode) {
 
   const sepayQRUrl = `https://qr.sepay.vn/img?acc=${accountNumber}&bank=${bankCode}&amount=${amount}&des=${note}`;
 
-  const qrImg = document.getElementById("bankQRImg").src 
+  const qrImg = document.getElementById("bankQRImg");
   qrImg.src = sepayQRUrl;
   document.getElementById("paymentAmountDisplay").textContent = `Số tiền cần thanh toán: ${amount.toLocaleString("vi-VN")}₫`;
   setTimeout(() => {
@@ -446,19 +533,25 @@ socket.on("payment-updated", ({ mssv, status }) => {
       <p><strong>Họ tên:</strong> ${formData.get("fullName")}</p>
       <p><strong>Email:</strong> ${formData.get("email")}</p>
       <p><strong>SĐT:</strong> ${formData.get("phone")}</p>
+      <p><strong>Giới tính:</strong> ${formData.get("gender")}</p>
       <p><strong>Khoa:</strong> ${formData.get("khoa")}</p>
       <p><strong>Lớp:</strong> ${formData.get("lop")}</p>
       <p><strong>MSSV:</strong> ${formData.get("mssv")}</p>
       <p><strong>Nội dung:</strong> ${(formData.getAll("noidung") || []).join(" + ")}</p>
     `;
-
+    const partnerGender = document.getElementById("partnerGender").value || "Không có";
+    const partnerKhoa = document.getElementById("partnerKhoaHidden").value || "Không có";
+    const partnerLop = partnerKhoa === "Hóa học"
+      ? document.getElementById("partnerLopSelect")?.value || "Không có"
+      : document.getElementById("partnerLopInput")?.value || "Không có";
     modalPage2.innerHTML = `
       <h3>Thông tin đồng đội</h3>
       <p><strong>Họ tên:</strong> ${formData.get("partnerName") || "Không có"}</p>
       <p><strong>Email:</strong> ${formData.get("partnerEmail") || "Không có"}</p>
       <p><strong>SĐT:</strong> ${formData.get("partnerPhone") || "Không có"}</p>
-      <p><strong>Khoa:</strong> ${formData.get("partnerKhoa") || "Không có"}</p>
-      <p><strong>Lớp:</strong> ${formData.get("partnerLop") || "Không có"}</p>
+      <p><strong>Giới tính:</strong> ${partnerGender}</p>
+      <p><strong>Khoa:</strong> ${partnerKhoa}</p>
+      <p><strong>Lớp:</strong> ${partnerLop}</p>
       <p><strong>MSSV:</strong> ${formData.get("partnerMSSV") || "Không có"}</p>
     `;
 
