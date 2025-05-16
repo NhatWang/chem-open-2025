@@ -719,3 +719,29 @@ select:focus {
     bottom: 8px;
   }
 }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes flashRed {
+  0% { filter: hue-rotate(0deg) brightness(1); }
+  50% { filter: hue-rotate(-30deg) brightness(1.4) contrast(1.5); }
+  100% { filter: hue-rotate(0deg) brightness(1); }
+}
+
+
+.shake {
+  animation: shake 0.4s infinite;
+}
+
+.qr-warning {
+  animation:
+    shake 0.4s infinite,
+    flashing-red 1s infinite;
+}
+
+.flash-red {
+  animation: flashRed 1s infinite;
+}

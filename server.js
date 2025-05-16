@@ -67,7 +67,6 @@ app.use("/api", require("./routes/payment-status"));
 app.use("/api", require("./routes/delete-registration"));
 app.use("/api", require("./routes/sepay-webhook")); // Webhook sẽ emit qua io
 app.use("/api", require("./routes/login"));
-
 // Phục vụ HTML
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chemopen_index.html"));

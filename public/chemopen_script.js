@@ -1,3 +1,6 @@
+let countdownInterval = null;
+let qrShakeInterval = null;
+
 window.addEventListener("load", () => {
   setTimeout(() => {
     const overlay = document.getElementById("loadingOverlay");
@@ -334,51 +337,7 @@ checkboxes.forEach(checkbox => {
     // ✅ Render lại PayPal button
     const paypalContainer = document.getElementById("paypal-button-container");
     paypalContainer.innerHTML = "";
-    paypal.Buttons({
-      createOrder: function (data, actions) {
-        const usd = (savedData.amount / 21500).toFixed(2);
-        return actions.order.create({
-          payer: {
-            address: {
-              country_code: "VN"
-            }
-          },
-          purchase_units: [{
-            amount: {
-              value: usd,
-              currency_code: "USD"
-            },
-            description: `Đăng ký Chem-Open: ${savedData.fullName} (${savedData.mssv})`
-          }]
-        });
-      },
-      onApprove: function (data, actions) {
-        return actions.order.capture().then(function (details) {
-          showToast(`✅ Thanh toán thành công! ${details.payer.name.given_name}`);
-          console.log("📦 Giao dịch thành công:", details);
-      
-          // Gửi yêu cầu cập nhật trạng thái thanh toán
-          return fetch("/api/update-payment", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              mssv: savedData.mssv,
-              paymentStatus: "paid"
-            })
-          });
-        })
-        .then(res => res.json())
-        .then(data => {
-          console.log("🔄 Cập nhật trạng thái thành công:", data);
-          showToast("🎉 Cảm ơn bạn đã đăng ký!", "success");
-          showFinalThankYouModal();
-        })
-          // Đóng modal sau 5 giây
-        .catch(err => {
-          console.error("❌ Lỗi cập nhật trạng thái:", err);
-        });
-      }      
-    }).render(paypalContainer);
+    
   // ✅ Xử lý chuyển đổi phương thức thanh toán
 
 document.querySelectorAll(".payment-option").forEach(option => {
@@ -448,11 +407,18 @@ function updateBankQR(mssv, fullName, selectedOptions, paymentCode) {
   qrImg.src = sepayQRUrl;
   document.getElementById("paymentAmountDisplay").textContent = `Số tiền cần thanh toán: ${amount.toLocaleString("vi-VN")}₫`;
   setTimeout(() => {
-    qrImg.src = "";
-    document.getElementById("paymentAmountDisplay").textContent =
-      "⏰ Mã QR đã hết hạn. Vui lòng tải lại form để nhận mã mới.";
-    showToast("Mã QR đã hết hạn. Vui lòng đăng ký lại!", "error");
-  }, 600000); // 10 phút
+  // Thêm hiệu ứng rung vào ảnh QR
+  qrImg.classList.add("shake");
+
+  // Đổi nội dung và màu chữ thông báo
+  const paymentAmountDisplay = document.getElementById("paymentAmountDisplay");
+  paymentAmountDisplay.innerHTML = `<span style="color: red; font-weight: bold;">
+    ⚠️ Mã QR đã hết hạn. Vui lòng tải lại form để nhận mã mới.
+  </span>`;
+
+  // Toast thông báo
+  showToast("Mã QR đã hết hạn. Vui lòng đăng ký lại!", "error");
+}, 600000); // 10 phút (600000ms)
 }
 
 
@@ -479,7 +445,10 @@ socket.on("payment-updated", ({ mssv, status }) => {
     // ✅ Cập nhật local
     if (!savedData) savedData = {};
   savedData.paymentStatus = "paid";
-
+    if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
     // ✅ Ẩn timer
     document.getElementById("countdownBox").style.display = "none";
 
@@ -585,7 +554,7 @@ socket.on("payment-updated", ({ mssv, status }) => {
     resultModal.classList.remove("show");
     document.getElementById("registrationSection").style.display = "none";
     document.getElementById("paymentSection").style.display = "block";
-    startCountdown(10);
+    startCountdown(600);
   });
 
   document.getElementById("cancelBtn").addEventListener("click", () => {
@@ -651,25 +620,85 @@ function showToast(message, type = "info") {
     toast.addEventListener("transitionend", () => toast.remove());
   }, 3000);
 }
-function startCountdown(minutes) {
-  const totalSeconds = minutes * 60;
-  let remaining = totalSeconds;
+
+function startCountdown(seconds) {
+  let remaining = Math.floor(seconds);
   const box = document.getElementById("countdownBox");
   const display = document.getElementById("countdown");
+  const qrImg = document.getElementById("bankQRImg");
+  const ping = document.getElementById("pingSound");
 
   box.style.display = "block";
 
-  const interval = setInterval(() => {
+  if (countdownInterval) clearInterval(countdownInterval);
+  if (qrShakeInterval) clearInterval(qrShakeInterval);
+
+  countdownInterval = setInterval(() => {
     const mins = Math.floor(remaining / 60);
     const secs = remaining % 60;
     display.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
+    // 🟥 Cảnh báo khi còn đúng 30 giây
+    if (remaining === 30) {
+      if (qrImg) {
+        qrImg.classList.add("qr-warning");
+
+        qrShakeInterval = setInterval(() => {
+          qrImg.classList.add("shake");
+          setTimeout(() => qrImg.classList.remove("shake"), 800);
+
+          if (ping) {
+            ping.currentTime = 0;
+            ping.play().catch(() => {});
+          }
+        }, 2000);
+      }
+    }
+
+    // 🕒 Hết thời gian
     if (remaining <= 0) {
-      clearInterval(interval);
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      if (qrShakeInterval) clearInterval(qrShakeInterval);
+
+      if (qrImg) {
+        qrImg.classList.remove("qr-warning");
+        qrImg.classList.remove("shake");
+        qrImg.style.opacity = "0.4";
+        qrImg.style.pointerEvents = "none";
+      }
+
       showModal("⏰ Đã hết thời gian giữ đơn, vui lòng đăng ký lại!");
-      window.location.reload(); // hoặc chuyển lại form
+      return;
     }
 
     remaining--;
   }, 1000);
+}
+function showModal(message) {
+  const modal = document.createElement("div");
+  modal.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  `;
+
+  modal.innerHTML = `
+    <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 90%;">
+      <h3>${message}</h3>
+      <button id="closeAutoModal" style="margin-top: 20px; padding: 10px 20px;">Đóng</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById("closeAutoModal").addEventListener("click", () => {
+    modal.remove();
+    window.location.reload();
+  });
 }
