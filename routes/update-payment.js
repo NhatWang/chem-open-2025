@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Registration = require("../models/Registration");
 const nodemailer = require("nodemailer");
 const path = require("path");
-const { generateReceiptPDF } = require("../utils/generateReceiptPDF");
+const generateReceiptPDF = require("../utils/generateReceiptPDF");
 
 mongoose.connect(process.env.MONGODB_URI.replace("<PASSWORD>", process.env.MONGO_PASS));
 
