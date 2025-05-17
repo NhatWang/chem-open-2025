@@ -456,7 +456,7 @@ socket.on("payment-updated", ({ mssv, status }) => {
     showToast("🎉 Thanh toán thành công!", "success");
 
     // ✅ Hiện modal cảm ơn
-    showFinalThankYouModal();
+    showFinalThankYouModal(savedData.fullName);
     setTimeout(() => window.location.href = "/", 3000);
   
     // ✅ Gửi lại dữ liệu vào MongoDB (nếu chưa có _id hoặc bạn muốn update chắc chắn)
@@ -579,30 +579,67 @@ socket.on("payment-updated", ({ mssv, status }) => {
   document.getElementById("paymentAmountDisplay").textContent = "";
 });
 });
-window.showFinalThankYouModal = function () {
+window.showFinalThankYouModal = function (fullName) {
   const modal = document.createElement("div");
   modal.style.cssText = `
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.6);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
   `;
+
   modal.innerHTML = `
-    <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
-      <h2>🎉 Cảm ơn bạn đã đăng ký giải đấu!</h2>
-      <button id="closeThankYouModal" style="margin-top: 20px; padding: 10px 20px;">Đóng</button>
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+      }
+    </style>
+    <div style="
+      background: linear-gradient(135deg, #ffffff, #f0f9ff);
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      text-align: center;
+      max-width: 90%;
+      width: 400px;
+      animation: fadeIn 0.5s ease-out;
+    ">
+      <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
+      <h2 style="font-size: 24px; margin-bottom: 15px; color: #333;">Cảm ơn bạn ${fullName} đã đăng ký!</h2>
+      <p style="font-size: 16px; color: #555;">BTC sẽ gửi mail xác nhận đến bạn trong vài phút tới.</p>
+      <button id="closeThankYouModal" style="
+        margin-top: 25px;
+        padding: 10px 25px;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        background: #007BFF;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+      ">Đóng</button>
     </div>
   `;
+
   document.body.appendChild(modal);
 
-  document.getElementById("closeThankYouModal").addEventListener("click", () => {
+  function closeAndRedirect() {
     modal.remove();
-  });
-}
+    window.location.href = "/";
+  }
+
+  document.getElementById("closeThankYouModal").addEventListener("click", closeAndRedirect);
+
+  // ✅ Tự động đóng sau 5 giây
+  setTimeout(closeAndRedirect, 5000);
+};
+
 function showToast(message, type = "info") {
   const toast = document.createElement("div");
   toast.className = `custom-toast ${type}`;

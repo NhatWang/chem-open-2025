@@ -217,7 +217,7 @@ body {
     position: fixed;
     bottom: 24px;
     right: 24px;
-    z-index: 2;
+    z-index: 99999;
     gap: 8px;
   }
   .toast {
@@ -231,7 +231,7 @@ body {
     min-width: 220px;
     animation: slideInRight 0.5s ease forwards;
     position: relative;
-    z-index: 9999;
+    z-index: 99999;
     overflow: hidden;
     white-space: nowrap;
   }
