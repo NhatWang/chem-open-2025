@@ -12,9 +12,6 @@ async function generateReceiptPDF(data) {
 
   const filePath = path.join(receiptsDir, `${data.paymentCode} - Biên nhận thanh toán Giải đấu Chem - Open 2025.pdf`);
 
-  const browser = await puppeteer.launch({ headless: "new" });
-  const page = await browser.newPage();
-
   const htmlContent = `
   <html>
   <head>
@@ -56,7 +53,6 @@ async function generateReceiptPDF(data) {
     max-width: 520px;
     padding: 25px 35px;
     margin: auto;
-    box-shadow: 0 0 12px rgba(0,0,0,0.1);
     line-height: 1.7;
   }
 
@@ -102,6 +98,20 @@ async function generateReceiptPDF(data) {
   </body>
 </html>
   `;
+
+  try {
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  const page = await browser.newPage();
+  await page.setContent(htmlContent);
+  await page.pdf({ path: filePath, format: "A4" });
+  await browser.close();
+} catch (err) {
+  console.error("Lỗi khi tạo PDF:", err);
+  throw err; // hoặc return null nếu bạn muốn xử lý im lặng
+}
 
   await page.setContent(htmlContent, { waitUntil:["domcontentloaded", "networkidle0"]});
 
