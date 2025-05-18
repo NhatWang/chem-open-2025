@@ -18,20 +18,27 @@ const transporter = nodemailer.createTransport({
 
 async function sendConfirmationEmail(user, pdfBuffer) {
   const htmlContent = `
-  <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; color: #000;">
+  <div style="font-family: 'Times New Roman', Times, serif; font-size: 15px; color: #000;">
     <p>Thân chào bạn <strong>${user.fullName}</strong>,</p>
 
-    <p>Lời đầu tiên, BTC xin gửi lời cảm ơn đến bạn đã dành thời gian quan tâm và đăng ký tham gia <strong>GIẢI CẦU LÔNG CHEM-OPEN</strong>. Sự ủng hộ của bạn là động lực giúp chúng mình ngày càng hoàn thiện và phấn đấu để mang đến nhiều hơn các hoạt động bổ ích và ý nghĩa.</p>
+   <p>Lời đầu tiên, BTC xin gửi lời cảm ơn đến bạn đã dành thời gian quan tâm và đăng ký tham gia <strong style="color: #0b5394;">GIẢI CẦU LÔNG CHEM-OPEN</strong>. Sự ủng hộ của bạn là động lực giúp chúng mình ngày càng hoàn thiện và phấn đấu để mang đến nhiều hơn các hoạt động bổ ích và ý nghĩa.</p>
 
-    <h3 style="font-size: 14px;">📅 Thông tin Giải đấu:</h3>
-    <ul>
-      <li><strong>Ngày bốc thăm:</strong> 18h00 ngày 04/06/2025 (Trực tuyến - BTC sẽ thông báo cụ thể sau)</li>
-      <li><strong>Ngày thi đấu:</strong> 07, 08/06/2025</li>
-      <li><strong>Địa điểm:</strong> Sân cầu lông Aquaminton (1458 Đ. Hoài Thanh, P.14, Q.8, TP.HCM)</li>
-    </ul>
+    <h3 style="font-size: 16px;">Dưới đây, chúng mình xin gửi bạn một số thông tin về Giải đấu:</h3>
+    <ol style="padding-left: 20px; font-size: 14px;">
+    <li>
+      <strong>Ngày bốc thăm</strong><br />
+      - Thời gian: 18h00 ngày 04/06/2025<br />
+      - Hình thức: Trực tuyến (BTC sẽ thông báo cụ thể sau)
+    </li>
+    <li style="margin-top: 8px;">
+      <strong>Ngày tiến hành giải đấu</strong><br />
+      - Thời gian: Ngày 07, 08/06/2025<br />
+      - Địa điểm: Sân cầu lông <strong>Aquaminton</strong> (1458 Đ. Hoài Thanh, Phường 14, Quận 8, TP. Hồ Chí Minh)
+    </li>
+  </ol>
 
-    <h4 style="font-size: 13px;">📌 Lưu ý:</h4>
-    <p>Để đảm bảo thông tin được cập nhật nhanh chóng và hỗ trợ kịp thời, bạn vui lòng tham gia nhóm Zalo của Giải đấu tại:<br/>
+    <h4 style="font-size: 16px;">Lưu ý:</h4>
+    <p>Để đảm bảo thông tin được cập nhật nhanh chóng và hỗ trợ kịp thời, bạn vui lòng tham gia <strong>nhóm Zalo của Giải đấu</strong> tại đường link sau:<br/>
     👉 <a href="https://zalo.me/g/gknpiy901" target="_blank">https://zalo.me/g/gknpiy901</a></p>
 
     <p>Nếu bạn có bất kỳ thắc mắc, đừng ngần ngại liên hệ với BTC qua email này hoặc Fanpage của chúng mình.</p>
@@ -42,9 +49,9 @@ async function sendConfirmationEmail(user, pdfBuffer) {
     BCH Liên chi Hội khoa Hoá học.</p>
 
     <hr style="margin-top: 30px; margin-bottom: 15px; border: none; border-top: 1px solid #ccc;" />
-    <div style="text-align: center;">
+    <div style="text-align: center; font-size: 30px; color: #000;">
       <p><strong>__________________________________</strong></p>
-      <img src="cid:logoLCH" alt="Logo BCH" style="width: 90px; margin-bottom: 10px;" />
+      <img src="cid:logoLCH" alt="Logo BCH" style="width: 100px; margin-bottom: 10px;" />
       <p style="margin: 5px 0; color: #1a73e8;"><strong>Hội sinh viên Việt Nam – TP. Hồ Chí Minh</strong></p>
       <p style="margin: 0; color: #1a73e8;"><strong>Trường Đại học Khoa học Tự nhiên, ĐHQG - HCM</strong></p>
       <p style="margin: 0 0 10px 0; color: #1a73e8;"><strong>BCH Liên chi Hội khoa Hóa học</strong></p>
