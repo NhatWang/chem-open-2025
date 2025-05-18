@@ -21,7 +21,7 @@ async function generateReceiptPDF(data) {
       });
 
       // ===== Logo =====
-      const logoPath = path.resolve(process.cwd(), 'public/images/chemopen/Title2.png');
+      const logoPath = path.resolve(process.cwd(), 'public/images/chemopen/Logoo.png');
       if (fs.existsSync(logoPath)) {
         doc.image(logoPath, (doc.page.width - 400) / 2, 30, { width: 400 });
         doc.moveDown(4);
@@ -138,7 +138,7 @@ async function generateReceiptPDF(data) {
         doc.image(seal, sealX, sealY, { width: 130, opacity: 0.4 });
         doc.restore(); // 🔄 Khôi phục trạng thái ban đầu để phần sau không bị nghiêng
       }
-      const sign = path.resolve(process.cwd(), 'public/images/chemopen/sign.png');
+      const sign = path.resolve(process.cwd(), 'public/images/chemopen/Sign.png');
       if (fs.existsSync(sign)) {
         const t = 330;
         doc.image(sign, t, doc.y - 5, { width: 200 });
