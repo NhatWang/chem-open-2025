@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-async function sendConfirmationEmail(user, attachmentPath) {
+async function sendConfirmationEmail(user, pdfBuffer) {
   const htmlContent = `
   <div style="font-family: 'Times New Roman', Times, serif; font-size: 13px; color: #000;">
     <p>Thân chào bạn <strong>${user.fullName}</strong>,</p>
@@ -69,7 +69,7 @@ async function sendConfirmationEmail(user, attachmentPath) {
     attachments: [
       {
         filename: `${user.paymentCode} - Biên nhận thanh toán Giải đấu Chem - Open 2025.pdf`,
-        path: path.resolve(__dirname, `../receipts/${user.paymentCode} - Biên nhận thanh toán Giải đấu Chem - Open 2025.pdf`)
+        content: pdfBuffer,
       },
         {
         filename: "lch.png",
@@ -108,8 +108,8 @@ router.put("/update-payment", async (req, res) => {
 
     if (paymentStatus === "paid") {
       try {
-        const pdfPath = await generateReceiptPDF(updated);
-        await sendConfirmationEmail(updated, pdfPath);
+        const pdfBuffer = await generateReceiptPDF(updated);
+        await sendConfirmationEmail(updated, pdfBuffer);
       } catch (err) {
         console.error("❌ Gửi email thất bại:", err);
       }
