@@ -73,7 +73,7 @@ async function sendConfirmationEmail(user, pdfBuffer) {
       },
         {
         filename: "lch.png",
-        path: path.resolve(__dirname, "../images/chemopen/lch.png"),
+        path: path.resolve(__dirname, "../public/images/chemopen/lch.png"),
         cid: "logoLCH"
       },
     ]
