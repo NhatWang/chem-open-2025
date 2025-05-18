@@ -2,6 +2,12 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const UTM_Avo = path.resolve(__dirname, '../public/fonts/UTM Avo.ttf');
 const UTM_AvoItalic = path.resolve(__dirname, '../public/fonts/UTM AvoItalic.ttf');
@@ -82,7 +88,7 @@ async function generateReceiptPDF(data) {
         doc.font(UTM_AvoBold).text(label, labelX, y);
         doc.font(UTM_Avo).text(value, valueX, y);
       };
-
+      const vnTime = dayjs().tz('Asia/Ho_Chi_Minh').format('HH:mm:ss DD/MM/YYYY');
       drawLine("Họ tên:", data.fullName, 0);
       drawLine("MSSV:", data.mssv, lineHeight);
       drawLine("Email:", data.email, lineHeight * 2);
@@ -91,7 +97,7 @@ async function generateReceiptPDF(data) {
       drawLine("Số tiền:", `${data.amount.toLocaleString('vi-VN')} VNĐ`, lineHeight * 5);
       drawLine("Hình thức thanh toán:", data.paymentMethod === 'bank' ? "Chuyển khoản" : "PayPal", lineHeight * 6);
       drawLine("Mã thanh toán:", data.paymentCode, lineHeight * 7);
-      drawLine("Thời gian xác nhận:", new Date().toLocaleString("vi-VN"), lineHeight * 8);
+      drawLine("Thời gian xác nhận:", vnTime, lineHeight * 8);
       drawLine("Trạng thái:", data.paymentStatus === 'paid' ? "Đã thanh toán" : "Chưa thanh toán", lineHeight * 9);
 
       doc.moveDown(2);
