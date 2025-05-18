@@ -7,6 +7,7 @@ const dummyData = {
   mssv: "2212345",
   email: "nnhquang2006@gmail.com",
   phone: "0909123456",
+  noidung: ["Đơn nam", "Đơn nữ"],
   amount: 50000,
   paymentMethod: "bank",
   paymentCode: "CHEMO0123",

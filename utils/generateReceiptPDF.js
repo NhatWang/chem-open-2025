@@ -21,7 +21,7 @@ async function generateReceiptPDF(data) {
       });
 
       // ===== Logo =====
-      const logoPath = path.resolve(__dirname, '../public/images/chemopen/Title (đen).png');
+      const logoPath = path.resolve(process.cwd(), 'public/images/chemopen/Title2.png');
       if (fs.existsSync(logoPath)) {
         doc.image(logoPath, (doc.page.width - 400) / 2, 30, { width: 400 });
         doc.moveDown(4);
@@ -74,7 +74,7 @@ async function generateReceiptPDF(data) {
       doc.fontSize(13).fillColor('#000');
       const infoStartY = doc.y;
 
-      const boxHeight = lineHeight * 9 + 24;
+      const boxHeight = lineHeight * 10 + 24;
       doc.roundedRect(50, infoStartY - 15, doc.page.width - 100, boxHeight, 10).stroke('#aaa');
 
       const drawLine = (label, value, yOffset) => {
@@ -87,11 +87,12 @@ async function generateReceiptPDF(data) {
       drawLine("MSSV:", data.mssv, lineHeight);
       drawLine("Email:", data.email, lineHeight * 2);
       drawLine("Số điện thoại:", data.phone, lineHeight * 3);
-      drawLine("Số tiền:", `${data.amount.toLocaleString('vi-VN')} VNĐ`, lineHeight * 4);
-      drawLine("Hình thức thanh toán:", data.paymentMethod === 'bank' ? "Chuyển khoản" : "PayPal", lineHeight * 5);
-      drawLine("Mã thanh toán:", data.paymentCode, lineHeight * 6);
-      drawLine("Thời gian xác nhận:", new Date().toLocaleString("vi-VN"), lineHeight * 7);
-      drawLine("Trạng thái:", data.paymentStatus === 'paid' ? "Đã thanh toán" : "Chưa thanh toán", lineHeight * 8);
+      drawLine("Nội dung thi đấu:", Array.isArray(data.noidung) ? data.noidung.join(", ") : "—", lineHeight * 4);
+      drawLine("Số tiền:", `${data.amount.toLocaleString('vi-VN')} VNĐ`, lineHeight * 5);
+      drawLine("Hình thức thanh toán:", data.paymentMethod === 'bank' ? "Chuyển khoản" : "PayPal", lineHeight * 6);
+      drawLine("Mã thanh toán:", data.paymentCode, lineHeight * 7);
+      drawLine("Thời gian xác nhận:", new Date().toLocaleString("vi-VN"), lineHeight * 8);
+      drawLine("Trạng thái:", data.paymentStatus === 'paid' ? "Đã thanh toán" : "Chưa thanh toán", lineHeight * 9);
 
       doc.moveDown(2);
 
@@ -128,7 +129,7 @@ async function generateReceiptPDF(data) {
       const y = 360;
       doc.text("Trưởng ban Ban Tổ Chức", y, doc.y, { lineBreak: false });
 
-      const seal = path.resolve(__dirname, '../public/images/chemopen/stamp.png');
+      const seal = path.resolve(process.cwd(), 'public/images/chemopen/stamp.png');
       if (fs.existsSync(seal)) {
         const sealX = 290;
         const sealY = doc.y + 5;
@@ -137,7 +138,7 @@ async function generateReceiptPDF(data) {
         doc.image(seal, sealX, sealY, { width: 130, opacity: 0.4 });
         doc.restore(); // 🔄 Khôi phục trạng thái ban đầu để phần sau không bị nghiêng
       }
-      const sign = path.resolve(__dirname, '../public/images/chemopen/sign.png');
+      const sign = path.resolve(process.cwd(), 'public/images/chemopen/sign.png');
       if (fs.existsSync(sign)) {
         const t = 330;
         doc.image(sign, t, doc.y - 5, { width: 200 });

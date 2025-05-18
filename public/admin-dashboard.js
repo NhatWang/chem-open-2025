@@ -103,6 +103,7 @@ function fetchAndRenderData() {
           <td>${reg.fullName}</td>
           <td>${reg.email}</td>
           <td>${reg.phone}</td>
+          <td>${reg.gender || "-"}</td>
           <td>${reg.khoa}</td>
           <td>${reg.lop}</td>
           <td>${reg.noidung?.join(" + ") || "-"}</td>
@@ -131,6 +132,7 @@ function fetchAndRenderData() {
             <td>${reg.partnerInfo.mssv || "-"}</td>
             <td>${reg.partnerInfo.email || "-"}</td>
             <td>${reg.partnerInfo.phone || "-"}</td>
+            <td>${reg.partnerInfo.gender || "-"}</td>
             <td>${reg.partnerInfo.khoa || "-"}</td>
             <td>${reg.partnerInfo.lop || "-"}</td>
           `;
