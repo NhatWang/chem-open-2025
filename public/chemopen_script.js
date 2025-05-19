@@ -290,6 +290,7 @@ checkboxes.forEach(checkbox => {
     paymentMethod: selectedPaymentMethod,
     paymentCode,
     paymentStatus: "pending",
+    expireAt: new Date(Date.now() + 10 * 60 * 1000), // 10 phút
     partnerInfo: ["Đôi nam", "Đôi nữ", "Đôi nam nữ"].some(nd => selected.includes(nd))
       ? {
           fullName: formData.get("partnerName"),
@@ -366,7 +367,7 @@ const backButton = document.getElementById("backButton");
 backButton.addEventListener("click", () => {
   // Ẩn phần thanh toán
   document.getElementById("paymentSection").style.display = "none";
-
+  document.getElementById("paymentOptions").style.display = "none";
   // Hiện lại form đăng ký
   document.getElementById("registrationSection").style.display = "block";
 
@@ -551,11 +552,20 @@ socket.on("payment-updated", ({ mssv, status }) => {
   });
 
   finalBtn.addEventListener("click", () => {
-    resultModal.classList.remove("show");
-    document.getElementById("registrationSection").style.display = "none";
-    document.getElementById("paymentSection").style.display = "block";
-    startCountdown(600);
-  });
+  resultModal.classList.remove("show");
+
+  // Chuyển sang trang thanh toán
+  document.getElementById("registrationSection").style.display = "none";
+  document.getElementById("paymentSection").style.display = "block";
+
+  document.getElementById("confirmInfoButton").style.display = "none";
+
+  // 👉 Hiện các ô thanh toán sau khi xác nhận thông tin
+  document.getElementById("paymentOptions").style.display = "flex";
+
+  // Bắt đầu đếm ngược
+  startCountdown(600);
+});
 
   document.getElementById("cancelBtn").addEventListener("click", () => {
   // Ẩn modal

@@ -36,8 +36,8 @@ body {
 }
 
 #loadingOverlay .loading-text {
-  font-size: 24px;
-  color: #fff;
+  font-size: 30px;
+  color: #000;
   margin-top: 50px;
   text-align: center;
   font-weight: 700;
@@ -387,7 +387,7 @@ body {
     font-size: 15px;
     padding: 20px 10px;
     margin-top: 15px;
-    color: #000000;
+    color: #000;
     font-weight: 500;
 }
 select {

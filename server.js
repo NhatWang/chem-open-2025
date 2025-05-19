@@ -67,11 +67,21 @@ app.use("/api", require("./routes/payment-status"));
 app.use("/api", require("./routes/delete-registration"));
 app.use("/api", require("./routes/sepay-webhook")); // Webhook sẽ emit qua io
 app.use("/api", require("./routes/login"));
+app.use('/api', require('./routes/draw'));
+app.use('/api', require('./routes/admin'));
 // Phục vụ HTML
+app.get("/register", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "chemopen_register.html"));
+});
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "chemopen_login.html"));
+});
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chemopen_index.html"));
 });
-
+app.get("/draw", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "chemopen_draw.html"));
+});
 app.get("/admin", (req, res) => {
   if (!req.session.user) {
     return res.redirect("/chemopen_login.html");

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GIẢI CẦU LÔNG CHEM-OPEN LẦN I NĂM 2025</title>
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('images/chemopen/CHEMOPEN.webp') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .title-container {
+  display: flex;
+  justify-content:center;
+  align-items: center;
+  width: auto;
+  z-index: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.title-image {
+  max-width: 80%;
+  height: auto;
+  display: block;
+  padding-bottom: 80px;
+  padding-top: 80px;
+}
+
+    .draw-box {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      margin: 80px auto;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 30px;
+      color: #222;
+    }
+
+    input[type="text"] {
+      width: 80%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #resultArea {
+      margin-top: 25px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .back-link {
+      margin-top: 20px;
+      display: inline-block;
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 99999;
+    }
+
+    .toast {
+      background-color: #28a745;
+      color: white;
+      padding: 14px 20px;
+      margin-top: 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-size: 16px;
+      min-width: 220px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.3s ease, slideUp 0.3s ease;
+    }
+
+    .toast.error {
+      background-color: #dc3545;
+    }
+
+    .toast-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background-color: rgba(255, 255, 255, 0.7);
+      width: 100%;
+      animation: progressBar 3s linear forwards;
+    }
+
+    @keyframes progressBar {
+      from {
+        width: 100%;
+      }
+      to {
+        width: 0%;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+    
+    button:disabled {
+    background-color: #6c757d; /* màu xám đậm hơn */
+    cursor: not-allowed;
+    opacity: 0.9;
+  }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="title-container">
+    <img src="images/chemopen/Title.png" alt="Title" class="title-image" />
+  </div>
+
+  <div class="draw-box">
+    <h1>BỐC THĂM CHIA TRẬN</h1>
+    <input type="text" id="codeInput" placeholder="Nhập mã giao dịch (paymentCode)" />
+    <button id="drawButton">BỐC THĂM</button>
+    <div id="resultArea"></div>
+    <a href="/" class="back-link">← QUAY LẠI TRANG CHỦ</a>
+  </div>
+  <div id="toast-container"></div>
+
+  <footer class="footer">
+    <strong>© 2025 Liên chi Hội khoa Hoá học,<br />Trường Đại học Khoa học tự nhiên, ĐHQG-HCM</strong>
+  </footer>
+
+  <script>
+  const showToast = (message, type = "success", duration = 3000) => {
+  const toastContainer = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+
+  const progress = document.createElement("div");
+  progress.className = "toast-progress";
+  progress.style.animationDuration = `${duration}ms`; // ⏱ duration từ tham số
+  toast.appendChild(progress);
+
+  toastContainer.appendChild(toast);
+  setTimeout(() => toast.remove(), duration);
+};
+
+
+function getEventPrefix(eventName) {
+  if (eventName.startsWith("Đơn nam")) return "A";
+  if (eventName.startsWith("Đơn nữ")) return "B";
+  if (eventName.startsWith("Đôi nam nữ")) return "C";
+  if (eventName.startsWith("Đôi nam")) return "D";
+  if (eventName.startsWith("Đôi nữ")) return "E";
+  return "X";
+}
+
+  document.getElementById("drawButton").addEventListener("click", async () => {
+    const code = document.getElementById("codeInput").value.trim();
+    const result = document.getElementById("resultArea");
+
+    if (!code) return showToast("⚠️ Vui lòng nhập mã.", "error");
+
+    result.innerHTML = `<p>⏳ Đang kiểm tra...</p>`;
+
+    try {
+      // ✅ Step 1: Precheck
+      const pre = await fetch(`/api/precheck/${code}`);
+      const preData = await pre.json();
+
+      if (!preData.success) {
+    showToast(`❌ ${preData.message}`, "error");
+        const drawBtn = document.getElementById("drawButton");
+        drawBtn.disabled = true;
+        drawBtn.textContent = "ĐÃ BỐC";
+      // ✅ Nếu có dữ liệu đã bốc, hiển thị luôn
+      if (preData.drawResult) {
+        
+        const resultHTML = Object.entries(preData.drawResult)
+          .map(([event, code]) => `<li>${event}: <strong style="color:#007BFF; font-size: 20px">${code}</strong></li>`)
+          .join("");
+
+        result.innerHTML = `
+          <div style="background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <p><strong>HỌ VÀ TÊN:</strong> ${preData.fullName}</p>
+            <p><strong>NỘI DUNG ĐÃ ĐĂNG KÝ:</strong> ${preData.noidung?.join(", ") || "Không xác định"}</p>
+            <p><strong>MÃ THĂM ĐƯỢC BỐC LÀ:</strong></p>
+            <ul style="list-style: none; padding-left: 0; font-size: 20px; line-height: 1.5;">
+              ${resultHTML}
+            </ul>
+          </div>
+        `;
+      } else {
+        result.innerHTML = "";
+      }
+
+      return;
+    }
+
+      // ✅ Step 2: Draw
+      const draw = await fetch(`/api/draw/${code}`);
+      const data = await draw.json();
+
+      if (data.success) {
+        showToast("🎉 Bắt đầu bốc thăm trong 10 giây!", "success",10000);
+
+        const drawBtn = document.getElementById("drawButton");
+        drawBtn.disabled = true;
+        drawBtn.textContent = "ĐANG QUAY...";
+
+        const entries = Object.entries(data.drawResult);
+        const fakeDraw = {};
+
+        const resultHTML = document.createElement("div");
+        resultHTML.innerHTML = `
+          <div style="background: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <p><strong>HỌ VÀ TÊN:</strong> ${data.fullName}</p>
+            <p><strong>NỘI DUNG ĐÃ ĐĂNG KÝ:</strong> ${data.noidung?.join(", ")}</p>
+            <p><strong>MÃ THĂM ĐƯỢC BỐC LÀ:</strong></p>
+            <ul id="lotteryList" style="list-style: none; padding-left: 0; font-size: 20px; line-height: 1.6;"></ul>
+          </div>
+        `;
+        result.innerHTML = "";
+        result.appendChild(resultHTML);
+
+        const ul = document.getElementById("lotteryList");
+
+        const intervals = {};
+        entries.forEach(([event, realCode]) => {
+          const li = document.createElement("li");
+          li.innerHTML = `${event}: <strong style="color:#007BFF">🔄...</strong>`;
+          ul.appendChild(li);
+
+          intervals[event] = setInterval(() => {
+            const prefix = getEventPrefix(event);
+            const poolSize = (prefix === "A") ? 32 : 16;
+            const randomFake = `${prefix}${Math.floor(Math.random() * poolSize) + 1}`;
+            li.querySelector("strong").textContent = randomFake;
+          }, 200);
+        });
+
+        // Sau 10 giây: dừng quay, gán mã thật
+        setTimeout(() => {
+          entries.forEach(([event, code]) => {
+            clearInterval(intervals[event]);
+            const li = Array.from(ul.children).find(el => el.textContent.includes(event));
+            if (li) {
+              li.querySelector("strong").textContent = code;
+            }
+          });
+
+          drawBtn.textContent = "ĐÃ BỐC";
+          showToast("✅ Đã hoàn tất bốc thăm!", "success");
+        }, 10000);
+      } else {
+        showToast(`❌ ${data.message}`, "error");
+        result.innerHTML = "";
+      }
+    } catch (err) {
+      showToast("⚠️ Lỗi máy chủ hoặc kết nối", "error");
+      result.innerHTML = "";
+    }
+  });
+</script>
+</body>
+</html>

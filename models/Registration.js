@@ -15,9 +15,12 @@ const registrationSchema = new mongoose.Schema({
   paymentStatus: { type: String, default: "pending" },
   expireAt: {
     type: Date,
-    default: () => new Date(Date.now() + 10 * 60 * 1000), // TTL: 10 phút
     index: { expires: 0 }
   },
+  drawResult: {
+  type: Object,
+  default: {}
+},
   partnerInfo: {
     fullName: String,
     email: String,
