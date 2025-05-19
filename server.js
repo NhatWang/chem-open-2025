@@ -70,21 +70,21 @@ app.use("/api", require("./routes/login"));
 app.use('/api', require('./routes/draw'));
 app.use('/api', require('./routes/admin'));
 // Phục vụ HTML
-app.get("/register", (req, res) => {
+app.get("/dang-ky", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chemopen_register.html"));
 });
-app.get("/login", (req, res) => {
+app.get("/dang-nhap", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chemopen_login.html"));
 });
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chemopen_index.html"));
 });
-app.get("/draw", (req, res) => {
+app.get("/boctham", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chemopen_draw.html"));
 });
 app.get("/admin", (req, res) => {
   if (!req.session.user) {
-    return res.redirect("/chemopen_login.html");
+    return res.redirect("/dang-nhap");
   }
   res.sendFile(path.join(__dirname, "public", "chemopen_admin.html"));
 });
