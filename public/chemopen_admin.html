@@ -54,6 +54,61 @@
       font-weight: bold;
       color: #007bff;
     }
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 99999;
+    }
+
+    .toast {
+      background-color: #28a745; /* Mặc định: thành công */
+      color: white;
+      padding: 14px 20px;
+      margin-top: 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-size: 16px;
+      min-width: 220px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.3s ease, slideUp 0.3s ease;
+      transition: all 0.3s ease;
+    }
+
+    /* Phân loại */
+    .toast.success { background-color: #28a745; }
+    .toast.error   { background-color: #dc3545; }
+    .toast.warning { background-color: #ffc107; color: #333; }
+
+    /* Thanh progress */
+    .toast-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background-color: rgba(255, 255, 255, 0.7);
+      width: 100%;
+      animation: progressBar 3s linear forwards;
+    }
+
+    /* Animation */
+    @keyframes progressBar {
+      from { width: 100%; }
+      to   { width: 0%; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); }
+      to   { transform: translateY(0); }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to   { opacity: 0; transform: translateY(-10px); }
+    }
   </style>
 </head>
 <body>
@@ -71,12 +126,14 @@
     <li class="nav-item">
       <a class="nav-link" data-bs-toggle="tab" href="#partner">DANH SÁCH ĐỒNG ĐỘI</a>
     </li>
-  </ul>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="#draws">KẾT QUẢ BỐC THĂM</a>
+    </li>
+      </ul>
   <button class="btn btn-outline-danger ms-3" onclick="logout()">
     <i class="fa-solid fa-right-from-bracket me-1"></i> Đăng xuất
   </button>
 </div>
-
         <div class="tab-content">
           <!-- Tổng quan -->
           <div id="overview" class="tab-pane fade show active">
@@ -163,11 +220,44 @@
             <tbody></tbody>
           </table>
         </div>
+        <div id="draws" class="tab-pane fade">
+              <table id="drawTable" class="table table-bordered table-striped">
+                <thead class="table-success">
+                  <tr>
+                    <th>STT</th>
+                    <th>Họ tên</th>
+                    <th>MSSV</th>
+                    <th>Mã giao dịch</th>
+                    <th>Nội dung</th>
+                    <th>Kết quả bốc thăm</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
       </div>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="admin-dashboard.js"></script>
+  <div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title">XÁC NHẬN XOÁ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">BẠN CÓ CHẮN CHẮN MUỐN XOÁ ĐƠN ĐĂNG KÝ NÀY KHÔNG?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="confirmBtn" class="btn btn-danger">XOÁ</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">HUỶ</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
 </body>
 </html>

@@ -193,6 +193,37 @@ function fetchAndRenderData() {
     });
 }
 
+async function loadDrawData() {
+  const res = await fetch('/api/admin/draw-results'); // cần tạo API này
+  const data = await res.json();
+
+  const tbody = document.querySelector('#drawTable tbody');
+  tbody.innerHTML = '';
+  data.forEach((user, index) => {
+    const drawResult = Object.entries(user.drawResult || {})
+      .map(([event, code]) => `${event}: <strong>${code}</strong>`)
+      .join('<br>');
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${user.fullName}</td>
+        <td>${user.mssv}</td>
+        <td>${user.paymentCode}</td>
+        <td>${user.noidung.join(', ')}</td>
+        <td>${drawResult}</td>
+      </tr>
+    `;
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const tabDraws = document.querySelector('a[href="#draws"]');
+  if (tabDraws) {
+    tabDraws.addEventListener('click', loadDrawData);
+  }
+});
+
 function filterTable() {
   const search = document.getElementById("searchInput").value.toLowerCase();
   const status = document.getElementById("statusFilter").value;
@@ -209,20 +240,39 @@ function attachDeleteHandlers() {
   document.querySelectorAll(".delete-entry").forEach(btn => {
     btn.addEventListener("click", () => {
       const mssv = btn.getAttribute("data-id");
-      showConfirm(`Bạn có chắc chắn muốn xoá đơn đăng ký của MSSV: ${mssv}?`, () => {
+      showConfirm(`BẠN CÓ CHẮC CHẮN MUỐN XOÁ ĐƠN ĐĂNG KÝ CỦA ${mssv} KHÔNG?`, () => {
         fetch(`/api/delete-registration?mssv=${encodeURIComponent(mssv)}`, {
           method: "DELETE"
         })
           .then(res => res.json())
           .then(data => {
-            if (data.success) fetchAndRenderData();
-            else alert("❌ Không xoá được đơn.");
+            if (data.success) {
+              fetchAndRenderData(); // Load lại bảng
+              showToast("✅ Đã xoá đơn đăng ký!", "success"); // ✅ Hiện toast
+            } else {
+              showToast("❌ Không xoá được đơn.", "error");
+            }
           })
           .catch(err => {
             console.error("❌ Lỗi xoá đơn:", err);
-            alert("❌ Có lỗi xảy ra!");
+            showToast("❌ Có lỗi xảy ra!", "error");
           });
       });
     });
   });
+}
+
+
+function showToast(message, type = "success") {
+  const toastContainer = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+
+  const progress = document.createElement("div");
+  progress.className = "toast-progress";
+  toast.appendChild(progress);
+
+  toastContainer.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }

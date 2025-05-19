@@ -27,18 +27,18 @@ async function generateReceiptPDF(data) {
       });
 
       // ===== Logo =====
-      const logoPath = path.resolve(process.cwd(), 'public/images/chemopen/Logoo.png');
+      const logoPath = path.resolve(process.cwd(), 'public/images/chemopen/receipt.png');
       if (fs.existsSync(logoPath)) {
         doc.image(logoPath, (doc.page.width - 400) / 2, 30, { width: 400 });
         doc.moveDown(4);
       }
-      doc.moveDown(7);
+      doc.moveDown(6);
 
       // ===== Tiêu đề =====
       doc
         .fontSize(20)
         .font(UTM_AvoBold)
-        .fillColor('#1a73e8')
+        .fillColor('#000')
         .text('BIÊN NHẬN THANH TOÁN', { align: 'center' });
 
       doc
@@ -133,17 +133,8 @@ async function generateReceiptPDF(data) {
       doc.moveDown(1.5);
       doc.font(UTM_Avo);
       const y = 360;
-      doc.text("Trưởng ban Ban Tổ Chức", y, doc.y, { lineBreak: false });
+      doc.text("Trưởng ban Ban Tổ chức", y, doc.y, { lineBreak: false });
 
-      const seal = path.resolve(process.cwd(), 'public/images/chemopen/stamp.png');
-      if (fs.existsSync(seal)) {
-        const sealX = 290;
-        const sealY = doc.y + 5;
-        doc.save(); // 🛡️ Lưu trạng thái hiện tại trước khi xoay
-        doc.rotate(8, { origin: [sealX + 65, sealY + 65] }); // 🔄 Xoay dấu 12 độ (có thể điều chỉnh)
-        doc.image(seal, sealX, sealY, { width: 130, opacity: 0.4 });
-        doc.restore(); // 🔄 Khôi phục trạng thái ban đầu để phần sau không bị nghiêng
-      }
       const sign = path.resolve(process.cwd(), 'public/images/chemopen/Sign.png');
       if (fs.existsSync(sign)) {
         const t = 330;
