@@ -11,7 +11,7 @@ const registrationSchema = new mongoose.Schema({
   noidung:  [String],
   amount:   Number,
   paymentMethod: String,
-  paymentCode:   { type: String, required: true },
+  paymentCode:   { type: String, required: true, unique: true },
   paymentStatus: { type: String, default: "pending" },
   expireAt: {
     type: Date,
