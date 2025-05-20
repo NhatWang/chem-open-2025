@@ -6,6 +6,10 @@ const nodemailer = require("nodemailer");
 const path = require("path");
 const generateReceiptPDF = require("../utils/generateReceiptPDF");
 
+if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.MONGODB_URI || !process.env.MONGO_PASS) {
+  throw new Error("❌ Thiếu biến môi trường: EMAIL_USER, EMAIL_PASS, MONGODB_URI hoặc MONGO_PASS.");
+}
+
 mongoose.connect(process.env.MONGODB_URI.replace("<PASSWORD>", process.env.MONGO_PASS));
 
 const transporter = nodemailer.createTransport({
@@ -13,7 +17,8 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  timeout: 15000,
 });
 
 async function sendConfirmationEmail(user, pdfBuffer) {
@@ -69,7 +74,7 @@ async function sendConfirmationEmail(user, pdfBuffer) {
 `;
 
   const mailOptions = {
-    from: '"BAN TỔ CHỨC CHEM-OPEN NĂM 2025" <lch.hh.khtn@gmail.com>',
+    from: '"BAN TỔ CHỨC CHEM-OPEN NĂM 2025"  <${process.env.EMAIL_USER}>',
     to: user.email,
     subject: "THƯ XÁC NHẬN ĐĂNG KÝ THAM GIA GIẢI CẦU LÔNG CHEM-OPEN 2025",
     html: htmlContent,
@@ -86,8 +91,16 @@ async function sendConfirmationEmail(user, pdfBuffer) {
     ]
   };
 
+  try {
   await transporter.sendMail(mailOptions);
   console.log(`📧 Đã gửi email xác nhận đến: ${user.email}`);
+} catch (err) {
+  if (err.code === 'ETIMEDOUT') {
+    console.error("⏱️ Gửi email bị timeout sau 15 giây.");
+  } else {
+    console.error(`❌ Gửi email lỗi tới ${user.email}:`, err);
+  }
+}
 }
 
 router.put("/update-payment", async (req, res) => {
@@ -113,12 +126,17 @@ router.put("/update-payment", async (req, res) => {
       return res.status(404).json({ success: false, message: "Không tìm thấy hoặc không có thay đổi." });
     }
 
+    // ⚠️ Đã thanh toán rồi, không gửi lại
+   if (paymentStatus === 'paid' && updated.paymentStatus === 'paid') {
+      return res.json({ success: true, message: "Đã thanh toán. Không cần gửi lại email." });
+    }
+
     if (paymentStatus === "paid") {
       try {
         const pdfBuffer = await generateReceiptPDF(updated);
         await sendConfirmationEmail(updated, pdfBuffer);
       } catch (err) {
-        console.error("❌ Gửi email thất bại:", err);
+        console.error(`❌ Gửi email thất bại tới ${updated.email}:`, err);
       }
     }
 
