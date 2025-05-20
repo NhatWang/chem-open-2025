@@ -320,6 +320,7 @@ checkboxes.forEach(checkbox => {
       if (result.success) {
         console.log("✅ Đã lưu vào MongoDB:", result.data);
         savedData = result.data; // cập nhật nếu MongoDB gán _id, expireAt,...
+        localStorage.setItem("paymentCode", savedData.paymentCode);
       } else {
         console.warn("⚠️ Lưu thất bại:", result.message);
         showToast("Không thể lưu thông tin, vui lòng thử lại.", "error");
@@ -362,23 +363,8 @@ document.querySelectorAll(".payment-option").forEach(option => {
     option.classList.add("selected");
   });
 });
-const backButton = document.getElementById("backButton");
-
-backButton.addEventListener("click", () => {
-  // Ẩn phần thanh toán
-  document.getElementById("paymentSection").style.display = "none";
-  document.getElementById("paymentOptions").style.display = "none";
-  // Hiện lại form đăng ký
-  document.getElementById("registrationSection").style.display = "block";
-
-  // ✅ Ẩn phần người thứ 2 nếu có
-  document.getElementById("partnerInfo").style.display = "none";
-
-  // ✅ Ẩn QR nếu đã render
-  document.getElementById("bankQRImg").src = "";
-  document.getElementById("paymentAmountDisplay").textContent = "";
 });
-});
+
 
 // ✅ Hàm phụ trợ
 
@@ -567,7 +553,26 @@ socket.on("payment-updated", ({ mssv, status }) => {
   startCountdown(600);
 });
 
-  document.getElementById("cancelBtn").addEventListener("click", () => {
+  document.getElementById("cancelBtn").addEventListener("click", async () => {
+  const paymentCode = localStorage.getItem("paymentCode");
+
+  // ✅ Xoá document khỏi MongoDB nếu có mã
+  if (paymentCode) {
+    try {
+      const res = await fetch(`/api/delete-registration/${paymentCode}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        showToast("🗑️ Đã huỷ đơn đăng ký.", "success");
+      } else {
+        showToast("⚠️ Không xoá được đơn.", "error");
+      }
+      localStorage.removeItem("paymentCode");
+    } catch (err) {
+      console.error("❌ Lỗi khi xoá đơn:", err);
+      showToast("⚠️ Lỗi kết nối khi huỷ đơn.", "error");
+    }
+  }
+
   // Ẩn modal
   document.getElementById("resultModal").classList.remove("show");
 
@@ -588,7 +593,9 @@ socket.on("payment-updated", ({ mssv, status }) => {
   document.getElementById("bankQRImg").src = "";
   document.getElementById("paymentAmountDisplay").textContent = "";
 });
+
 });
+
 window.showFinalThankYouModal = function (fullName) {
   const modal = document.createElement("div");
   modal.style.cssText = `
