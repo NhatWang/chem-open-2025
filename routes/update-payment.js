@@ -192,26 +192,17 @@ router.put("/update-payment", async (req, res) => {
   }
 
   try {
-    // Lấy dữ liệu cũ trước khi cập nhật để kiểm tra sự thay đổi
-    const currentData = await Registration.findOne({ paymentCode });
-
-    if (!currentData) {
-      return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký." });
-    }
-
-    // Nếu trạng thái không thay đổi, không cần cập nhật lại DB
-    if (currentData.paymentStatus === paymentStatus) {
-      return res.json({ success: true, message: `⚠️ Trạng thái đã là '${paymentStatus}', không cần cập nhật.` });
-    }
-
-    // Cập nhật
     const updated = await Registration.findOneAndUpdate(
       { paymentCode },
       { $set: { paymentStatus }, $unset: { expireAt: "" } },
       { new: true }
     );
 
-    // Nếu trạng thái mới là "paid", gửi email
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký." });
+    }
+
+    // Bỏ kiểm tra trạng thái cũ, luôn gửi nếu trạng thái hiện tại là "paid"
     if (paymentStatus === "paid") {
       try {
         const pdfBuffer = await generateReceiptPDF(updated);
@@ -222,11 +213,17 @@ router.put("/update-payment", async (req, res) => {
         }
       } catch (err) {
         console.error(`❌ Gửi email lỗi:`, err);
-        return res.status(500).json({ success: false, message: "Đã cập nhật trạng thái nhưng lỗi khi gửi email." });
+        return res.status(500).json({
+          success: false,
+          message: "Đã cập nhật trạng thái nhưng lỗi khi gửi email."
+        });
       }
     }
 
-    return res.json({ success: true, message: "✅ Cập nhật trạng thái thành công." });
+    return res.json({
+      success: true,
+      message: "✅ Đã cập nhật trạng thái và gửi mail (nếu applicable)."
+    });
   } catch (err) {
     console.error("❌ Lỗi cập nhật trạng thái:", err);
     return res.status(500).json({ success: false, message: "Lỗi máy chủ." });
