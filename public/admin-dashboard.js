@@ -110,6 +110,9 @@ function fetchAndRenderData() {
           <td>${reg.paymentMethod === "paypal" ? "PayPal" : "Chuyển khoản"}</td>
           <td>${reg.paymentStatus}</td>
           <td>
+            <button class="btn btn-sm btn-primary resend-email" data-code="${reg.paymentCode}" title="Gửi lại email xác nhận" ${reg.paymentStatus !== 'paid' ? 'disabled' : ''}>
+              <i class="fa-solid fa-envelope"></i>
+            </button>
             <button class="btn btn-sm btn-danger delete-entry" data-id="${reg.mssv}">
               <i class="fa-solid fa-trash"></i>
             </button>
@@ -141,6 +144,8 @@ function fetchAndRenderData() {
       });
 
       attachDeleteHandlers();
+      attachResendHandlers();
+
 
       document.getElementById("paidCount").textContent = paid;
       document.getElementById("pendingCount").textContent = pending;
@@ -262,6 +267,32 @@ function attachDeleteHandlers() {
   });
 }
 
+function attachResendHandlers() {
+  document.querySelectorAll(".resend-email").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const paymentCode = btn.getAttribute("data-code");
+      showConfirm(`Gửi lại email xác nhận cho mã thanh toán <strong>${paymentCode}</strong>?`, () => {
+        fetch("/api/resend-mail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paymentCode })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              showToast("📧 Đã gửi lại email xác nhận!", "success");
+            } else {
+              showToast("❌ Không thể gửi lại email: " + data.message, "error");
+            }
+          })
+          .catch(err => {
+            console.error("❌ Lỗi gửi lại email:", err);
+            showToast("❌ Có lỗi khi gửi email.", "error");
+          });
+      });
+    });
+  });
+}
 
 function showToast(message, type = "success") {
   const toastContainer = document.getElementById("toast-container");

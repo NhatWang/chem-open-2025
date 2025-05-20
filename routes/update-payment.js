@@ -74,7 +74,7 @@ async function sendConfirmationEmail(user, pdfBuffer) {
 `;
 
   const mailOptions = {
-    from: '"BAN TỔ CHỨC CHEM-OPEN NĂM 2025"  <${process.env.EMAIL_USER}>',
+    from: `BAN TỔ CHỨC CHEM-OPEN NĂM 2025 <${process.env.EMAIL_USER}>`,
     to: user.email,
     subject: "THƯ XÁC NHẬN ĐĂNG KÝ THAM GIA GIẢI CẦU LÔNG CHEM-OPEN 2025",
     html: htmlContent,
@@ -144,6 +144,34 @@ router.put("/update-payment", async (req, res) => {
   } catch (err) {
     console.error("❌ Lỗi khi cập nhật:", err);
     return res.status(500).json({ success: false, message: "Lỗi máy chủ." });
+  }
+});
+
+router.post("/resend-mail", async (req, res) => {
+  const { paymentCode } = req.body;
+
+  if (!paymentCode) {
+    return res.status(400).json({ success: false, message: "Thiếu mã thanh toán." });
+  }
+
+  try {
+    const registration = await Registration.findOne({ paymentCode });
+
+    if (!registration) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký." });
+    }
+
+    if (registration.paymentStatus !== "paid") {
+      return res.status(400).json({ success: false, message: "Chỉ gửi lại email cho đơn đã thanh toán." });
+    }
+
+    const pdfBuffer = await generateReceiptPDF(registration);
+    await sendConfirmationEmail(registration, pdfBuffer);
+
+    return res.json({ success: true, message: `✅ Đã gửi lại email cho ${registration.email}` });
+  } catch (err) {
+    console.error(`❌ Lỗi khi gửi lại email cho ${paymentCode}:`, err);
+    return res.status(500).json({ success: false, message: "Lỗi máy chủ khi gửi lại email." });
   }
 });
 
