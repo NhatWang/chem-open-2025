@@ -23,8 +23,9 @@ function logout() {
 
 let pendingAction = null;
 
-function showConfirm(message, callback) {
-  document.getElementById("confirmMessage").innerText = message;
+function showConfirm(message, callback, title = "XÁC NHẬN") {
+  document.getElementById("confirmMessage").innerHTML = message;
+  document.getElementById("confirmTitle").textContent = title;
   pendingAction = callback;
   const modal = new bootstrap.Modal(document.getElementById("confirmModal"));
   modal.show();
@@ -271,7 +272,7 @@ function attachResendHandlers() {
   document.querySelectorAll(".resend-email").forEach(btn => {
     btn.addEventListener("click", () => {
       const paymentCode = btn.getAttribute("data-code");
-      showConfirm(`Gửi lại email xác nhận cho mã thanh toán <strong>${paymentCode}</strong>?`, () => {
+      showConfirm(`Gửi lại email xác nhận cho mã thanh toán ${paymentCode}?`, () => {
         fetch("/api/resend-mail", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
