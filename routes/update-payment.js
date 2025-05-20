@@ -6,8 +6,8 @@ const nodemailer = require("nodemailer");
 const path = require("path");
 const generateReceiptPDF = require("../utils/generateReceiptPDF");
 
-if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.MONGODB_URI || !process.env.MONGO_PASS) {
-  throw new Error("❌ Thiếu biến môi trường: EMAIL_USER, EMAIL_PASS, MONGODB_URI hoặc MONGO_PASS.");
+if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.MONGODB_URI) {
+  throw new Error("❌ Thiếu biến môi trường: EMAIL_USER, EMAIL_PASS hoặc MONGODB_URI.");
 }
 
 mongoose.connect(process.env.MONGODB_URI);
