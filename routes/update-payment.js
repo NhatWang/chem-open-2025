@@ -232,6 +232,24 @@ router.put("/update-payment", async (req, res) => {
     return res.status(500).json({ success: false, message: "Lỗi máy chủ." });
   }
 });
+
+router.post("/send-partner-mail", async (req, res) => {
+  const { paymentCode } = req.body;
+  const reg = await Registration.findOne({ paymentCode });
+
+  if (!reg || reg.paymentStatus !== "paid" || !reg.partnerInfo?.email) {
+    return res.status(400).json({ success: false, message: "Không hợp lệ." });
+  }
+
+  try {
+    const pdfBuffer = await generateReceiptPDF(reg);
+    await sendConfirmationEmailToPartner(reg.partnerInfo, reg, pdfBuffer);
+    return res.json({ success: true, message: `✅ Đã gửi mail cho partner ${reg.partnerInfo.email}` });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Lỗi khi gửi mail cho partner." });
+  }
+});
+
 router.post("/resend-mail", async (req, res) => {
   const { paymentCode } = req.body;
 
