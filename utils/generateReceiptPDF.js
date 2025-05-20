@@ -120,10 +120,10 @@ async function generateReceiptPDF(data) {
       doc.moveDown(3);
 
       // ===== Ký tên căn giữa theo khối phải =====
-      const now = new Date();
-      const day = now.getDate();
-      const month = now.getMonth() + 1;
-      const year = now.getFullYear();
+      const now = dayjs().tz('Asia/Ho_Chi_Minh');
+      const day = now.date();
+      const month = now.month() + 1;
+      const year = now.year();
       const dateText = `TP. Hồ Chí Minh, ngày ${day} tháng ${month} năm ${year}`;
 
       doc.fontSize(12).font(UTM_AvoItalic);
