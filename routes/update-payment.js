@@ -126,11 +126,6 @@ router.put("/update-payment", async (req, res) => {
       return res.status(404).json({ success: false, message: "Không tìm thấy hoặc không có thay đổi." });
     }
 
-    // ⚠️ Đã thanh toán rồi, không gửi lại
-   if (paymentStatus === 'paid' && updated.paymentStatus === 'paid') {
-      return res.json({ success: true, message: "Đã thanh toán. Không cần gửi lại email." });
-    }
-
     if (paymentStatus === "paid") {
       try {
         const pdfBuffer = await generateReceiptPDF(updated);
