@@ -10,7 +10,7 @@ if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.MONGODB_U
   throw new Error("❌ Thiếu biến môi trường: EMAIL_USER, EMAIL_PASS, MONGODB_URI hoặc MONGO_PASS.");
 }
 
-mongoose.connect(process.env.MONGODB_URI.replace("<PASSWORD>", process.env.MONGO_PASS));
+mongoose.connect(process.env.MONGODB_URI);
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
