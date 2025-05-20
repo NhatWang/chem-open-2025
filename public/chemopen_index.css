@@ -170,3 +170,8 @@ body {
   background-color: #00337a;
   transform: translateY(-2px);
 }
+button:disabled {
+    background-color: #6c757d; /* màu xám đậm hơn */
+    cursor: not-allowed;
+    opacity: 0.9;
+  }
