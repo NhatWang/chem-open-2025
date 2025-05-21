@@ -1,4 +1,11 @@
-{
+
+  {
+  "name": "chemopen",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "body-parser": "^2.2.0",
     "connect-mongo": "^5.1.0",
