@@ -31,7 +31,7 @@
     .bg-pending { background-color: #ffc107; color: #333; }
     .bg-failed { background-color: #dc3545; }
     table {
-      width: 100%;
+      max-width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
       background: #fff;
@@ -40,6 +40,19 @@
       padding: 10px;
       border: 1px solid #ccc;
       text-align: center;
+    }
+    td .btn {
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+
+    td .btn:last-child {
+      margin-right: 0;
+    }
+
+    td .btn-group {
+      display: inline-flex;
+      gap: 6px;
     }
     th {
       background-color: #007bff;
