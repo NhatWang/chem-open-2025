@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "express-session": "^1.18.1",
-    "swiper": "^11.2.6"
-  }
-}
