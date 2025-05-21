@@ -111,13 +111,16 @@ function fetchAndRenderData() {
           <td>${reg.paymentMethod === "paypal" ? "PayPal" : "Chuyển khoản"}</td>
           <td>${reg.paymentStatus}</td>
           <td>
-            <button class="btn btn-sm btn-primary resend-email" data-code="${reg.paymentCode}" title="Gửi lại email xác nhận" ${reg.paymentStatus !== 'paid' ? 'disabled' : ''}>
-              <i class="fa-solid fa-envelope"></i>
-            </button>
-            <button class="btn btn-sm btn-danger delete-entry" data-id="${reg.mssv}">
-              <i class="fa-solid fa-trash"></i>
-            </button>
+            <div class="btn-group">
+              <button class="btn btn-sm btn-primary resend-email" data-code="${reg.paymentCode}" title="Gửi lại email xác nhận" ${reg.paymentStatus !== 'paid' ? 'disabled' : ''}>
+                <i class="fa-solid fa-envelope"></i>
+              </button>
+              <button class="btn btn-sm btn-danger delete-entry" data-id="${reg.mssv}">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
           </td>
+
         `;
         tbody.appendChild(row);
       });
