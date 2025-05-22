@@ -612,3 +612,19 @@ document.getElementById("changePasswordForm").addEventListener("submit", async f
     showToast("❌ Lỗi máy chủ khi duyệt tài khoản.", "error");
   }
 }
+
+function togglePassword(icon) {
+  const wrapper = icon.closest(".***HIDDEN***-wrapper");
+  const input = wrapper?.querySelector("input");
+  if (!input) return;
+
+  if (input.type === "***HIDDEN***") {
+    input.type = "text";
+    icon.classList.remove("fa-eye");
+    icon.classList.add("fa-eye-slash");
+  } else {
+    input.type = "***HIDDEN***";
+    icon.classList.remove("fa-eye-slash");
+    icon.classList.add("fa-eye");
+  }
+}
