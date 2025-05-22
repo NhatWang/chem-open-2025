@@ -38,6 +38,20 @@ const io = new Server(server, {
 
 // Gắn io vào app để các route khác có thể dùng
 app.set("io", io);
+io.on("connection", socket => {
+  console.log("🔌 Client connected:", socket.id);
+
+  socket.on("join-room", userId => {
+    if (userId) {
+      socket.join(userId);
+      console.log(`📡 Socket ${socket.id} joined room ${userId}`);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔌 Client disconnected:", socket.id);
+  });
+});
 
 const PORT = process.env.PORT || 3001;
 const mongoURI = process.env.MONGODB_URI;

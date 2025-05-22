@@ -508,7 +508,7 @@ async function checkUserRole() {
     const res = await fetch("/api/me", { credentials: "include" });
     const data = await res.json();
 
-    if (!data.success || !data.user) {
+    if (!data.success || !data.user || data.user.active === false) {
       return window.location.href = "/dang-nhap"; // chưa đăng nhập
     }
 
@@ -516,6 +516,25 @@ async function checkUserRole() {
 
     document.getElementById("userGreeting").textContent = `👋 Xin chào, ${fullName || username}`;
     document.getElementById("userRole").textContent = `👤 Vai trò: ${role}`;
+
+    const socket = io();
+    socket.emit("join-room", data.user._id); // _id là userId
+    socket.on("force-logout", () => {
+      alert("🔒 Bạn đã bị đăng xuất khỏi hệ thống.");
+      window.location.href = "/dang-nhap";
+    });
+      socket.on("user-status-updated", ({ userId, active }) => {
+      const rows = document.querySelectorAll("#userTable tbody tr");
+
+      rows.forEach(row => {
+        const idCell = row.querySelector("select[data-id]");
+        if (idCell?.getAttribute("data-id") === userId) {
+          const statusCell = row.children[6]; // cột thứ 7 là trạng thái hoạt động
+          statusCell.textContent = active ? "Đang hoạt động" : "Đã đăng xuất";
+          statusCell.className = active ? "text-success" : "text-muted";
+        }
+      });
+    });
 
     const dashboard = document.getElementById("dashboardContainer");
     if (dashboard) dashboard.style.display = "block";
