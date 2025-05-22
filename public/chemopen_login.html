@@ -119,6 +119,28 @@
   padding: 0;
   margin: 0;
 }
+.auth-links {
+  margin-top: 20px;
+  font-size: 15px;
+  text-align: center;
+  color: #444;
+}
+
+.auth-links p {
+  margin: 6px 0;
+}
+
+.auth-links a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.auth-links a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
 
 .title-image {
   max-width: 45%;
@@ -149,6 +171,46 @@
     <i class="fa-solid fa-eye toggle-password" onclick="togglePassword()"></i>
   </div>
   <button type="submit">ĐĂNG NHẬP</button>
+<div class="auth-links">
+  <p><i class="fa-solid fa-user-plus me-1"></i>  Chưa có tài khoản? <a href="#" onclick="showRegister()">Tạo tài khoản</a></p>
+  <p><i class="fa-solid fa-key me-1"></i>  Quên mật khẩu? <a href="#" onclick="showForgot()">Lấy lại mật khẩu</a></p>
+</div>
+  </form>
+
+<!-- FORM ĐĂNG KÝ ẨN MẶC ĐỊNH -->
+<form class="login-container" id="registerForm" style="display: none;">
+  <h2><i class="fa-solid fa-user-plus"></i> ĐĂNG KÝ TÀI KHOẢN</h2>
+  <input type="text" id="regUsername" placeholder="Tên đăng nhập" required />
+  <input type="text" id="regMSSV" placeholder="Mã số sinh viên" required />
+  <input type="email" id="regEmail" placeholder="Email" required />
+  <input type="password" id="regPassword" placeholder="Mật khẩu" required />
+  <div class="password-wrapper">
+    <input type="password" id="regConfirmPassword" placeholder="Nhập lại mật khẩu" required />
+    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword()"></i>
+  </div>
+  <input type="hidden" id="regRole" value="collab" />
+  <button type="button" onclick="submitRegister()">ĐĂNG KÝ</button>
+  <div class="auth-links">
+  <p>Đã có tài khoản? <a href="#" onclick="showLogin()">Quay lại đăng nhập</a></p>
+  </div>
+</form>
+<form class="login-container" id="forgotForm" style="display: none;">
+  <h2><i class="fa-solid fa-key"></i> QUÊN MẬT KHẨU</h2>
+  <input type="text" id="forgotUsername" placeholder="Tên đăng nhập" required />
+  <input type="email" id="forgotEmail" placeholder="Email đã đăng ký" required />
+  <button type="button" onclick="submitForgot()">GỬI YÊU CẦU</button>
+  <div class="auth-links">
+  <p>Quay lại? <a href="#" onclick="showLogin()">Đăng nhập</a></p>
+  </div>
+</form>
+<form class="login-container" id="resetForm" style="display: none;">
+  <h2><i class="fa-solid fa-key"></i> KHÔI PHỤC MẬT KHẨU</h2>
+  <input type="password" id="newPassword" placeholder="Mật khẩu mới" required />
+  <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu" required />
+  <button type="button" onclick="submitReset()">ĐẶT LẠI MẬT KHẨU</button>
+  <div class="auth-links">
+  <p>Quay lại <a href="#" onclick="showLogin()">Đăng nhập</a></p>
+  </div>
 </form>
 
 <script>
@@ -225,6 +287,118 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
+async function submitRegister() {
+  const username = document.getElementById("regUsername").value.trim();
+  const password = document.getElementById("regPassword").value;
+  const mssv = document.getElementById("regMSSV").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const role = document.getElementById("regRole").value;
+
+  if (!username || !password || !mssv || !email) {
+    return showToast("⚠️ Vui lòng nhập đầy đủ thông tin.");
+  }
+
+  try {
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password, role, mssv, email })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      showToast("✅ Đăng ký thành công! Vui lòng chờ duyệt.", "success");
+      showLogin();
+    } else {
+      showToast(data.message || "❌ Đăng ký thất bại!");
+    }
+  } catch (err) {
+    showToast("❌ Không kết nối được máy chủ.");
+  }
+}
+function showRegister() {
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("registerForm").style.display = "block";
+    document.getElementById("forgotForm").style.display = "none";
+    document.getElementById("resetForm").style.display = "none";
+  }
+
+  function showLogin() {
+    document.getElementById("registerForm").style.display = "none";
+    document.getElementById("loginForm").style.display = "block";
+    document.getElementById("forgotForm").style.display = "none";
+    document.getElementById("resetForm").style.display = "none";
+  }
+function showForgot() {
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("registerForm").style.display = "none";
+  document.getElementById("forgotForm").style.display = "block";
+  document.getElementById("resetForm").style.display = "none";
+}
+function showReset() {
+  document.getElementById("forgotForm").style.display = "none";
+  document.getElementById("resetForm").style.display = "block";
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("registerForm").style.display = "none";
+}
+
+async function submitForgot() {
+  const username = document.getElementById("forgotUsername").value.trim();
+  const email = document.getElementById("forgotEmail").value.trim(); 
+  if (!username || !email) return showToast("⚠️ Vui lòng nhập đầy đủ thông tin.");
+
+  try {
+    const res = await fetch("/api/request-reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      showToast("📧 Yêu cầu đã được gửi! Vui lòng kiểm tra email.", "success");
+      showLogin();
+    } else {
+      showToast(data.message || "❌ Gửi yêu cầu thất bại!");
+    }
+  } catch (err) {
+    showToast("❌ Không kết nối được máy chủ.");
+  }
+}
+const urlParams = new URLSearchParams(window.location.search);
+const resetToken = urlParams.get("token");
+if (resetToken) {
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("resetForm").style.display = "block";
+}
+
+async function submitReset() {
+  const password = document.getElementById("newPassword").value.trim();
+  const confirm = document.getElementById("confirmPassword").value.trim();
+
+  if (!password || !confirm) return showToast("⚠️ Vui lòng nhập đầy đủ.");
+  if (password !== confirm) return showToast("⚠️ Mật khẩu không khớp.");
+
+  try {
+    const res = await fetch("/api/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: resetToken, newPassword: password })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      showToast("✅ Bạn đã đặt lại mật khẩu thành công. Vui lòng đăng nhập lại!", "success");
+      showLogin();
+      document.getElementById("usernameInput")?.focus();
+      history.replaceState({}, document.title, window.location.pathname); // Xoá token khỏi URL
+    } else {
+      showToast(data.message || "❌ Lỗi đặt lại mật khẩu.");
+    }
+  } catch (err) {
+    showToast("❌ Không thể kết nối máy chủ.");
+  }
+}
 </script>
 <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
 </div>

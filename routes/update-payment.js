@@ -5,6 +5,7 @@ const Registration = require("../models/Registration");
 const nodemailer = require("nodemailer");
 const path = require("path");
 const generateReceiptPDF = require("../utils/generateReceiptPDF");
+const { protect, requireRole } = require("../middlewares/auth");
 
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.MONGODB_URI) {
   throw new Error("❌ Thiếu biến môi trường: EMAIL_USER, EMAIL_PASS hoặc MONGODB_URI.");
@@ -179,7 +180,7 @@ const mailOptions = {
   }
 }
 
-router.put("/update-payment", async (req, res) => {
+router.put("/update-payment", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
   const { paymentStatus, paymentCode } = req.body;
 
   if (!paymentCode) {

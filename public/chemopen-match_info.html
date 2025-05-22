@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preload" href="images/chemopen/CHEMOPEN.webp" as="image">
+  <meta charset="UTF-8">
+  <title>Đăng nhập quản trị</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+ body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: url(images/chemopen/CHEMOPEN.webp) no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+}
+
+#loadingOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-image: url('images/chemopen/CHEMOPEN.webp');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  flex-direction: column;
+  transition: opacity 0.5s ease;
+  opacity: 1;
+  pointer-events: all;
+}
+
+#loadingOverlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#loadingOverlay .loading-text {
+  font-size: 30px;
+  color: #000;
+  margin-top: 50px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.shuttle-spinner {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.shuttle {
+  width: 8%;
+  height: auto;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.shuttle1, .shuttle3, .shuttle5 { animation-name: bounceRight; }
+.shuttle2, .shuttle4 { animation-name: bounceLeft; }
+
+.shuttle1 { animation-delay: 0s; }
+.shuttle2 { animation-delay: 0.15s; }
+.shuttle3 { animation-delay: 0.3s; }
+.shuttle4 { animation-delay: 0.45s; }
+.shuttle5 { animation-delay: 0.6s; }
+
+@keyframes bounceRight {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-40px) rotate(5deg); }
+}
+
+@keyframes bounceLeft {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-40px) rotate(-5deg); }
+}
+
+.title-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  z-index: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.title-image {
+  max-width: 45%;
+  height: auto;
+  display: block;
+  margin-top: 50px;
+}
+
+.match-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #ffffffee;
+  border-radius: 20px;
+  padding: 30px 25px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+h1 {
+  color: #004aad;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+/* Tabs layout */
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  flex-grow: 1;
+  text-align: center;
+  padding: 14px 0;
+  min-width: 150px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.tab.active {
+  background-color: #ffffff;
+  color: #004aad;
+  font-weight: bold;
+}
+
+/* Tab content box */
+.tab-content {
+  display: none;
+  background: white;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 0 0 10px 10px;
+}
+.tab-content.active {
+  display: block;
+}
+
+/* Table formatting */
+table {
+  font-size: 17px;
+  background-color: #ffffffee;
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 10px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 15px 12px;
+  text-align: center;
+  font-weight: 500;
+}
+
+th {
+  background-color: #f7f7f7;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Status styles */
+td.status-upcoming {
+  color: #f59e0b;
+  font-weight: 700;
+  background-color: #fff7e6;
+  border-radius: 6px;
+}
+td.status-ongoing {
+  color: #1d4ed8;
+  font-weight: 700;
+  background-color: #e0edff;
+  border-radius: 6px;
+}
+td.status-finished {
+  color: #16a34a;
+  font-weight: 700;
+  background-color: #e6f9eb;
+  border-radius: 6px;
+}
+
+.footer {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  font-size: 15px;
+  padding: 20px 10px;
+  margin-top: 15px;
+  color: #000000;
+  font-weight: 500;
+}
+
+  </style>
+</head>
+<body>
+    <div id="loadingOverlay">
+  <div class="shuttle-spinner">
+    <img src="images/chemopen/badminton.webp" class="shuttle shuttle1" />
+    <img src="images/chemopen/badminton.webp" class="shuttle shuttle2" />
+    <img src="images/chemopen/badminton.webp" class="shuttle shuttle3" />
+    <img src="images/chemopen/badminton.webp" class="shuttle shuttle4" />
+    <img src="images/chemopen/badminton.webp" class="shuttle shuttle5" />
+  </div>
+  <p class="loading-text"></p>
+</div>
+  <div class="title-container">
+    <img src="images/chemopen/Title.webp" alt="Title" class="title-image">
+  </div>
+  <h1>📅 Trận đấu theo nội dung</h1>
+  <div class="match-container">
+  <div class="tabs" id="tab-buttons"></div>
+  <div id="tab-contents"></div>
+</div>
+<div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="chemopen-match_info.js"></script>
+<footer class="footer">
+    <strong>© 2025 Liên chi Hội khoa Hoá học,<br>
+    Trường Đại học Khoa học tự nhiên, ĐHQG-HCM</strong>
+  </footer>
+</body>
+</html>
