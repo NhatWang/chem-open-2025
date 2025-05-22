@@ -444,12 +444,20 @@ async function loadUserList() {
         <td>${user.email}</td>
         <td>${user.username}</td>
         <td>${user.role}</td>
+        <td>${user.fullName || "-"}</td>
+        <td>${user.mssv || "-"}</td>
+        <td>${user.pending ? "Chờ duyệt" : "Đã duyệt"}</td>
         <td>${user.active ? "Đang hoạt động" : "Đã đăng xuất"}</td>
-        <td>
-          <button class="btn btn-sm btn-danger" onclick="forceLogoutUser('${user._id}')">
-            <i class="fa-solid fa-power-off me-1"></i> Đăng xuất
-          </button>
-        </td>
+       <td>
+        ${user.pending
+          ? `<button class="btn btn-sm btn-success" onclick="approveUser('${user._id}')">
+              <i class="fa-solid fa-check me-1"></i> Duyệt
+            </button>`
+          : ""}
+        <button class="btn btn-sm btn-danger" onclick="forceLogoutUser('${user._id}')">
+          <i class="fa-solid fa-power-off me-1"></i> Đăng xuất
+        </button>
+       </td>
       `;
       tbody.appendChild(row);
     });
@@ -552,5 +560,55 @@ async function createMatch(event) {
   } catch (err) {
     console.error("❌ Lỗi tạo trận:", err);
     showToast("❌ Lỗi khi tạo trận đấu", "error");
+  }
+}
+
+document.getElementById("changePasswordForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const currentPassword = document.getElementById("currentPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const msgBox = document.getElementById("changePasswordMessage");
+
+    if (newPassword !== confirmPassword) {
+      msgBox.innerHTML = `<div class='alert alert-warning'>Mật khẩu mới không khớp.</div>`;
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/change-***HIDDEN***", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        msgBox.innerHTML = `<div class='alert alert-success'>${data.message}</div>`;
+      } else {
+        msgBox.innerHTML = `<div class='alert alert-danger'>${data.message}</div>`;
+      }
+    } catch (err) {
+      msgBox.innerHTML = `<div class='alert alert-danger'>Đã xảy ra lỗi khi đổi mật khẩu.</div>`;
+    }
+  });
+
+  async function approveUser(userId) {
+  if (!confirm("Bạn chắc chắn muốn duyệt tài khoản này?")) return;
+
+  try {
+    const res = await fetch(`/api/approve-user/${userId}`, {
+      method: "PUT",
+      credentials: "include"
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast("✅ Đã duyệt tài khoản!", "success");
+      loadUserList();
+    } else {
+      showToast("❌ Không duyệt được tài khoản.", "error");
+    }
+  } catch (err) {
+    console.error("❌ Lỗi duyệt tài khoản:", err);
+    showToast("❌ Lỗi máy chủ khi duyệt tài khoản.", "error");
   }
 }
