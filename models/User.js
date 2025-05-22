@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
   pending: { type: Boolean, default: true },
   resetToken: String,
   resetExpires: Date,
+  active: { type: Boolean, default: false } // đúng, nhưng không ảnh hưởng update
 });
 
 // So sánh mật khẩu

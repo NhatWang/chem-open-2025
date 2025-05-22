@@ -68,7 +68,15 @@ router.post("/login", async (req, res) => {
       mssv: user.mssv || "",
     };
 
-    res.json({ success: true, redirect: "/admin" });
+    await User.findByIdAndUpdate(
+  user._id,
+  { active: true },
+  { new: true }
+);
+const io = req.app.get("io");
+io.emit("user-status-updated", { userId: user._id, active: true });
+
+    res.json({ success: true, redirect: "/admin", user: user._id });
   } catch (err) {
     console.error("❌ Lỗi đăng nhập:", err);
     res.status(500).json({ success: false, message: "Lỗi máy chủ" });
@@ -76,8 +84,21 @@ router.post("/login", async (req, res) => {
 });
 
 // Đăng xuất
-router.post("/logout", (req, res) => {
-  req.session.destroy(() => {
+router.post("/logout", async (req, res) => {
+  const userId = req.session?.user?._id;
+  if (!userId) return res.json({ success: false });
+
+  try {
+    await User.findByIdAndUpdate(userId, { active: false });
+    const io = req.app.get("io");
+    io.emit("user-status-updated", { userId, active: false });
+  } catch (err) {
+    console.warn("❌ Không thể cập nhật active:", err);
+  }
+
+  req.session.destroy(err => {
+    if (err) return res.status(500).json({ success: false });
+    res.clearCookie("connect.sid");
     res.json({ success: true });
   });
 });
@@ -91,8 +112,18 @@ router.get("/check-auth", (req, res) => {
 });
 
 // Lấy thông tin người dùng hiện tại
-router.get("/me", protect, (req, res) => {
-  res.json({ success: true, user: req.session.user });
+router.get("/me", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id).select("-***HIDDEN***");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy người dùng" });
+    }
+
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error("❌ Lỗi khi lấy thông tin người dùng:", err);
+    res.status(500).json({ success: false });
+  }
 });
 
 
@@ -244,21 +275,45 @@ router.delete("/reject-user/:id", async (req, res) => {
 });
 
 // Đăng xuất người dùng khác (force logout)
+
 router.post("/logout/:id", isSuperadmin, async (req, res) => {
   const sessionStore = req.sessionStore;
-  sessionStore.all((err, sessions) => {
-    if (err) return res.status(500).json({ success: false, message: "Không thể lấy session." });
+  const userId = req.params.id;
+  const io = req.app.get("io");
+
+  sessionStore.all(async (err, sessions) => {
+    if (err) return res.status(500).json({ success: false });
 
     let count = 0;
     for (const sid in sessions) {
-      const session = JSON.parse(sessions[sid]);
-      if (session?.user?._id === req.params.id) {
-        sessionStore.destroy(sid);
+      let session = sessions[sid];
+      if (typeof session === "string") {
+        try {
+          session = JSON.parse(session);
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (session?.user?._id === userId) {
+        sessionStore.destroy(sid, () => {});
         count++;
       }
     }
 
-    res.json({ success: true, message: `✅ Đã đăng xuất ${count} phiên hoạt động.` });
+    try {
+      await User.findByIdAndUpdate(userId, { active: false });
+      const io = req.app.get("io");
+      io.emit("user-status-updated", { userId, active: false });
+    } catch (e) {
+      console.error("❌ Lỗi cập nhật active:", e);
+    }
+
+    if (io) {
+      io.to(userId).emit("force-logout");
+    }
+
+    res.json({ success: true, message: `✅ Đã đăng xuất ${count} phiên.` });
   });
 });
 
