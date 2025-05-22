@@ -470,7 +470,7 @@ async function forceLogoutUser(userId) {
   if (!confirm("Bạn chắc chắn muốn đăng xuất người dùng này?")) return;
 
   try {
-    const res = await fetch(`/api/admin/users/logout/${userId}`, {
+    const res = await fetch(`/api/logout/${userId}`, {
       method: "POST",
       credentials: "include"
     });
