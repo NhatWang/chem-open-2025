@@ -203,7 +203,7 @@ function isSuperadmin(req, res, next) {
 }
 
 // Lấy danh sách người dùng
-router.get("/", isSuperadmin, async (req, res) => {
+router.get("/users", isSuperadmin, async (req, res) => {
   const users = await User.find({}, "-***HIDDEN***");
   res.json(users);
 });
@@ -230,6 +230,19 @@ router.put("/approve-user/:id", protect, requireRole(["superadmin"]), async (req
   }
 });
 
+// Từ chối tài khoản
+router.delete("/reject-user/:id", async (req, res) => {
+  try {
+    const result = await User.findByIdAndDelete(req.params.id);
+    if (!result) return res.status(404).json({ success: false, message: "Không tìm thấy người dùng" });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("❌ Lỗi khi xoá tài khoản:", err);
+    res.status(500).json({ success: false, message: "Lỗi máy chủ" });
+  }
+});
+
 // Đăng xuất người dùng khác (force logout)
 router.post("/logout/:id", isSuperadmin, async (req, res) => {
   const sessionStore = req.sessionStore;
@@ -247,6 +260,23 @@ router.post("/logout/:id", isSuperadmin, async (req, res) => {
 
     res.json({ success: true, message: `✅ Đã đăng xuất ${count} phiên hoạt động.` });
   });
+});
+
+// Cập nhật thông tin người dùng
+router.put("/change-role/:id", protect, requireRole(["superadmin"]), async (req, res) => {
+  const { role } = req.body;
+
+  if (!["admin", "collab", "superadmin"].includes(role)) {
+    return res.status(400).json({ success: false, message: "Vai trò không hợp lệ." });
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error("❌ Lỗi khi cập nhật vai trò:", err);
+    res.status(500).json({ success: false, message: "Lỗi máy chủ" });
+  }
 });
 
 
