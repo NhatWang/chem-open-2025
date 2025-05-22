@@ -168,7 +168,7 @@
   <input type="text" id="usernameInput" placeholder="Tên đăng nhập" required />
   <div class="password-wrapper">
     <input type="password" id="passwordInput" placeholder="Mật khẩu" required autocomplete="off" />
-    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword()"></i>
+     <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
   </div>
   <button type="submit">ĐĂNG NHẬP</button>
 <div class="auth-links">
@@ -182,11 +182,15 @@
   <h2><i class="fa-solid fa-user-plus"></i> ĐĂNG KÝ TÀI KHOẢN</h2>
   <input type="text" id="regUsername" placeholder="Tên đăng nhập" required />
   <input type="text" id="regMSSV" placeholder="Mã số sinh viên" required />
+  <input type="text" id="regFullName" placeholder="Họ và tên" required />
   <input type="email" id="regEmail" placeholder="Email" required />
+  <div class="password-wrapper">
   <input type="password" id="regPassword" placeholder="Mật khẩu" required />
+  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
+</div>
   <div class="password-wrapper">
     <input type="password" id="regConfirmPassword" placeholder="Nhập lại mật khẩu" required />
-    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword()"></i>
+    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
   </div>
   <input type="hidden" id="regRole" value="collab" />
   <button type="button" onclick="submitRegister()">ĐĂNG KÝ</button>
@@ -205,8 +209,14 @@
 </form>
 <form class="login-container" id="resetForm" style="display: none;">
   <h2><i class="fa-solid fa-key"></i> KHÔI PHỤC MẬT KHẨU</h2>
+  <div class="password-wrapper">
   <input type="password" id="newPassword" placeholder="Mật khẩu mới" required />
+  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
+</div>
+  <div class="password-wrapper">
   <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu" required />
+  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
+</div>
   <button type="button" onclick="submitReset()">ĐẶT LẠI MẬT KHẨU</button>
   <div class="auth-links">
   <p>Quay lại <a href="#" onclick="showLogin()">Đăng nhập</a></p>
@@ -214,13 +224,13 @@
 </form>
 
 <script>
-  function togglePassword() {
-    const input = document.getElementById("passwordInput");
-    const icon = document.querySelector(".toggle-password");
+  function togglePassword(icon) {
+    const input = icon.previousElementSibling;
     input.type = input.type === "password" ? "text" : "password";
     icon.classList.toggle("fa-eye-slash");
     icon.classList.toggle("fa-eye");
   }
+
 
   document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -289,20 +299,21 @@ document.head.appendChild(style);
 
 async function submitRegister() {
   const username = document.getElementById("regUsername").value.trim();
+  const fullName = document.getElementById("regFullName").value.trim();
   const password = document.getElementById("regPassword").value;
   const mssv = document.getElementById("regMSSV").value.trim();
   const email = document.getElementById("regEmail").value.trim();
   const role = document.getElementById("regRole").value;
 
-  if (!username || !password || !mssv || !email) {
+  if (!username || !fullName || !password || !mssv || !email) {
     return showToast("⚠️ Vui lòng nhập đầy đủ thông tin.");
   }
 
   try {
-    const res = await fetch("/api/register", {
+    const res = await fetch("/api/register-user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password, role, mssv, email })
+      body: JSON.stringify({ username, password, role, mssv, email, fullName })
     });
 
     const data = await res.json();
