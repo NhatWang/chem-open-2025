@@ -311,18 +311,6 @@ function showToast(message, type = "success") {
   toastContainer.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
-const sampleMatches = [
-  {
-    event: "Đơn nam",
-    team1: "Nguyễn A",
-    team2: "Lê B",
-    set1: "21-17",
-    set2: "18-21",
-    set3: "21-19",
-    total: "2-1",
-    status: "Sắp bắt đầu"
-  }
-];
 
 async function renderMatchUpdateTable() {
   try {
@@ -419,21 +407,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-    try {
-      const res = await fetch("/api/me", { credentials: "include" });
-      const data = await res.json();
-      if (data.success && data.user) {
-        const name = data.user.fullName;
-        document.getElementById("userGreeting").textContent = `👋 Xin chào, ${name}`;
-      }
-    } catch (err) {
-      console.error("❌ Lỗi khi lấy thông tin người dùng:", err);
-    }
-  });
+  try {
+    await checkUserRole(); // ✅ Đảm bảo đã xác thực xong trước khi render giao diện
+    fetchAndRenderData();  // ✅ Gọi sau khi đã xác thực role
+    renderMatchUpdateTable(); // ✅ Nếu cần, cũng gọi sau role
+  } catch (err) {
+    console.error("❌ Lỗi khi load ban đầu:", err);
+    window.location.href = "/dang-nhap"; // fallback
+  }
+});
 
 async function loadUserList() {
   try {
-    const res = await fetch("/api/admin/users", { credentials: "include" });
+    const res = await fetch("/api/users", { credentials: "include" });
     const users = await res.json();
     const tbody = document.querySelector("#userTable tbody");
     tbody.innerHTML = "";
@@ -443,7 +429,13 @@ async function loadUserList() {
       row.innerHTML = `
         <td>${user.email}</td>
         <td>${user.username}</td>
-        <td>${user.role}</td>
+        <td>
+          <select class="form-select form-select-sm user-role-select" data-id="${user._id}" ${user.role === "superadmin" ? "disabled" : ""}>
+            <option value="collab" ${user.role === "collab" ? "selected" : ""}>collab</option>
+            <option value="admin" ${user.role === "admin" ? "selected" : ""}>admin</option>
+            <option value="superadmin" ${user.role === "superadmin" ? "selected" : ""}>superadmin</option>
+          </select>
+        </td>
         <td>${user.fullName || "-"}</td>
         <td>${user.mssv || "-"}</td>
         <td>${user.pending ? "Chờ duyệt" : "Đã duyệt"}</td>
@@ -452,8 +444,11 @@ async function loadUserList() {
         ${user.pending
           ? `<button class="btn btn-sm btn-success" onclick="approveUser('${user._id}')">
               <i class="fa-solid fa-check me-1"></i> Duyệt
-            </button>`
-          : ""}
+            </button>
+             <button class="btn btn-sm btn-secondary" onclick="rejectUser('${user._id}')">
+              <i class="fa-solid fa-xmark me-1"></i> Không duyệt
+            </button>
+    ` : ""}
         <button class="btn btn-sm btn-danger" onclick="forceLogoutUser('${user._id}')">
           <i class="fa-solid fa-power-off me-1"></i> Đăng xuất
         </button>
@@ -461,10 +456,36 @@ async function loadUserList() {
       `;
       tbody.appendChild(row);
     });
+
+    // 🔄 Gắn sự kiện sau khi tạo xong DOM
+    document.querySelectorAll(".user-role-select").forEach(select => {
+      select.addEventListener("change", async () => {
+        const userId = select.getAttribute("data-id");
+        const newRole = select.value;
+        try {
+          const res = await fetch(`/api/change-role/${userId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ role: newRole })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast("✅ Đã cập nhật vai trò.");
+          } else {
+            showToast("❌ Không thể cập nhật vai trò.");
+          }
+        } catch (err) {
+          showToast("❌ Lỗi khi cập nhật vai trò.", "error");
+        }
+      });
+    });
+
   } catch (err) {
     console.error("Lỗi tải danh sách người dùng:", err);
   }
 }
+
 
 async function forceLogoutUser(userId) {
   if (!confirm("Bạn chắc chắn muốn đăng xuất người dùng này?")) return;
@@ -491,30 +512,46 @@ async function checkUserRole() {
       return window.location.href = "/dang-nhap"; // chưa đăng nhập
     }
 
-    const role = data.user.role;
+    const { role, fullName, username } = data.user;
 
-    document.getElementById("userGreeting").textContent = `👋 Xin chào, ${data.user.fullName || data.user.username} (${role})`;
+    document.getElementById("userGreeting").textContent = `👋 Xin chào, ${fullName || username}`;
+    document.getElementById("userRole").textContent = `👤 Vai trò: ${role}`;
 
-    // Ẩn/hiện tab theo vai trò
+    const dashboard = document.getElementById("dashboardContainer");
+    if (dashboard) dashboard.style.display = "block";
+
     if (role === "collab") {
       hideTabsExcept(["match-update"]);
     } else if (role === "admin") {
       hideTabsExcept(["overview", "list", "partner", "draws", "match-update"]);
     } else if (role === "superadmin") {
-      // Hiển thị tất cả – không cần ẩn gì cả
+      // superadmin xem tất cả tab
+    } else {
+      alert("❌ Bạn không có quyền truy cập.");
+      return window.location.href = "/dang-nhap";
     }
+
     if (role === "admin" || role === "superadmin") {
       document.getElementById("createMatchWrapper").style.display = "block";
     }
+
   } catch (err) {
     console.error("❌ Lỗi khi kiểm tra vai trò:", err);
     window.location.href = "/dang-nhap";
   }
 }
 function hideTabsExcept(allowedIds = []) {
+  if (!Array.isArray(allowedIds)) {
+    console.warn("⚠️ allowedIds không hợp lệ, đang gán mảng rỗng thay thế.");
+    allowedIds = [];
+  }
+
   const allTabs = document.querySelectorAll("#adminTabs .nav-link");
   allTabs.forEach(tab => {
-    const target = tab.getAttribute("href")?.replace("#", "");
+    const href = tab.getAttribute("href");
+    if (!href) return;
+
+    const target = href.replace("#", "");
     if (!allowedIds.includes(target)) {
       tab.parentElement.style.display = "none";
       const tabContent = document.getElementById(target);
@@ -612,6 +649,23 @@ document.getElementById("changePasswordForm").addEventListener("submit", async f
     showToast("❌ Lỗi máy chủ khi duyệt tài khoản.", "error");
   }
 }
+async function rejectUser(userId) {
+  if (!confirm("Bạn có chắc muốn không duyệt và xoá tài khoản này khỏi hệ thống?")) return;
+
+  try {
+    const res = await fetch(`/api/reject-user/${userId}`, {
+      method: "DELETE",
+      credentials: "include"
+    });
+    const data = await res.json();
+    showToast(data.success ? "✅ Đã xoá tài khoản." : "❌ Không thể xoá.", data.success ? "success" : "error");
+    if (data.success) loadUserList();
+  } catch (err) {
+    console.error("❌ Lỗi khi xoá tài khoản:", err);
+    showToast("❌ Lỗi máy chủ khi xoá tài khoản.", "error");
+  }
+}
+
 
 function togglePassword(icon) {
   const wrapper = icon.closest(".password-wrapper");
@@ -628,3 +682,13 @@ function togglePassword(icon) {
     icon.classList.add("fa-eye");
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const tabUser = document.querySelector('a[href="#user-management"]');
+  if (tabUser) {
+    tabUser.addEventListener('click', loadUserList);
+  }
+  if (window.location.hash === "#user-management") {
+      loadUserList();
+  }
+});
