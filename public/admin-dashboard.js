@@ -311,3 +311,246 @@ function showToast(message, type = "success") {
   toastContainer.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
+const sampleMatches = [
+  {
+    event: "Đơn nam",
+    team1: "Nguyễn A",
+    team2: "Lê B",
+    set1: "21-17",
+    set2: "18-21",
+    set3: "21-19",
+    total: "2-1",
+    status: "Sắp bắt đầu"
+  }
+];
+
+async function renderMatchUpdateTable() {
+  try {
+    const res = await fetch("/api/matches", { credentials: "include" });
+    const matches = await res.json();
+
+    const tbody = document.getElementById("updateMatchTableBody");
+    tbody.innerHTML = "";
+
+    matches.forEach((match, index) => {
+      const row = document.createElement("tr");
+      const [datePart, timePart] = match.time?.split(" ") || ["", ""];
+      row.innerHTML = `
+        <td>${index + 1}</td>
+        <td>
+    <input type="date" class="form-control form-control-sm" 
+      value="${datePart}" 
+      data-field="date">
+  </td>
+  <td>
+    <input type="time" class="form-control form-control-sm" 
+      value="${timePart}" 
+      data-field="time">
+  </td>
+        <td><input class="form-control form-control-sm" value="${match.location || ''}" data-field="location"></td>
+        <td>${match.event}</td>
+        <td>${match.team1}</td>
+        <td>${match.team2}</td>
+        <td><input class="form-control form-control-sm" value="${match.set1 || ""}" data-field="set1"></td>
+        <td><input class="form-control form-control-sm" value="${match.set2 || ""}" data-field="set2"></td>
+        <td><input class="form-control form-control-sm" value="${match.set3 || ""}" data-field="set3"></td>
+        <td><input class="form-control form-control-sm" value="${match.total || ""}" data-field="total"></td>
+        <td>
+          <select class="form-select form-select-sm" data-field="status">
+            <option${match.status === "Sắp bắt đầu" ? " selected" : ""}>Sắp bắt đầu</option>
+            <option${match.status === "Đang diễn ra" ? " selected" : ""}>Đang diễn ra</option>
+            <option${match.status === "Đã kết thúc" ? " selected" : ""}>Đã kết thúc</option>
+          </select>
+        </td>
+        <td><button class="btn btn-sm btn-success" onclick="saveMatch('${match._id}', this)">Lưu</button></td>
+      `;
+      tbody.appendChild(row);
+    });
+  } catch (err) {
+    console.error("❌ Lỗi tải dữ liệu trận đấu:", err);
+  }
+}
+
+function saveMatch(id, button) {
+  const row = button.closest("tr");
+  const inputs = row.querySelectorAll("input, select");
+
+  const body = {};
+  let dateStr = "", timeStr = "";
+
+  inputs.forEach(input => {
+    const field = input.getAttribute("data-field");
+
+    if (field === "date") dateStr = input.value;
+    else if (field === "time") timeStr = input.value;
+    else body[field] = input.value;
+  });
+
+  if (dateStr && timeStr) {
+  body.time = `${dateStr} ${timeStr}`; // lưu chuỗi
+}
+
+  fetch(`/api/update-match/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body)
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showToast("✅ Đã lưu trận đấu.", "success");
+      } else {
+        showToast("❌ Lỗi lưu.", "error");
+      }
+    })
+    .catch(err => {
+      console.error("❌ Lỗi gửi request:", err);
+      showToast("❌ Lỗi khi gửi dữ liệu.", "error");
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const tabMatchUpdate = document.querySelector('a[href="#match-update"]');
+  if (tabMatchUpdate) {
+    tabMatchUpdate.addEventListener('click', renderMatchUpdateTable);
+  }
+  renderMatchUpdateTable();
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const res = await fetch("/api/me", { credentials: "include" });
+      const data = await res.json();
+      if (data.success && data.user) {
+        const name = data.user.fullName;
+        document.getElementById("userGreeting").textContent = `👋 Xin chào, ${name}`;
+      }
+    } catch (err) {
+      console.error("❌ Lỗi khi lấy thông tin người dùng:", err);
+    }
+  });
+
+async function loadUserList() {
+  try {
+    const res = await fetch("/api/admin/users", { credentials: "include" });
+    const users = await res.json();
+    const tbody = document.querySelector("#userTable tbody");
+    tbody.innerHTML = "";
+
+    users.forEach(user => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${user.email}</td>
+        <td>${user.username}</td>
+        <td>${user.role}</td>
+        <td>${user.active ? "Đang hoạt động" : "Đã đăng xuất"}</td>
+        <td>
+          <button class="btn btn-sm btn-danger" onclick="forceLogoutUser('${user._id}')">
+            <i class="fa-solid fa-power-off me-1"></i> Đăng xuất
+          </button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  } catch (err) {
+    console.error("Lỗi tải danh sách người dùng:", err);
+  }
+}
+
+async function forceLogoutUser(userId) {
+  if (!confirm("Bạn chắc chắn muốn đăng xuất người dùng này?")) return;
+
+  try {
+    const res = await fetch(`/api/admin/users/logout/${userId}`, {
+      method: "POST",
+      credentials: "include"
+    });
+    const data = await res.json();
+    showToast(data.success ? "✅ Đã đăng xuất người dùng." : "❌ Không thể đăng xuất.");
+    loadUserList();
+  } catch (err) {
+    showToast("❌ Lỗi máy chủ.", "error");
+  }
+}
+
+async function checkUserRole() {
+  try {
+    const res = await fetch("/api/me", { credentials: "include" });
+    const data = await res.json();
+
+    if (!data.success || !data.user) {
+      return window.location.href = "/dang-nhap"; // chưa đăng nhập
+    }
+
+    const role = data.user.role;
+
+    document.getElementById("userGreeting").textContent = `👋 Xin chào, ${data.user.fullName || data.user.username} (${role})`;
+
+    // Ẩn/hiện tab theo vai trò
+    if (role === "collab") {
+      hideTabsExcept(["match-update"]);
+    } else if (role === "admin") {
+      hideTabsExcept(["overview", "list", "partner", "draws", "match-update"]);
+    } else if (role === "superadmin") {
+      // Hiển thị tất cả – không cần ẩn gì cả
+    }
+    if (role === "admin" || role === "superadmin") {
+      document.getElementById("createMatchWrapper").style.display = "block";
+    }
+  } catch (err) {
+    console.error("❌ Lỗi khi kiểm tra vai trò:", err);
+    window.location.href = "/dang-nhap";
+  }
+}
+function hideTabsExcept(allowedIds = []) {
+  const allTabs = document.querySelectorAll("#adminTabs .nav-link");
+  allTabs.forEach(tab => {
+    const target = tab.getAttribute("href")?.replace("#", "");
+    if (!allowedIds.includes(target)) {
+      tab.parentElement.style.display = "none";
+      const tabContent = document.getElementById(target);
+      if (tabContent) tabContent.style.display = "none";
+    }
+  });
+}
+function showCreateMatchModal() {
+  const modal = new bootstrap.Modal(document.getElementById("createMatchModal"));
+  modal.show();
+}
+
+async function createMatch(event) {
+  event.preventDefault();
+  const form = document.getElementById("createMatchForm");
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
+
+  const datetime = `${data.date}T${data.time}`;
+  const payload = {
+    event: data.event,
+    time: datetime,
+    location: data.location,
+    team1: data.team1,
+    team2: data.team2
+  };
+
+  try {
+    const res = await fetch("/api/create-match", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (result.success) {
+      showToast("✅ Đã tạo trận đấu", "success");
+      bootstrap.Modal.getInstance(document.getElementById("createMatchModal")).hide();
+      renderMatchUpdateTable(); // Refresh danh sách
+    } else {
+      showToast("❌ " + result.message, "error");
+    }
+  } catch (err) {
+    console.error("❌ Lỗi tạo trận:", err);
+    showToast("❌ Lỗi khi tạo trận đấu", "error");
+  }
+}

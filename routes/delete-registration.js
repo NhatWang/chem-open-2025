@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { protect } = require("../middlewares/auth");
+const { protect, requireRole } = require("../middlewares/auth");
 const Registration = require("../models/Registration");
 
 // Xoá đơn đăng ký theo MSSV (cho admin)
-router.delete("/delete-registration", async (req, res) => {
+router.delete("/delete-registration", protect, requireRole(["admin","superadmin"]), async (req, res) => {
   const mssv = req.query.mssv;
   if (!mssv) return res.status(400).json({ success: false, message: "Thiếu MSSV" });
 

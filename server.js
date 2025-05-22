@@ -11,6 +11,7 @@ const app = express();
 const server = http.createServer(app); // dùng http để tạo server
 const session = require("express-session");
 const rateLimit = require("express-rate-limit");
+const matchRoutes = require("./routes/match");
 
 app.set("trust proxy", 1); // cần thiết nếu dùng proxy (Heroku, Nginx, etc.)
 
@@ -52,7 +53,7 @@ const loginLimiter = rateLimit({
   message: "🚫 Quá nhiều lần đăng nhập sai, vui lòng thử lại sau 15 phút."
 });
 app.use("/api/login", loginLimiter);
-
+app.use("/", matchRoutes);
 app.use(cors({
   origin: "https://www.chem-open2025.id.vn/", // hoặc đúng domain frontend của bạn
   credentials: true
@@ -66,7 +67,8 @@ app.use("/api", require("./routes/update-payment"));
 app.use("/api", require("./routes/payment-status"));
 app.use("/api", require("./routes/delete-registration"));
 app.use("/api", require("./routes/sepay-webhook")); // Webhook sẽ emit qua io
-app.use("/api", require("./routes/login"));
+app.use("/api", require("./routes/user"));
+app.use("/api", require("./routes/match"));
 app.use('/api', require('./routes/draw'));
 app.use('/api', require('./routes/admin'));
 // Phục vụ HTML
@@ -81,6 +83,9 @@ app.get("/", (req, res) => {
 });
 app.get("/boctham", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chemopen_draw.html"));
+});
+app.get("/thong-tin-tran-dau", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "chemopen-match_info.html"));
 });
 app.get("/admin", (req, res) => {
   if (!req.session.user) {

@@ -3,11 +3,34 @@ function protect(req, res, next) {
     return next(); // ✅ Đã đăng nhập
   }
 
-  // ❌ Chưa đăng nhập
-  res.status(401).json({
+  console.warn("🔒 Chặn truy cập vì chưa đăng nhập.");
+  return res.status(401).json({
     success: false,
     message: "❌ Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục."
   });
 }
 
-module.exports = { protect };
+function requireRole(roles = []) {
+  return (req, res, next) => {
+    const user = req.session?.user;
+    if (!user) {
+      console.warn("🚫 Truy cập bị chặn do chưa đăng nhập.");
+      return res.status(401).json({ success: false, message: "Chưa đăng nhập" });
+    }
+
+    if (!roles.includes(user.role)) {
+      console.warn(`🚫 Truy cập bị chặn: Role '${user.role}' không nằm trong [${roles.join(", ")}]`);
+      return res.status(403).json({
+        success: false,
+        message: "🚫 Bạn không có quyền truy cập chức năng này."
+      });
+    }
+
+    next();
+  };
+}
+
+module.exports = {
+  protect,
+  requireRole
+};

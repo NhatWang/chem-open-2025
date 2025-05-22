@@ -7,7 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="preload" href="images/chemopen/CHEMOPEN.webp" as="image">
   <style>
     html, body {
       height: 100%;
@@ -67,6 +66,8 @@
     .nav-tabs .nav-link.active {
       font-weight: bold;
       color: #007bff;
+      justify-content: center;
+      text-align: center;
     }
     #toast-container {
       position: fixed;
@@ -130,18 +131,25 @@
     <div class="row min-vh-100">
         <div class="col p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-  <ul class="nav nav-tabs" id="adminTabs">
+      <div id="userGreeting" class="me-3 text-end text-primary fw-bold"></div>
+  <ul class="nav nav-tabs" id="adminTabs" style="text-align: center;">
     <li class="nav-item">
-      <a class="nav-link active" data-bs-toggle="tab" href="#overview">TỔNG QUAN</a>
+      <a class="nav-link active" data-bs-toggle="tab" href="#overview">TỔNG<br>QUAN</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" data-bs-toggle="tab" href="#list">DANH SÁCH ĐĂNG KÝ</a>
+      <a class="nav-link" data-bs-toggle="tab" href="#list">DANH SÁCH<br>ĐĂNG KÝ</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" data-bs-toggle="tab" href="#partner">DANH SÁCH ĐỒNG ĐỘI</a>
+      <a class="nav-link" data-bs-toggle="tab" href="#partner">DANH SÁCH<br>ĐỒNG ĐỘI</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" data-bs-toggle="tab" href="#draws">KẾT QUẢ BỐC THĂM</a>
+      <a class="nav-link" data-bs-toggle="tab" href="#draws">KẾT QUẢ<br>BỐC THĂM</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="#match-update">CẬP NHẬT<br>TRẬN ĐẤU</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="user-tab" data-bs-toggle="tab" href="#user-management" role="tab">QUẢN LÝ <br> NGƯỜI DÙNG</a>
     </li>
       </ul>
   <button class="btn btn-outline-danger ms-3" onclick="logout()">
@@ -249,6 +257,52 @@
                 <tbody></tbody>
               </table>
             </div>
+          <!-- Cập nhật trận đấu -->
+           <div id="match-update" class="tab-pane fade">
+            <table class="table table-bordered">
+              <thead class="table-warning">
+                <tr>
+                  <th>STT</th>
+                  <th>Ngày</th>
+                  <th>Giờ</th>  
+                  <th>Địa điểm</th>
+                  <th>Nội dung</th>
+                  <th>Đối thủ 1</th>
+                  <th>Đối thủ 2</th>
+                  <th>Set 1</th>
+                  <th>Set 2</th>
+                  <th>Set 3</th>
+                  <th>Tỉ số</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="updateMatchTableBody">
+                <!-- JS sẽ render tại đây -->
+              </tbody>
+            </table>
+              <div class="d-flex justify-content-end mb-2" id="createMatchWrapper" style="display: none;">
+            <button class="btn btn-primary" onclick="showCreateMatchModal()">
+              <i class="fa-solid fa-plus me-1"></i> TẠO TRẬN ĐẤU
+            </button>
+          </div>
+          </div>
+          <!-- Quản lý người dùng -->
+           <div id="user-management" class="tab-pane fade">
+            <h5 class="mt-3 mb-3">👤 Danh sách người dùng</h5>
+            <table id="userTable" class="table table-bordered table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>Email</th>
+                  <th>Tên đăng nhập</th>
+                  <th>Vai trò</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
       </div>
     </div>
   </div>
@@ -272,7 +326,53 @@
     </div>
   </div>
 </div>
-
+<div class="modal fade" id="createMatchModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" id="createMatchForm" onsubmit="createMatch(event)">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Tạo trận đấu mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label">Nội dung</label>
+          <select class="form-select" name="event" required>
+            <option value="">-- Chọn nội dung --</option>
+            <option>Đơn nam</option>
+            <option>Đơn nữ</option>
+            <option>Đôi nam</option>
+            <option>Đôi nữ</option>
+            <option>Đôi nam nữ</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Ngày</label>
+          <input type="date" class="form-control" name="date" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Giờ</label>
+          <input type="time" class="form-control" name="time" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Địa điểm</label>
+          <input type="text" class="form-control" name="location" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Đối thủ 1</label>
+          <input type="text" class="form-control" name="team1" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Đối thủ 2</label>
+          <input type="text" class="form-control" name="team2" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Tạo</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+      </div>
+    </form>
+  </div>
+</div>
 <div id="toast-container"></div>
 </body>
 </html>

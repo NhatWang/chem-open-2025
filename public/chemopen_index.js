@@ -1,5 +1,3 @@
-let countdownInterval = null;
-let qrShakeInterval = null;
 
 window.addEventListener("load", () => {
   setTimeout(() => {
