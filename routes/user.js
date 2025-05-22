@@ -13,7 +13,7 @@ const sendMail = require("../utils/sendMail");
 // ========================
 
 // Đăng ký tài khoản
-router.post("/register", async (req, res) => {
+router.post("/register-user", async (req, res) => {
   const { username, password, role, mssv, email, fullName } = req.body;
 
   if (!username || !password || !role || !mssv || !email || !fullName) {
@@ -114,10 +114,17 @@ router.post("/request-reset", async (req, res) => {
 
   const resetLink = `https://www.chem-open2025.id.vn/reset-password.html?token=${token}`;
   await sendMail({
-    to: user.email,
-    subject: "Khôi phục mật khẩu",
-    html: `<p>Bạn đã yêu cầu khôi phục mật khẩu. Click vào đây để đặt lại: <a href="${resetLink}">${resetLink}</a></p>`
-  });
+  to: user.email,
+  subject: "Khôi phục mật khẩu",
+  html: `
+    <p>Xin chào <strong>${user.fullName || user.username}</strong>,</p>
+    <p>Bạn đã yêu cầu khôi phục mật khẩu tại hệ thống CHEM-OPEN.</p>
+    <p>Vui lòng nhấn vào nút bên dưới để đặt lại mật khẩu:</p>
+    <p><a href="${resetLink}" style="padding: 10px 20px; background: #0b5394; color: #fff; text-decoration: none;">Đặt lại mật khẩu</a></p>
+    <p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email.</p>
+    <p>Trân trọng,<br/>Liên chi Hội khoa Hoá học.</p>
+  `
+});
 
   res.json({ success: true });
 });
@@ -153,6 +160,35 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+router.post("/change-password", protect, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ success: false, message: "Thiếu mật khẩu hiện tại hoặc mật khẩu mới." });
+  }
+
+  try {
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy người dùng." });
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Mật khẩu hiện tại không đúng." });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    await user.save();
+
+    res.json({ success: true, message: "✅ Đã đổi mật khẩu thành công." });
+  } catch (err) {
+    console.error("❌ Lỗi đổi mật khẩu:", err);
+    res.status(500).json({ success: false, message: "Lỗi máy chủ." });
+  }
+});
+
 
 // ========================
 // 🧑‍💼 3. ADMIN FUNCTIONS
@@ -175,7 +211,18 @@ router.get("/", isSuperadmin, async (req, res) => {
 // Duyệt tài khoản
 router.put("/approve-user/:id", protect, requireRole(["superadmin"]), async (req, res) => {
   try {
-    await User.findByIdAndUpdate(req.params.id, { pending: false });
+    const user = await User.findByIdAndUpdate(req.params.id, { pending: false }, { new: true });
+
+    if (user?.email) {
+      await sendMail({
+        to: user.email,
+        subject: "TÀI KHOẢN ĐÃ ĐƯỢC DUYỆT",
+        html: `<p>Xin chào <strong>${user.fullName || user.username}</strong>,</p>
+        <p>Tài khoản của bạn đã được duyệt để sử dụng hệ thống quản lý CHEM-OPEN 2025.</p>
+        <p>Bạn có thể đăng nhập tại: <a href="https://www.chem-open2025.id.vn/chemopen_login.html">TRANG ĐĂNG NHẬP</a></p>
+        <p>Trân trọng,<br/>BCH Liên chi Hội khoa Hóa học.</p>`
+      });
+    }
     res.json({ success: true });
   } catch (err) {
     console.error("❌ Lỗi duyệt tài khoản:", err);
