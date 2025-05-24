@@ -23,7 +23,7 @@ function generateMainHTML(fullName) {
     <hr style="margin-top: 30px; margin-bottom: 15px; border: none; border-top: 1px solid #ccc;" />
     <div style="text-align: center; font-size: 25px; color: #000;">
       <p><strong>__________________________________</strong></p>
-      <img src="cid:logoLCH" alt="Logo BCH" style="width: 200px; margin-bottom: 10px;" />
+      <img src="https://chem-open2025.id.vn/public/images/chemopen/lch.png" alt="Logo BCH" style="width: 200px;" />
       <p style="margin: 5px 0; color: #1a73e8;"><strong>Hội sinh viên Việt Nam – TP. Hồ Chí Minh</strong></p>
       <p style="margin: 0; color: #1a73e8;"><strong>Trường Đại học Khoa học Tự nhiên, ĐHQG - HCM</strong></p>
       <p style="margin: 0 0 10px 0; color: #1a73e8;"><strong>BCH Liên chi Hội khoa Hóa học</strong></p>
@@ -66,7 +66,7 @@ function generatePartnerHTML(partnerName, mainName) {
     <hr style="margin-top: 30px; margin-bottom: 15px; border: none; border-top: 1px solid #ccc;" />
     <div style="text-align: center; font-size: 25px; color: #000;">
       <p><strong>__________________________________</strong></p>
-      <img src="cid:logoLCH" alt="Logo BCH" style="width: 200px; margin-bottom: 10px;" />
+      <img src="https://chem-open2025.id.vn/public/images/chemopen/lch.png" alt="Logo BCH" style="width: 200px;" />
       <p style="margin: 5px 0; color: #1a73e8;"><strong>Hội sinh viên Việt Nam – TP. Hồ Chí Minh</strong></p>
       <p style="margin: 0; color: #1a73e8;"><strong>Trường Đại học Khoa học Tự nhiên, ĐHQG - HCM</strong></p>
       <p style="margin: 0 0 10px 0; color: #1a73e8;"><strong>BCH Liên chi Hội khoa Hóa học</strong></p>

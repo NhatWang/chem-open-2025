@@ -9,52 +9,43 @@ const { protect, requireRole } = require("../middlewares/auth");
 const sendMail = require("../utils/mailer");
 const { generateMainHTML, generatePartnerHTML } = require("../utils/mailTemplates");
 
-if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.MONGODB_URI) {
-  throw new Error("❌ Thiếu biến môi trường: EMAIL_USER, EMAIL_PASS hoặc MONGODB_URI.");
+if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM || !process.env.MONGODB_URI) {
+  throw new Error("❌ Thiếu SENDGRID_API_KEY, SENDGRID_FROM hoặc MONGODB_URI.");
 }
 
 mongoose.connect(process.env.MONGODB_URI);
 
 function buildMainMailOptions(user, pdfBuffer) {
   return {
-    from: `BAN TỔ CHỨC CHEM-OPEN NĂM 2025 <${process.env.EMAIL_USER}>`,
     to: user.email,
     subject: "THƯ XÁC NHẬN ĐĂNG KÝ THAM GIA GIẢI CẦU LÔNG CHEM-OPEN 2025",
     html: generateMainHTML(user.fullName),
     attachments: [
       {
-        filename: `${user.paymentCode} - Biên nhận thanh toán Giải đấu Chem - Open 2025.pdf`,
-        content: pdfBuffer,
-      },
-      {
-        filename: "lch.png",
-        path: path.resolve(__dirname, "../public/images/chemopen/lch.png"),
-        cid: "logoLCH"
-      },
+        content: pdfBuffer.toString("base64"),
+        filename: `${user.paymentCode} - Biên nhận thanh toán giải đấu CHEM-OPEN 2025.pdf`,
+        type: "application/pdf",
+        disposition: "attachment"
+      }
     ]
   };
 }
 
 function buildPartnerMailOptions(partner, mainUser, pdfBuffer) {
   return {
-    from: `BAN TỔ CHỨC CHEM-OPEN NĂM 2025 <${process.env.EMAIL_USER}>`,
     to: partner.email,
     subject: "THƯ XÁC NHẬN ĐĂNG KÝ THAM GIA GIẢI CẦU LÔNG CHEM-OPEN 2025",
     html: generatePartnerHTML(partner.fullName, mainUser.fullName),
     attachments: [
       {
-        filename: `${mainUser.paymentCode} - Biên nhận thanh toán Giải đấu Chem - Open 2025.pdf`,
-        content: pdfBuffer,
-      },
-      {
-        filename: "lch.png",
-        path: path.resolve(__dirname, "../public/images/chemopen/lch.png"),
-        cid: "logoLCH"
-      },
+        content: pdfBuffer.toString("base64"),
+        filename: `${mainUser.paymentCode} - Biên nhận thanh toán giải đấu CHEM-OPEN 2025.pdf`,
+        type: "application/pdf",
+        disposition: "attachment"
+      }
     ]
   };
 }
-
 router.put("/update-payment", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
   const { paymentStatus, paymentCode } = req.body;
 
@@ -68,6 +59,15 @@ router.put("/update-payment", protect, requireRole(["admin", "superadmin"]), asy
   }
 
   try {
+    // Lấy trạng thái cũ trước khi update
+    const existing = await Registration.findOne({ paymentCode });
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký." });
+    }
+
+    const wasPending = existing.paymentStatus === "pending";
+
+    // Cập nhật trạng thái mới
     const updated = await Registration.findOneAndUpdate(
       { paymentCode },
       { $set: { paymentStatus }, $unset: { expireAt: "" } },
@@ -75,22 +75,29 @@ router.put("/update-payment", protect, requireRole(["admin", "superadmin"]), asy
     );
 
     if (!updated) {
-      return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký." });
+      return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký sau khi cập nhật." });
     }
 
-    if (paymentStatus === "paid") {
+    // Chỉ gửi mail nếu từ pending chuyển sang paid
+    if (paymentStatus === "paid" && wasPending) {
       const pdfBuffer = await generateReceiptPDF(updated);
-      const mainSent = await sendMail(buildMainMailOptions(updated, pdfBuffer));
+      const tasks = [sendMail(buildMainMailOptions(updated, pdfBuffer))];
 
       if (updated.partnerInfo?.email) {
-        await sendMail(buildPartnerMailOptions(updated.partnerInfo, updated, pdfBuffer));
+        tasks.push(sendMail(buildPartnerMailOptions(updated.partnerInfo, updated, pdfBuffer)));
       }
 
-      if (!mainSent) {
+      const [mainResult, partnerResult] = await Promise.allSettled(tasks);
+
+      if (mainResult.status !== "fulfilled") {
         return res.status(500).json({
           success: false,
-          message: "Đã cập nhật trạng thái nhưng lỗi khi gửi email."
+          message: "Đã cập nhật trạng thái nhưng lỗi khi gửi email chính.",
         });
+      }
+
+      if (partnerResult?.status !== "fulfilled") {
+        console.warn(`⚠️ Không gửi được mail partner đến ${updated.partnerInfo.email}:`, partnerResult.reason);
       }
     }
 
@@ -103,6 +110,7 @@ router.put("/update-payment", protect, requireRole(["admin", "superadmin"]), asy
     return res.status(500).json({ success: false, message: "Lỗi máy chủ." });
   }
 });
+
 
 router.post("/send-partner-mail", async (req, res) => {
   const { paymentCode } = req.body;
@@ -140,10 +148,22 @@ router.post("/resend-mail", async (req, res) => {
     }
 
     const pdfBuffer = await generateReceiptPDF(registration);
-    await sendMail(buildMainMailOptions(registration, pdfBuffer));
-
+    const tasks = [sendMail(buildMainMailOptions(registration, pdfBuffer))];
     if (registration.partnerInfo?.email) {
-      await sendMail(buildPartnerMailOptions(registration.partnerInfo, registration, pdfBuffer));
+      tasks.push(sendMail(buildPartnerMailOptions(registration.partnerInfo, registration, pdfBuffer)));
+    }
+    const [mainResult, partnerResult] = await Promise.allSettled(tasks);
+
+    if (mainResult.status !== "fulfilled") {
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi khi gửi lại email chính.",
+      });
+    }
+
+    // Nếu mail phụ lỗi, vẫn thành công nhưng log
+    if (partnerResult?.status !== "fulfilled") {
+      console.warn(`⚠️ Không gửi được mail partner đến ${registration.partnerInfo.email}:`, partnerResult.reason);
     }
 
     return res.json({ success: true, message: `✅ Đã gửi lại email cho ${registration.email}` });

@@ -5,7 +5,7 @@ const router = express.Router();
 
 const User = require("../models/User");
 const { protect, requireRole } = require("../middlewares/auth");
-const sendMail = require("../utils/sendMail");
+const sendMail = require("../utils/mailer");
 
 
 // ========================
@@ -153,7 +153,8 @@ router.post("/request-reset", async (req, res) => {
     <p>Vui lòng nhấn vào nút bên dưới để đặt lại mật khẩu:</p>
     <p><a href="${resetLink}" style="padding: 10px 20px; background: #0b5394; color: #fff; text-decoration: none;">Đặt lại mật khẩu</a></p>
     <p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email.</p>
-    <p>Trân trọng,<br/>Liên chi Hội khoa Hoá học.</p>
+    <p>Đường dẫn sẽ hết hạn sau 15 phút.</p>
+    <p>Trân trọng,<br/>BCH Liên chi Hội khoa Hoá học.</p>
   `
 });
 

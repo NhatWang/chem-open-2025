@@ -1,27 +1,18 @@
-const fs = require('fs');
-const path = require('path');
-const generateReceiptPDF = require('../LCH_project/utils/generateReceiptPDF'); // chỉnh lại đường dẫn nếu cần
+require("dotenv").config();
+const sgMail = require('@sendgrid/mail');
 
-const testData = {
-  fullName: "Nguyễn Võ Phú Quí",
-  mssv: "24147111",
-  email: "nvpq2609@gmail.com",
-  phone: "0826764327",
-  noidung: ["Đơn nam"],
-  amount: 70000,
-  paymentMethod: "bank",
-  paymentCode: "CHEMODDM9",
-  paymentStatus: "paid"
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+const msg = {
+  to: process.env.SENDGRID_FROM, // Gửi tới chính mình để verify
+  from: {
+    email: process.env.SENDGRID_FROM,
+    name: "BAN TỔ CHỨC CHEM-OPEN NĂM 2025"
+  },
+  subject: 'Test SendGrid Integration',
+  html: '<strong>Email này xác nhận cấu hình SendGrid thành công.</strong>',
 };
 
-
-(async () => {
-  try {
-    const pdfBuffer = await generateReceiptPDF(testData);
-    const outputPath = path.join(__dirname, 'receipt_test.pdf');
-    fs.writeFileSync(outputPath, pdfBuffer);
-    console.log(`✅ PDF đã được tạo thành công tại: ${outputPath}`);
-  } catch (error) {
-    console.error("❌ Lỗi khi tạo PDF:", error);
-  }
-})();
+sgMail.send(msg)
+  .then(() => console.log("📧 Email test đã gửi thành công"))
+  .catch(err => console.error("❌ Lỗi khi gửi mail:", err.response?.body || err));

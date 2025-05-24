@@ -31,7 +31,7 @@ app.use(session({
 const { Server } = require("socket.io");
 const io = new Server(server, {
   cors: {
-    origin: ["https://www.chem-open2025.id.vn","http://localhost:3000"], // hoặc cụ thể domain nếu deploy
+    origin: ["https://www.chem-open2025.id.vn","http://localhost:3001"], // hoặc cụ thể domain nếu deploy
     methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
