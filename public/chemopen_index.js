@@ -56,18 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   overlay.addEventListener('click', () => {
-    const vjs = player.videojs();
-    const tech = vjs?.tech({ IWillNotUseThisInPlugins: true });
-
-    // ✅ Bật tiếng chính xác
-    if (tech && tech.setMuted) {
-      tech.setMuted(false);
-    } else {
-      vjs.muted(false);
-    }
-
-    vjs.volume(1);
-    vjs.play();
+    player.muted(false);
+    player.volume(1);
+    player.play();
     overlay.classList.add('hidden');
   });
 });
