@@ -91,16 +91,16 @@
       }
     }
 
-.***HIDDEN***-wrapper {
+.password-wrapper {
   position: relative;
 }
 
-.***HIDDEN***-wrapper input {
+.password-wrapper input {
   width: 85%;
   padding-right: 44px; /* để chừa chỗ cho icon 👁 */
 }
 
-.toggle-***HIDDEN*** {
+.toggle-password {
   position: absolute;
   top: 50%;
   right: 45px;
@@ -166,9 +166,9 @@
   <form class="login-container" id="loginForm">
   <h2><i class="fa-solid fa-lock"></i> ĐĂNG NHẬP TRANG QUẢN TRỊ</h2>
   <input type="text" id="usernameInput" placeholder="Tên đăng nhập" required />
-  <div class="***HIDDEN***-wrapper">
-    <input type="***HIDDEN***" id="***HIDDEN***Input" placeholder="Mật khẩu" required autocomplete="off" />
-     <i class="fa-solid fa-eye toggle-***HIDDEN***" onclick="togglePassword(this)"></i>
+  <div class="password-wrapper">
+    <input type="password" id="passwordInput" placeholder="Mật khẩu" required autocomplete="off" />
+     <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
   </div>
   <button type="submit">ĐĂNG NHẬP</button>
 <div class="auth-links">
@@ -184,13 +184,13 @@
   <input type="text" id="regMSSV" placeholder="Mã số sinh viên" required />
   <input type="text" id="regFullName" placeholder="Họ và tên" required />
   <input type="email" id="regEmail" placeholder="Email" required />
-  <div class="***HIDDEN***-wrapper">
-  <input type="***HIDDEN***" id="regPassword" placeholder="Mật khẩu" required />
-  <i class="fa-solid fa-eye toggle-***HIDDEN***" onclick="togglePassword(this)"></i>
+  <div class="password-wrapper">
+  <input type="password" id="regPassword" placeholder="Mật khẩu" required />
+  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
 </div>
-  <div class="***HIDDEN***-wrapper">
-    <input type="***HIDDEN***" id="regConfirmPassword" placeholder="Nhập lại mật khẩu" required />
-    <i class="fa-solid fa-eye toggle-***HIDDEN***" onclick="togglePassword(this)"></i>
+  <div class="password-wrapper">
+    <input type="password" id="regConfirmPassword" placeholder="Nhập lại mật khẩu" required />
+    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
   </div>
   <input type="hidden" id="regRole" value="collab" />
   <button type="button" onclick="submitRegister()">ĐĂNG KÝ</button>
@@ -209,13 +209,13 @@
 </form>
 <form class="login-container" id="resetForm" style="display: none;">
   <h2><i class="fa-solid fa-key"></i> KHÔI PHỤC MẬT KHẨU</h2>
-  <div class="***HIDDEN***-wrapper">
-  <input type="***HIDDEN***" id="newPassword" placeholder="Mật khẩu mới" required />
-  <i class="fa-solid fa-eye toggle-***HIDDEN***" onclick="togglePassword(this)"></i>
+  <div class="password-wrapper">
+  <input type="password" id="newPassword" placeholder="Mật khẩu mới" required />
+  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
 </div>
-  <div class="***HIDDEN***-wrapper">
-  <input type="***HIDDEN***" id="confirmPassword" placeholder="Nhập lại mật khẩu" required />
-  <i class="fa-solid fa-eye toggle-***HIDDEN***" onclick="togglePassword(this)"></i>
+  <div class="password-wrapper">
+  <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu" required />
+  <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
 </div>
   <button type="button" onclick="submitReset()">ĐẶT LẠI MẬT KHẨU</button>
   <div class="auth-links">
@@ -226,7 +226,7 @@
 <script>
   function togglePassword(icon) {
     const input = icon.previousElementSibling;
-    input.type = input.type === "***HIDDEN***" ? "text" : "***HIDDEN***";
+    input.type = input.type === "password" ? "text" : "password";
     icon.classList.toggle("fa-eye-slash");
     icon.classList.toggle("fa-eye");
   }
@@ -236,14 +236,14 @@
   e.preventDefault();
 
   const username = document.getElementById("usernameInput").value;
-  const ***HIDDEN*** = document.getElementById("***HIDDEN***Input").value;
+  const password = document.getElementById("passwordInput").value;
 
   try {
     const response = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ username, ***HIDDEN*** }),
+      body: JSON.stringify({ username, password }),
     });
 
     const data = await response.json();
@@ -300,12 +300,12 @@ document.head.appendChild(style);
 async function submitRegister() {
   const username = document.getElementById("regUsername").value.trim();
   const fullName = document.getElementById("regFullName").value.trim();
-  const ***HIDDEN*** = document.getElementById("regPassword").value;
+  const password = document.getElementById("regPassword").value;
   const mssv = document.getElementById("regMSSV").value.trim();
   const email = document.getElementById("regEmail").value.trim();
   const role = document.getElementById("regRole").value;
 
-  if (!username || !fullName || !***HIDDEN*** || !mssv || !email) {
+  if (!username || !fullName || !password || !mssv || !email) {
     return showToast("⚠️ Vui lòng nhập đầy đủ thông tin.");
   }
 
@@ -313,7 +313,7 @@ async function submitRegister() {
     const res = await fetch("/api/register-user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, ***HIDDEN***, role, mssv, email, fullName })
+      body: JSON.stringify({ username, password, role, mssv, email, fullName })
     });
 
     const data = await res.json();
@@ -384,17 +384,17 @@ if (resetToken) {
 }
 
 async function submitReset() {
-  const ***HIDDEN*** = document.getElementById("newPassword").value.trim();
+  const password = document.getElementById("newPassword").value.trim();
   const confirm = document.getElementById("confirmPassword").value.trim();
 
-  if (!***HIDDEN*** || !confirm) return showToast("⚠️ Vui lòng nhập đầy đủ.");
-  if (***HIDDEN*** !== confirm) return showToast("⚠️ Mật khẩu không khớp.");
+  if (!password || !confirm) return showToast("⚠️ Vui lòng nhập đầy đủ.");
+  if (password !== confirm) return showToast("⚠️ Mật khẩu không khớp.");
 
   try {
-    const res = await fetch("/api/reset-***HIDDEN***", {
+    const res = await fetch("/api/reset-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: resetToken, newPassword: ***HIDDEN*** })
+      body: JSON.stringify({ token: resetToken, newPassword: password })
     });
 
     const data = await res.json();
