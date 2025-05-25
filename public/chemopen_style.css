@@ -760,6 +760,14 @@ select:focus {
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .modal-video-content {
@@ -779,12 +787,15 @@ select:focus {
 }
 
 .close-btn {
-  position: absolute;
-  top: 8px;
-  right: 14px;
-  font-size: 30px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
   cursor: pointer;
-  color: #333;
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  z-index: 10;
 }
 
 @keyframes zoomIn {

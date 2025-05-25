@@ -764,20 +764,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const video = modal.querySelector("video");
 
   openBtn.addEventListener("click", () => {
-    modal.style.display = "flex";
+    modal.classList.add("active");
     video.currentTime = 0;
     video.play();
   });
 
-  closeBtn.addEventListener("click", () => {
-    modal.style.display = "none";
+  function closeModal() {
+    modal.classList.remove("active");
     video.pause();
+  }
+
+  closeBtn.addEventListener("click", closeModal);
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
   });
 
-  window.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      modal.style.display = "none";
-      video.pause();
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("active")) {
+      closeModal();
     }
   });
 });
