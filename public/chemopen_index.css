@@ -181,6 +181,9 @@ body {
   100% { transform: translate(-50%, -50%) scale(1); }
 }
 
+.video-container .vjs-big-play-button {
+  display: none !important;
+}
 
 .action-buttons {
   background-color: #ffffff;
