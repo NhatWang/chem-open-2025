@@ -154,6 +154,8 @@ function fetchAndRenderData() {
       document.getElementById("paidCount").textContent = paid;
       document.getElementById("pendingCount").textContent = pending;
       document.getElementById("failedCount").textContent = failed;
+      document.getElementById("totalCount").textContent = data.length;
+
 
       // Destroy biểu đồ cũ nếu có
       if (paymentChartInstance) paymentChartInstance.destroy();
