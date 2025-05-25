@@ -189,7 +189,6 @@ function fetchAndRenderData() {
         types.forEach(type => {
           eventStats[type] = (eventStats[type] || 0) + 1;
         });
-      });
         const partner = reg.partnerInfo;
         if (partner && partner.noidung) {
           partner.noidung.forEach(type => {
@@ -197,6 +196,7 @@ function fetchAndRenderData() {
           });
         }
       });
+      
 
       if (eventChartInstance) eventChartInstance.destroy();
 
@@ -216,7 +216,8 @@ function fetchAndRenderData() {
           scales: { y: { beginAtZero: true } }
         }
       });
-    }
+    });
+}
 
 async function loadDrawData() {
   const res = await fetch('/api/admin/draw-results'); // cần tạo API này
