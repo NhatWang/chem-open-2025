@@ -42,9 +42,17 @@ const cld = cloudinary.Cloudinary.new({ cloud_name: 'dbmhmxsat', secure: true })
 
   const overlay = document.getElementById('unmuteOverlay');
 
+  // Khi video bắt đầu phát → hẹn giờ 1 giây rồi dừng lại
+  player.on('playing', () => {
+    setTimeout(() => {
+      player.videojs().pause(); // dừng sau 1 giây
+    }, 1000);
+  });
+
+  // Khi người dùng nhấn overlay → bật tiếng + play tiếp tục
   overlay.addEventListener('click', () => {
-    player.muted(false);      // Bỏ mute
-    player.volume(1);         // Max volume
-    player.play();            // Bắt đầu phát (đảm bảo video không dừng)
-    overlay.classList.add('hidden'); // Ẩn overlay
+    player.videojs().muted(false);
+    player.videojs().volume(1);
+    player.videojs().play(); // phát tiếp tục
+    overlay.classList.add('hidden');
   });

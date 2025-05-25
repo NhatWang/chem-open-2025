@@ -190,6 +190,13 @@ function fetchAndRenderData() {
           eventStats[type] = (eventStats[type] || 0) + 1;
         });
       });
+        const partner = reg.partnerInfo;
+        if (partner && partner.noidung) {
+          partner.noidung.forEach(type => {
+            eventStats[type] = (eventStats[type] || 0) + 1;
+          });
+        }
+      });
 
       if (eventChartInstance) eventChartInstance.destroy();
 
@@ -209,8 +216,7 @@ function fetchAndRenderData() {
           scales: { y: { beginAtZero: true } }
         }
       });
-    });
-}
+    }
 
 async function loadDrawData() {
   const res = await fetch('/api/admin/draw-results'); // cần tạo API này
