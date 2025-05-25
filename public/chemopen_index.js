@@ -42,21 +42,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.getElementById('unmuteOverlay');
 
   player.on('sourceChanged', () => {
-    const vjs = player.videojs(); // đảm bảo đã sẵn sàng
+    const vjs = player.videojs();
 
-    // ⏱️ Dừng lại sau 1 giây
+    // ⏱ Dừng lại sau 1s khi bắt đầu phát
     vjs.one('playing', () => {
       setTimeout(() => {
         vjs.pause();
       }, 1000);
     });
 
+    // Khi click overlay → bật tiếng, play tiếp, ẩn overlay
     overlay.addEventListener('click', () => {
-      vjs.muted(false);
-      vjs.volume(1);
-      vjs.play();
-      overlay.classList.add('hidden');
+      vjs.muted = false;             // ✅ dùng như thuộc tính
+      vjs.volume(1);                 // Tăng âm lượng
+      vjs.play();                    // Tiếp tục phát
+      overlay.classList.add('hidden'); // Ẩn overlay bằng class CSS
     });
   });
 });
+
 
