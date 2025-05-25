@@ -27,7 +27,7 @@ let index = 0;
       text.textContent = tips[index];
     }, 2500);
   }
-
+document.addEventListener("DOMContentLoaded", () => {
 const cld = cloudinary.Cloudinary.new({ cloud_name: 'dbmhmxsat', secure: true });
 
   const player = cld.videoPlayer('promo', {
@@ -56,3 +56,4 @@ const cld = cloudinary.Cloudinary.new({ cloud_name: 'dbmhmxsat', secure: true })
     player.videojs().play(); // phát tiếp tục
     overlay.classList.add('hidden');
   });
+});
