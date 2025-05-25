@@ -29,7 +29,6 @@ let index = 0;
   }
 document.addEventListener("DOMContentLoaded", () => {
   const cld = cloudinary.Cloudinary.new({ cloud_name: 'dbmhmxsat', secure: true });
-
   const player = cld.videoPlayer('promo', {
     controls: true,
     autoplay: true,
@@ -42,18 +41,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const overlay = document.getElementById('unmuteOverlay');
 
-  // Khi video bắt đầu phát → dừng sau 1s
-  player.on('playing', () => {
-    setTimeout(() => {
-      player.pause(); // ✅ dùng trực tiếp player, không cần .videojs()
-    }, 1000);
-  });
+  player.on('sourceChanged', () => {
+    const vjs = player.videojs(); // đảm bảo đã sẵn sàng
 
-  // Khi người dùng click overlay → bật tiếng và play lại
-  overlay.addEventListener('click', () => {
-    player.muted(false);        // ✅ unmute
-    player.volume(1);           // ✅ chỉnh âm lượng
-    player.play();              // ✅ tiếp tục phát
-    overlay.classList.add('hidden');
+    // ⏱️ Dừng lại sau 1 giây
+    vjs.one('playing', () => {
+      setTimeout(() => {
+        vjs.pause();
+      }, 1000);
+    });
+
+    overlay.addEventListener('click', () => {
+      vjs.muted(false);
+      vjs.volume(1);
+      vjs.play();
+      overlay.classList.add('hidden');
+    });
   });
 });
+

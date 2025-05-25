@@ -37,6 +37,8 @@
     .bg-paid { background-color: #28a745; }
     .bg-pending { background-color: #ffc107; color: #333; }
     .bg-failed { background-color: #dc3545; }
+    .bg-total { background-color: #0069d9; }
+
     table {
       max-width: 100%;
       border-collapse: collapse;
@@ -104,6 +106,7 @@
     .toast.error   { background-color: #dc3545; }
     .toast.warning { background-color: #ffc107; color: #333; }
 
+
     /* Thanh progress */
     .toast-progress {
       position: absolute;
@@ -147,7 +150,7 @@
       font-size: 18px;
       color: #666;
     }
-    .bg-total { background-color: #0069d9; }
+    
   </style>
 </head>
 <body>
@@ -193,25 +196,25 @@
           <!-- Tổng quan -->
           <div id="overview" class="tab-pane fade show active">
             <div class="row mb-4">
-              <div class="col-md-4">
+              <div class="col-md-3">
               <div class="stat-card bg-total">
                 <h5>Tổng số người tham gia</h5>
                 <h3 id="totalParticipants">0</h3>
               </div>
             </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="stat-card bg-paid">
                   <h5>Đã thanh toán</h5>
                   <h3 id="paidCount">0</h3>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="stat-card bg-pending">
                   <h5>Chờ thanh toán</h5>
                   <h3 id="pendingCount">0</h3>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <div class="stat-card bg-failed">
                   <h5>Thanh toán thất bại</h5>
                   <h3 id="failedCount">0</h3>
