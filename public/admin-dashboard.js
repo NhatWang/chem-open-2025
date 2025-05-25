@@ -290,30 +290,34 @@ function attachDeleteHandlers() {
 
 function attachResendHandlers() {
   document.querySelectorAll(".resend-email").forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const paymentCode = btn.getAttribute("data-code");
-      showConfirm(`Gửi lại email xác nhận cho mã thanh toán ${paymentCode}?`, () => {
-        fetch("/api/resend-mail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paymentCode })
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              showToast("📧 Đã gửi lại email xác nhận!", "success");
-            } else {
-              showToast("❌ Không thể gửi lại email: " + data.message, "error");
-            }
-          })
-          .catch(err => {
-            console.error("❌ Lỗi gửi lại email:", err);
-            showToast("❌ Có lỗi khi gửi email.", "error");
+      const confirmMsg = `Gửi lại email xác nhận cho mã thanh toán ${paymentCode}?`;
+
+      showConfirm(confirmMsg, async () => {
+        try {
+          const res = await fetch("/api/resend-mail", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paymentCode })
           });
+
+          const data = await res.json();
+
+          if (data.success) {
+            showToast(data.message || "📧 Đã gửi lại email xác nhận!", "success");
+          } else {
+            showToast("❌ Không thể gửi lại email: " + (data.message || "Lỗi không rõ."), "error");
+          }
+        } catch (err) {
+          console.error("❌ Lỗi gửi lại email:", err);
+          showToast("❌ Có lỗi khi gửi email.", "error");
+        }
       });
     });
   });
 }
+
 
 function showToast(message, type = "success") {
   const toastContainer = document.getElementById("toast-container");

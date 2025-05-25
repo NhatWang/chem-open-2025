@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Registration = require("../models/Registration");
+const sendConfirmationEmail = require("../utils/sendReceipt");
 
 router.post("/sepay-webhook", async (req, res) => {
   console.log("📦 Nhận webhook từ Sepay:", req.body);
@@ -39,6 +40,13 @@ router.post("/sepay-webhook", async (req, res) => {
 
 if (result.modifiedCount > 0) {
   io.emit("payment-updated", { mssv: user.mssv, status: "paid" });
+
+  // Gửi mail xác nhận
+  try {
+    await sendConfirmationEmail(user);
+  } catch (err) {
+    console.error("❌ Lỗi gửi email xác nhận:", err);
+  }
 }
 
     return res.json({ success: true, message: `✅ Đã xác nhận mã ${paymentCode}` });

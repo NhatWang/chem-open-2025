@@ -8,6 +8,7 @@ const generateReceiptPDF = require("../utils/generateReceiptPDF");
 const { protect, requireRole } = require("../middlewares/auth");
 const sendMail = require("../utils/mailer");
 const { generateMainHTML, generatePartnerHTML } = require("../utils/mailTemplates");
+const sendConfirmationEmail = require("../utils/sendReceipt");
 
 if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM || !process.env.MONGODB_URI) {
   throw new Error("❌ Thiếu SENDGRID_API_KEY, SENDGRID_FROM hoặc MONGODB_URI.");
@@ -15,37 +16,6 @@ if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM || !process.env.
 
 mongoose.connect(process.env.MONGODB_URI);
 
-function buildMainMailOptions(user, pdfBuffer) {
-  return {
-    to: user.email,
-    subject: "THƯ XÁC NHẬN ĐĂNG KÝ THAM GIA GIẢI CẦU LÔNG CHEM-OPEN 2025",
-    html: generateMainHTML(user.fullName),
-    attachments: [
-      {
-        content: pdfBuffer.toString("base64"),
-        filename: `${user.paymentCode} - Biên nhận thanh toán giải đấu CHEM-OPEN 2025.pdf`,
-        type: "application/pdf",
-        disposition: "attachment"
-      }
-    ]
-  };
-}
-
-function buildPartnerMailOptions(partner, mainUser, pdfBuffer) {
-  return {
-    to: partner.email,
-    subject: "THƯ XÁC NHẬN ĐĂNG KÝ THAM GIA GIẢI CẦU LÔNG CHEM-OPEN 2025",
-    html: generatePartnerHTML(partner.fullName, mainUser.fullName),
-    attachments: [
-      {
-        content: pdfBuffer.toString("base64"),
-        filename: `${mainUser.paymentCode} - Biên nhận thanh toán giải đấu CHEM-OPEN 2025.pdf`,
-        type: "application/pdf",
-        disposition: "attachment"
-      }
-    ]
-  };
-}
 router.put("/update-payment", async (req, res) => {
   const { paymentStatus, paymentCode } = req.body;
 
@@ -78,32 +48,9 @@ router.put("/update-payment", async (req, res) => {
       return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký sau khi cập nhật." });
     }
 
-    // Chỉ gửi mail nếu từ pending chuyển sang paid
-    if (paymentStatus === "paid" && wasPending) {
-      const pdfBuffer = await generateReceiptPDF(updated);
-      const tasks = [sendMail(buildMainMailOptions(updated, pdfBuffer))];
-
-      if (updated.partnerInfo?.email) {
-        tasks.push(sendMail(buildPartnerMailOptions(updated.partnerInfo, updated, pdfBuffer)));
-      }
-
-      const [mainResult, partnerResult] = await Promise.allSettled(tasks);
-
-      if (mainResult.status !== "fulfilled") {
-        return res.status(500).json({
-          success: false,
-          message: "Đã cập nhật trạng thái nhưng lỗi khi gửi email chính.",
-        });
-      }
-
-      if (partnerResult?.status !== "fulfilled") {
-        console.warn(`⚠️ Không gửi được mail partner đến ${updated.partnerInfo.email}:`, partnerResult.reason);
-      }
-    }
-
     return res.json({
       success: true,
-      message: "✅ Đã cập nhật trạng thái và gửi mail (nếu applicable)."
+      message: "✅ Đã cập nhật trạng thái."
     });
   } catch (err) {
     console.error("❌ Lỗi cập nhật trạng thái:", err);
@@ -111,66 +58,57 @@ router.put("/update-payment", async (req, res) => {
   }
 });
 
-
-router.post("/send-partner-mail", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
-  const { paymentCode } = req.body;
-  const reg = await Registration.findOne({ paymentCode });
-
-  if (!reg || reg.paymentStatus !== "paid" || !reg.partnerInfo?.email) {
-    return res.status(400).json({ success: false, message: "Không hợp lệ." });
-  }
-
-  try {
-    const pdfBuffer = await generateReceiptPDF(reg);
-    await sendMail(buildPartnerMailOptions(reg.partnerInfo, reg, pdfBuffer));
-    return res.json({ success: true, message: `✅ Đã gửi mail cho partner ${reg.partnerInfo.email}` });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: "Lỗi khi gửi mail cho partner." });
-  }
-});
-
 router.post("/resend-mail", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
   const { paymentCode } = req.body;
 
   if (!paymentCode) {
-    return res.status(400).json({ success: false, message: "Thiếu mã thanh toán." });
+    return res.status(400).json({ success: false, message: "❌ Thiếu mã thanh toán." });
   }
 
   try {
     const registration = await Registration.findOne({ paymentCode });
-
     if (!registration) {
-      return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký." });
+      return res.status(404).json({ success: false, message: "❌ Không tìm thấy đơn đăng ký." });
     }
 
     if (registration.paymentStatus !== "paid") {
-      return res.status(400).json({ success: false, message: "Chỉ gửi lại email cho đơn đã thanh toán." });
+      return res.status(400).json({ success: false, message: "❌ Chỉ gửi lại email cho đơn đã thanh toán." });
     }
 
     const pdfBuffer = await generateReceiptPDF(registration);
+    const emailMain = registration.email;
+    const emailPartner = registration.partnerInfo?.email;
+
     const tasks = [sendMail(buildMainMailOptions(registration, pdfBuffer))];
-    if (registration.partnerInfo?.email) {
+    if (emailPartner) {
       tasks.push(sendMail(buildPartnerMailOptions(registration.partnerInfo, registration, pdfBuffer)));
     }
+
     const [mainResult, partnerResult] = await Promise.allSettled(tasks);
 
     if (mainResult.status !== "fulfilled") {
       return res.status(500).json({
         success: false,
-        message: "Lỗi khi gửi lại email chính.",
+        message: "❌ Lỗi khi gửi lại email chính.",
       });
     }
 
-    // Nếu mail phụ lỗi, vẫn thành công nhưng log
-    if (partnerResult?.status !== "fulfilled") {
-      console.warn(`⚠️ Không gửi được mail partner đến ${registration.partnerInfo.email}:`, partnerResult.reason);
+    // Log partner email nếu có
+    if (emailPartner) {
+      if (partnerResult?.status === "fulfilled") {
+        console.log(`✅ Đã gửi lại email cho partner: ${emailPartner}`);
+      } else {
+        console.warn(`⚠️ Không gửi được mail partner đến ${emailPartner}:`, partnerResult?.reason);
+      }
     }
 
-    return res.json({ success: true, message: `✅ Đã gửi lại email cho ${registration.email}` });
+    const msg = `📧 Đã gửi lại email cho ${emailMain}` + (emailPartner ? ` và ${emailPartner}` : "");
+    return res.json({ success: true, message: msg });
   } catch (err) {
     console.error(`❌ Lỗi khi gửi lại email cho ${paymentCode}:`, err);
-    return res.status(500).json({ success: false, message: "Lỗi máy chủ khi gửi lại email." });
+    return res.status(500).json({ success: false, message: "❌ Lỗi máy chủ khi gửi lại email." });
   }
 });
+
 
 module.exports = router;

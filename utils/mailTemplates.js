@@ -84,7 +84,41 @@ function generatePartnerHTML(partnerName, mainName) {
   `;
 }
 
+function buildMainMailOptions(user, pdfBuffer) {
+  return {
+    to: user.email,
+    subject: "THƯ XÁC NHẬN ĐĂNG KÝ THAM GIA GIẢI CẦU LÔNG CHEM-OPEN 2025",
+    html: generateMainHTML(user.fullName),
+    attachments: [
+      {
+        content: pdfBuffer.toString("base64"),
+        filename: `${user.paymentCode} - Biên nhận thanh toán giải đấu CHEM-OPEN 2025.pdf`,
+        type: "application/pdf",
+        disposition: "attachment"
+      }
+    ]
+  };
+}
+
+function buildPartnerMailOptions(partner, mainUser, pdfBuffer) {
+  return {
+    to: partner.email,
+    subject: "THƯ XÁC NHẬN ĐĂNG KÝ THAM GIA GIẢI CẦU LÔNG CHEM-OPEN 2025",
+    html: generatePartnerHTML(partner.fullName, mainUser.fullName),
+    attachments: [
+      {
+        content: pdfBuffer.toString("base64"),
+        filename: `${mainUser.paymentCode} - Biên nhận thanh toán giải đấu CHEM-OPEN 2025.pdf`,
+        type: "application/pdf",
+        disposition: "attachment"
+      }
+    ]
+  };
+}
+
 module.exports = {
   generateMainHTML,
-  generatePartnerHTML
+  generatePartnerHTML,
+  buildMainMailOptions,
+  buildPartnerMailOptions
 };

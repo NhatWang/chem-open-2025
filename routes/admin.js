@@ -9,13 +9,6 @@ router.get("/registrations", protect, requireRole(["admin", "superadmin"]), asyn
   res.json(data);
 });
 
-// ✅ Cập nhật trạng thái thanh toán (thủ công)
-router.put("/update-payment", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
-  const { mssv, paymentStatus } = req.body;
-  await Registration.findOneAndUpdate({ mssv }, { paymentStatus });
-  res.json({ success: true });
-});
-
 // ✅ Lấy kết quả bốc thăm
 router.get('/admin/draw-results', protect, requireRole(["admin", "superadmin"]), async (req, res) => {
   try {
