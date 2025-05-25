@@ -154,7 +154,15 @@ function fetchAndRenderData() {
       document.getElementById("paidCount").textContent = paid;
       document.getElementById("pendingCount").textContent = pending;
       document.getElementById("failedCount").textContent = failed;
-      document.getElementById("totalCount").textContent = data.length;
+      let total = data.length; // người đăng ký chính
+
+      data.forEach(reg => {
+        if (reg.partnerInfo?.fullName || reg.partnerInfo?.mssv) {
+          total += 1; // có đồng đội -> +1
+        }
+      });
+
+      document.getElementById("totalCount").textContent = total;
 
 
       // Destroy biểu đồ cũ nếu có
