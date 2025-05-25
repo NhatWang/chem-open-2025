@@ -29,36 +29,48 @@ let index = 0;
   }
 document.addEventListener("DOMContentLoaded", () => {
   const cld = cloudinary.Cloudinary.new({ cloud_name: 'dbmhmxsat', secure: true });
+
   const player = cld.videoPlayer('promo', {
-    controls: true,
     autoplay: true,
     muted: true,
     loop: true,
-    preload: 'auto'
+    controls: false, // ẩn thanh điều khiển
+    preload: 'auto',
+    posterOptions: {
+    transformation: { width: 960, crop: "scale" } // có thể tuỳ chỉnh thêm
+  }
   });
 
   player.source('ycqx8slkb7mpmmxymrqz');
 
   const overlay = document.getElementById('unmuteOverlay');
 
-  player.on('sourceChanged', () => {
-    const vjs = player.videojs();
-
-    // ⏱ Dừng lại sau 1s khi bắt đầu phát
-    vjs.one('playing', () => {
+  player.on('play', () => {
+    // Chỉ dừng sau 1 giây, chạy duy nhất 1 lần
+    if (!player.__pausedOnce) {
+      player.__pausedOnce = true;
       setTimeout(() => {
-        vjs.pause();
+        player.pause();
       }, 1000);
-    });
+    }
+  });
 
-    // Khi click overlay → bật tiếng, play tiếp, ẩn overlay
-    overlay.addEventListener('click', () => {
-      vjs.muted = false;             // ✅ dùng như thuộc tính
-      vjs.volume(1);                 // Tăng âm lượng
-      vjs.play();                    // Tiếp tục phát
-      overlay.classList.add('hidden'); // Ẩn overlay bằng class CSS
-    });
+  overlay.addEventListener('click', () => {
+    const vjs = player.videojs();
+    const tech = vjs?.tech({ IWillNotUseThisInPlugins: true });
+
+    // ✅ Bật tiếng chính xác
+    if (tech && tech.setMuted) {
+      tech.setMuted(false);
+    } else {
+      vjs.muted(false);
+    }
+
+    vjs.volume(1);
+    vjs.play();
+    overlay.classList.add('hidden');
   });
 });
+
 
 
