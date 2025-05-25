@@ -758,26 +758,27 @@ function showModal(message) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("toggleGuideBtn");
+  const openBtn = document.getElementById("openGuideBtn");
   const modal = document.getElementById("guideModal");
-  const closeBtn = document.getElementById("closeGuideModal");
+  const closeBtn = document.getElementById("closeGuideBtn");
+  const video = modal.querySelector("video");
 
-  if (btn && modal && closeBtn) {
-    btn.addEventListener("click", () => {
-      modal.style.display = "flex";
-    });
+  openBtn.addEventListener("click", () => {
+    modal.style.display = "flex";
+    video.currentTime = 0;
+    video.play();
+  });
 
-    closeBtn.addEventListener("click", () => {
+  closeBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+    video.pause();
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) {
       modal.style.display = "none";
-      modal.querySelector("video").pause(); // dừng video khi tắt
-    });
-
-    // Nhấn ra ngoài video để đóng
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-        modal.querySelector("video").pause();
-      }
-    });
-  }
+      video.pause();
+    }
+  });
 });
+

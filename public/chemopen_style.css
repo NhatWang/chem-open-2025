@@ -797,3 +797,21 @@ select:focus {
     opacity: 1;
   }
 }
+
+.guide-btn {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease;
+  padding-bottom: 20px;
+}
+
+.guide-btn:hover {
+  background-color: #0056b3;
+}
