@@ -28,3 +28,9 @@ let index = 0;
     }, 2500);
   }
 
+document.addEventListener('click', () => {
+  const video = document.getElementById('promo');
+  video.muted = false;
+  video.volume = 1;
+  video.play();
+});
