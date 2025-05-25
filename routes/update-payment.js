@@ -46,7 +46,7 @@ function buildPartnerMailOptions(partner, mainUser, pdfBuffer) {
     ]
   };
 }
-router.put("/update-payment", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
+router.put("/update-payment", async (req, res) => {
   const { paymentStatus, paymentCode } = req.body;
 
   if (!paymentCode) {
@@ -112,7 +112,7 @@ router.put("/update-payment", protect, requireRole(["admin", "superadmin"]), asy
 });
 
 
-router.post("/send-partner-mail", async (req, res) => {
+router.post("/send-partner-mail", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
   const { paymentCode } = req.body;
   const reg = await Registration.findOne({ paymentCode });
 
@@ -129,7 +129,7 @@ router.post("/send-partner-mail", async (req, res) => {
   }
 });
 
-router.post("/resend-mail", async (req, res) => {
+router.post("/resend-mail", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
   const { paymentCode } = req.body;
 
   if (!paymentCode) {
