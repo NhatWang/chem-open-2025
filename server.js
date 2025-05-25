@@ -1,6 +1,3 @@
-require("dotenv").config();
-console.log("✅ MONGO_URI:", process.env.MONGODB_URI);
-console.log("🌍 ENV:", process.env.NODE_ENV || "development");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");

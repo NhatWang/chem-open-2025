@@ -14,9 +14,9 @@ const sendMail = require("../utils/mailer");
 
 // Đăng ký tài khoản
 router.post("/register-user", async (req, res) => {
-  const { username, ***HIDDEN***, role, mssv, email, fullName } = req.body;
+  const { username, password, role, mssv, email, fullName } = req.body;
 
-  if (!username || !***HIDDEN*** || !role || !mssv || !email || !fullName) {
+  if (!username || !password || !role || !mssv || !email || !fullName) {
     return res.status(400).json({ success: false, message: "Thiếu thông tin." });
   }
 
@@ -35,8 +35,8 @@ router.post("/register-user", async (req, res) => {
     if (mssvExists) return res.status(409).json({ success: false, message: "MSSV đã được dùng." });
     if (emailExists) return res.status(409).json({ success: false, message: "Email đã được dùng." });
 
-    const hashed = await bcrypt.hash(***HIDDEN***, 10);
-    await User.create({ username, ***HIDDEN***: hashed, role, mssv, email, fullName, pending: true });
+    const hashed = await bcrypt.hash(password, 10);
+    await User.create({ username, password: hashed, role, mssv, email, fullName, pending: true });
 
     res.json({ success: true, message: "✅ Đăng ký thành công. Vui lòng chờ phê duyệt." });
   } catch (err) {
@@ -47,7 +47,7 @@ router.post("/register-user", async (req, res) => {
 
 // Đăng nhập
 router.post("/login", async (req, res) => {
-  const { username, ***HIDDEN*** } = req.body;
+  const { username, password } = req.body;
 
   try {
     const user = await User.findOne({ username });
@@ -55,7 +55,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ success: false, message: "Tài khoản chưa được phê duyệt hoặc không tồn tại." });
     }
 
-    const isMatch = await user.comparePassword(***HIDDEN***);
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: "Sai tài khoản hoặc mật khẩu." });
     }
@@ -114,7 +114,7 @@ router.get("/check-auth", (req, res) => {
 // Lấy thông tin người dùng hiện tại
 router.get("/me", protect, async (req, res) => {
   try {
-    const user = await User.findById(req.session.user._id).select("-***HIDDEN***");
+    const user = await User.findById(req.session.user._id).select("-password");
     if (!user) {
       return res.status(404).json({ success: false, message: "Không tìm thấy người dùng" });
     }
@@ -143,7 +143,7 @@ router.post("/request-reset", async (req, res) => {
   user.resetExpires = Date.now() + 15 * 60 * 1000;
   await user.save();
 
-  const resetLink = `https://www.chem-open2025.id.vn/reset-***HIDDEN***.html?token=${token}`;
+  const resetLink = `https://www.chem-open2025.id.vn/reset-password.html?token=${token}`;
   await sendMail({
   to: user.email,
   subject: "Khôi phục mật khẩu",
@@ -162,7 +162,7 @@ router.post("/request-reset", async (req, res) => {
 });
 
 // Đặt lại mật khẩu
-router.post("/reset-***HIDDEN***", async (req, res) => {
+router.post("/reset-password", async (req, res) => {
   const { token, newPassword } = req.body;
 
   if (!token || !newPassword) {
@@ -180,19 +180,19 @@ router.post("/reset-***HIDDEN***", async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(newPassword, 10);
-    user.***HIDDEN*** = hashed;
+    user.password = hashed;
     user.resetToken = undefined;
     user.resetExpires = undefined;
     await user.save();
 
     res.json({ success: true, message: "✅ Mật khẩu đã được đặt lại." });
   } catch (err) {
-    console.error("❌ Lỗi reset ***HIDDEN***:", err);
+    console.error("❌ Lỗi reset mật khẩu:", err);
     res.status(500).json({ success: false, message: "Lỗi máy chủ." });
   }
 });
 
-router.post("/change-***HIDDEN***", protect, async (req, res) => {
+router.post("/change-password", protect, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   if (!currentPassword || !newPassword) {
@@ -211,7 +211,7 @@ router.post("/change-***HIDDEN***", protect, async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(newPassword, 10);
-    user.***HIDDEN*** = hashed;
+    user.password = hashed;
     await user.save();
 
     res.json({ success: true, message: "✅ Đã đổi mật khẩu thành công." });
@@ -236,7 +236,7 @@ function isSuperadmin(req, res, next) {
 
 // Lấy danh sách người dùng
 router.get("/users", isSuperadmin, async (req, res) => {
-  const users = await User.find({}, "-***HIDDEN***");
+  const users = await User.find({}, "-password");
   res.json(users);
 });
 

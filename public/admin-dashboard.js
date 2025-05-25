@@ -632,7 +632,7 @@ document.getElementById("changePasswordForm").addEventListener("submit", async f
     }
 
     try {
-      const res = await fetch("/api/change-***HIDDEN***", {
+      const res = await fetch("/api/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword, newPassword }),
@@ -687,16 +687,16 @@ async function rejectUser(userId) {
 
 
 function togglePassword(icon) {
-  const wrapper = icon.closest(".***HIDDEN***-wrapper");
+  const wrapper = icon.closest(".password-wrapper");
   const input = wrapper?.querySelector("input");
   if (!input) return;
 
-  if (input.type === "***HIDDEN***") {
+  if (input.type === "password") {
     input.type = "text";
     icon.classList.remove("fa-eye");
     icon.classList.add("fa-eye-slash");
   } else {
-    input.type = "***HIDDEN***";
+    input.type = "password";
     icon.classList.remove("fa-eye-slash");
     icon.classList.add("fa-eye");
   }

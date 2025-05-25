@@ -124,13 +124,13 @@
       from { opacity: 1; }
       to   { opacity: 0; transform: translateY(-10px); }
     }
-    .***HIDDEN***-wrapper {
+    .password-wrapper {
       position: relative;
     }
-    .***HIDDEN***-wrapper input {
+    .password-wrapper input {
       padding-right: 44px;
     }
-    .toggle-***HIDDEN*** {
+    .toggle-password {
       position: absolute;
       top: 75%;
       right: 12px;
@@ -173,7 +173,7 @@
       <a class="nav-link" id="user-tab" data-bs-toggle="tab" href="#user-management" role="tab">QUẢN LÝ <br> NGƯỜI DÙNG</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" data-bs-toggle="tab" href="#change-***HIDDEN***">ĐỔI<br>MẬT KHẨU</a>
+      <a class="nav-link" data-bs-toggle="tab" href="#change-password">ĐỔI<br>MẬT KHẨU</a>
     </li>
       </ul>
   <button class="btn btn-outline-danger ms-3" onclick="logout()">
@@ -331,29 +331,29 @@
             </table>
           </div>
           <!-- Đổi mật khẩu -->
-          <div id="change-***HIDDEN***" class="tab-pane fade">
+          <div id="change-password" class="tab-pane fade">
             <div class="card mt-4" style="max-width: 500px; margin: auto;">
               <div class="card-header">
                 <h5 class="mb-0">🔐 Đổi mật khẩu</h5>
               </div>
               <div class="card-body">
                 <form id="changePasswordForm">
-                  <div class="mb-3 ***HIDDEN***-wrapper">
+                  <div class="mb-3 password-wrapper">
                     <label for="currentPassword" class="form-label">Mật khẩu hiện tại</label>
-                    <input type="***HIDDEN***" class="form-control" id="currentPassword" required />
-                    <i class="fa-solid fa-eye toggle-***HIDDEN***" onclick="togglePassword(this)"></i>
+                    <input type="password" class="form-control" id="currentPassword" required />
+                    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
                   </div>
 
-                  <div class="mb-3 ***HIDDEN***-wrapper">
+                  <div class="mb-3 password-wrapper">
                     <label for="newPassword" class="form-label">Mật khẩu mới</label>
-                    <input type="***HIDDEN***" class="form-control" id="newPassword" required />
-                    <i class="fa-solid fa-eye toggle-***HIDDEN***" onclick="togglePassword(this)"></i>
+                    <input type="password" class="form-control" id="newPassword" required />
+                    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
                   </div>
 
-                  <div class="mb-3 ***HIDDEN***-wrapper">
+                  <div class="mb-3 password-wrapper">
                     <label for="confirmPassword" class="form-label">Nhập lại mật khẩu mới</label>
-                    <input type="***HIDDEN***" class="form-control" id="confirmPassword" required />
-                    <i class="fa-solid fa-eye toggle-***HIDDEN***" onclick="togglePassword(this)"></i>
+                    <input type="password" class="form-control" id="confirmPassword" required />
+                    <i class="fa-solid fa-eye toggle-password" onclick="togglePassword(this)"></i>
                   </div>
                   <button type="submit" class="btn btn-primary w-100">Lưu thay đổi</button>
                 </form>
