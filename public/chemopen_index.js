@@ -34,32 +34,41 @@ document.addEventListener("DOMContentLoaded", () => {
     autoplay: true,
     muted: true,
     loop: true,
-    controls: false, // ẩn thanh điều khiển
+    controls: false,
     preload: 'auto',
     posterOptions: {
-    transformation: { width: 960, crop: "scale" } // có thể tuỳ chỉnh thêm
-  }
+      transformation: { width: 960, crop: "scale" }
+    }
   });
 
   player.source('ycqx8slkb7mpmmxymrqz');
 
   const overlay = document.getElementById('unmuteOverlay');
 
+  let pausedOnce = false;
+
+  // Khi bắt đầu phát → dừng sau 1 giây
   player.on('play', () => {
-    // Chỉ dừng sau 1 giây, chạy duy nhất 1 lần
-    if (!player.__pausedOnce) {
-      player.__pausedOnce = true;
+    if (!pausedOnce) {
+      pausedOnce = true;
       setTimeout(() => {
-        player.pause();
+        const videoEl = document.querySelector('#promo video');
+        if (videoEl) {
+          videoEl.pause(); // dừng lại sau 1s
+        }
       }, 1000);
     }
   });
 
+  // Khi click overlay → bật tiếng và play lại
   overlay.addEventListener('click', () => {
-    player.muted(false);
-    player.volume(1);
-    player.play();
-    overlay.classList.add('hidden');
+    const videoEl = document.querySelector('#promo video');
+    if (videoEl) {
+      videoEl.muted = false;
+      videoEl.volume = 1;
+      videoEl.play();
+      overlay.classList.add('hidden');
+    }
   });
 });
 
