@@ -28,9 +28,23 @@ let index = 0;
     }, 2500);
   }
 
-document.addEventListener('click', () => {
-  const video = document.getElementById('promo');
-  video.muted = false;
-  video.volume = 1;
-  video.play();
-});
+const cld = cloudinary.Cloudinary.new({ cloud_name: 'dbmhmxsat', secure: true });
+
+  const player = cld.videoPlayer('promo', {
+    controls: true,
+    autoplay: true,
+    muted: true,
+    loop: true,
+    preload: 'auto'
+  });
+
+  player.source('ycqx8slkb7mpmmxymrqz');
+
+  const overlay = document.getElementById('unmuteOverlay');
+
+  overlay.addEventListener('click', () => {
+    player.muted(false);      // Bỏ mute
+    player.volume(1);         // Max volume
+    player.play();            // Bắt đầu phát (đảm bảo video không dừng)
+    overlay.classList.add('hidden'); // Ẩn overlay
+  });

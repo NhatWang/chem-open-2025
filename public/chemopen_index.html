@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="chemopen_index.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="preload" href="images/chemopen/CHEMOPEN.webp" as="image">
+  <script src="https://unpkg.com/cloudinary-video-player@1.10.5/dist/cld-video-player.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/cloudinary-video-player@1.10.5/dist/cld-video-player.min.css" />
 </head>
 <body>
   <div id="loadingOverlay">
@@ -23,12 +25,13 @@
   <div class="title-container">
     <img src="images/chemopen/Title.webp" alt="Title" class="title-image">
   </div>
-  <div class="video-container">
-  <video id="promo" autoplay muted playsinline class="promo-video">
-    <source src="videos/chemopen.mp4" type="video/mp4">
-    Trình duyệt của bạn không hỗ trợ video.
-  </video>
+<div class="video-container">
+  <video id="promo" class="cld-video-player cld-fluid"></video>
+  <div id="unmuteOverlay" class="unmute-overlay">
+    🔊 Nhấn để bật tiếng
+  </div>
 </div>
+
 <div class="action-buttons">
   <button onclick="location.href='/dang-ky'">ĐĂNG KÝ THI ĐẤU</button>
   <button onclick="location.href='/boctham'" disabled>BỐC THĂM CHIA TRẬN ĐẤU</button>

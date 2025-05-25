@@ -25,7 +25,14 @@
       padding: 20px;
       color: white;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: start;
+      gap: 4px;
     }
+
     .bg-paid { background-color: #28a745; }
     .bg-pending { background-color: #ffc107; color: #333; }
     .bg-failed { background-color: #dc3545; }
@@ -184,13 +191,13 @@
         <div class="tab-content">
           <!-- Tổng quan -->
           <div id="overview" class="tab-pane fade show active">
-            <div class="col-md-4">
+            <div class="row mb-4">
+              <div class="col-md-4">
               <div class="stat-card bg-total">
                 <h5>Tổng số người tham gia</h5>
                 <h3 id="totalParticipants">0</h3>
               </div>
             </div>
-            <div class="row mb-4">
               <div class="col-md-4">
                 <div class="stat-card bg-paid">
                   <h5>Đã thanh toán</h5>

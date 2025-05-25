@@ -162,7 +162,7 @@ function fetchAndRenderData() {
         }
       });
 
-      document.getElementById("totalCount").textContent = total;
+      document.getElementById("totalParticipants").textContent = total;
 
 
       // Destroy biểu đồ cũ nếu có
