@@ -9,7 +9,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 async function sendMail({ to, subject, html, attachments }) {
   const msg = {
     to,
-    from: `"BAN TỔ CHỨC CHEM-OPEN NĂM 2025" <${process.env.SENDGRID_FROM}>`,
+    from: `BAN TỔ CHỨC CHEM-OPEN NĂM 2025 <${process.env.SENDGRID_FROM}>`,
     subject,
     html,
     attachments: attachments || []
