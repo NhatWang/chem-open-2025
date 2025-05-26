@@ -1,5 +1,6 @@
 let paymentChartInstance = null;
 let eventChartInstance = null;
+let departmentChartInstance = null;
 
 function logout() {
   fetch("/api/logout", {
@@ -182,6 +183,59 @@ function fetchAndRenderData() {
           plugins: { legend: { position: "bottom" } }
         }
       });
+
+      // Thống kê số lượng theo khoa
+      const DEPARTMENT_COLORS = {
+        "Hóa học": "#007bff",                // Xanh dương
+        "Sinh học": "#28a745",               // Xanh lá
+        "Vật lý - Vật lý kỹ thuật": "#dc3545", // Đỏ
+        "Toán - Tin học": "#ffc107",         // Vàng
+        "Công nghệ Thông tin": "#6f42c1",    // Tím
+        "Môi trường": "#20c997",             // Xanh ngọc
+        "Địa chất": "#fd7e14",               // Cam
+        "Khoa học và vật liệu": "#17a2b8",   // Xanh biển
+        "Điện tử viễn thông": "#e83e8c"      // Hồng
+      };
+
+      const departmentStats = {};
+
+      // Gộp người chính và đồng đội
+      data.forEach(reg => {
+        departmentStats[reg.khoa] = (departmentStats[reg.khoa] || 0) + 1;
+        if (reg.partnerInfo?.khoa) {
+          departmentStats[reg.partnerInfo.khoa] = (departmentStats[reg.partnerInfo.khoa] || 0) + 1;
+        }
+      });
+
+      // Lấy labels và values
+      const departmentLabels = Object.keys(departmentStats);
+      const departmentValues = Object.values(departmentStats);
+      const departmentColors = departmentLabels.map(khoa => DEPARTMENT_COLORS[khoa] || "#999"); // fallback màu xám
+
+      if (departmentChartInstance) departmentChartInstance.destroy();
+
+      departmentChartInstance = new Chart(document.getElementById("departmentChart"), {
+        type: "doughnut",
+        data: {
+          labels: departmentLabels,
+          datasets: [{
+            data: departmentValues,
+            backgroundColor: departmentColors
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom" },
+            title: {
+              display: true,
+              text: "Thống kê số lượng theo Khoa"
+            }
+          }
+        }
+      });
+
+
 
       const eventStats = {};
       data.forEach(reg => {
