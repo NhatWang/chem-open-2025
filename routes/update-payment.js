@@ -7,7 +7,7 @@ const path = require("path");
 const generateReceiptPDF = require("../utils/generateReceiptPDF");
 const { protect, requireRole } = require("../middlewares/auth");
 const sendMail = require("../utils/mailer");
-const { generateMainHTML, generatePartnerHTML } = require("../utils/mailTemplates");
+const { buildMainMailOptions, buildPartnerMailOptions } = require("../utils/mailTemplates");
 const sendConfirmationEmail = require("../utils/sendReceipt");
 
 if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM || !process.env.MONGODB_URI) {
@@ -75,40 +75,17 @@ router.post("/resend-mail", protect, requireRole(["admin", "superadmin"]), async
       return res.status(400).json({ success: false, message: "❌ Chỉ gửi lại email cho đơn đã thanh toán." });
     }
 
-    const pdfBuffer = await generateReceiptPDF(registration);
+    await sendConfirmationEmail(registration); // ✅ Dùng lại logic xử lý sẵn
+
     const emailMain = registration.email;
     const emailPartner = registration.partnerInfo?.email;
-
-    const tasks = [sendMail(buildMainMailOptions(registration, pdfBuffer))];
-    if (emailPartner) {
-      tasks.push(sendMail(buildPartnerMailOptions(registration.partnerInfo, registration, pdfBuffer)));
-    }
-
-    const [mainResult, partnerResult] = await Promise.allSettled(tasks);
-
-    if (mainResult.status !== "fulfilled") {
-      return res.status(500).json({
-        success: false,
-        message: "❌ Lỗi khi gửi lại email chính.",
-      });
-    }
-
-    // Log partner email nếu có
-    if (emailPartner) {
-      if (partnerResult?.status === "fulfilled") {
-        console.log(`✅ Đã gửi lại email cho partner: ${emailPartner}`);
-      } else {
-        console.warn(`⚠️ Không gửi được mail partner đến ${emailPartner}:`, partnerResult?.reason);
-      }
-    }
-
     const msg = `📧 Đã gửi lại email cho ${emailMain}` + (emailPartner ? ` và ${emailPartner}` : "");
+
     return res.json({ success: true, message: msg });
   } catch (err) {
     console.error(`❌ Lỗi khi gửi lại email cho ${paymentCode}:`, err);
     return res.status(500).json({ success: false, message: "❌ Lỗi máy chủ khi gửi lại email." });
   }
 });
-
 
 module.exports = router;

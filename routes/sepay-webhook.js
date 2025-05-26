@@ -41,9 +41,11 @@ router.post("/sepay-webhook", async (req, res) => {
 if (result.modifiedCount > 0) {
   io.emit("payment-updated", { mssv: user.mssv, status: "paid" });
 
+  const updatedUser = await Registration.findOne({ paymentCode });
   // Gửi mail xác nhận
   try {
-    await sendConfirmationEmail(user);
+    await sendConfirmationEmail(updatedUser);
+  console.log("✅ Đã gửi email xác nhận cho mã:", paymentCode);
   } catch (err) {
     console.error("❌ Lỗi gửi email xác nhận:", err);
   }
