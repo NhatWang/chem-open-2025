@@ -24,6 +24,10 @@ router.post("/sepay-webhook", async (req, res) => {
     const user = await Registration.findOne({ paymentCode });
 
     if (!user) {
+      await Registration.updateOne(
+    { paymentCode },
+    { $set: { paymentStatus: "failed" } }
+  );
       return res.json({ success: false, message: `❌ Không tìm thấy người dùng với mã: ${paymentCode}` });
     }
 

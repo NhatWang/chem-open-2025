@@ -305,30 +305,37 @@ checkboxes.forEach(checkbox => {
       : null
   };
 
-    console.log("✅ Dữ liệu:", savedData);
     showToast("Thông tin hợp lệ!", "success");
     fetch("/api/register", {
-      method: "POST",
-      headers: {
-    "Content-Type": "application/json"
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
     },
-      body: JSON.stringify(savedData)
-    })
-    .then(res => res.json())
-    .then(result => {
-      if (result.success) {
-        console.log("✅ Đã lưu vào MongoDB:", result.data);
-        savedData = result.data; // cập nhật nếu MongoDB gán _id, expireAt,...
-        localStorage.setItem("paymentCode", savedData.paymentCode);
-      } else {
-        console.warn("⚠️ Lưu thất bại:", result.message);
-        showToast("Không thể lưu thông tin, vui lòng thử lại.", "error");
-      }
-    })
-    .catch(err => {
-      console.error("❌ Lỗi gửi dữ liệu:", err);
-      showToast("Không thể kết nối đến máy chủ.", "error");
-    });
+    body: JSON.stringify(savedData)
+  })
+  .then(res => res.json())
+  .then(result => {
+    if (result.success) {
+      savedData = result.data;
+      localStorage.setItem("paymentCode", savedData.paymentCode);
+
+      const serverExpireAt = new Date(result.data.expireAt);
+      const serverNow = new Date(result.data.serverTime);
+      const clientNow = new Date();
+      const drift = clientNow - serverNow;
+      const realRemaining = serverExpireAt - clientNow + drift;
+
+      startCountdown(Math.floor(realRemaining / 1000));
+    } else {
+      console.warn("⚠️ Lưu thất bại:", result.message);
+      showToast("Không thể lưu thông tin, vui lòng thử lại.", "error");
+    }
+  })
+  .catch(err => {
+    console.error("❌ Lỗi gửi dữ liệu:", err);
+    showToast("Không thể kết nối đến máy chủ.", "error");
+  });
+
 
     // ✅ QR & Chuyển bước
     updateBankQR(mssv, fullName, selected, paymentCode);
@@ -399,7 +406,7 @@ function updateBankQR(mssv, fullName, selectedOptions, paymentCode) {
   // Đổi nội dung và màu chữ thông báo
   const paymentAmountDisplay = document.getElementById("paymentAmountDisplay");
   paymentAmountDisplay.innerHTML = `<span style="color: red; font-weight: bold;">
-    ⚠️ Mã QR đã hết hạn. Vui lòng tải lại form để nhận mã mới.
+    ⚠️ Mã QR đã hết hạn. Vui lòng điền lại form để nhận mã mới.
   </span>`;
 
   // Toast thông báo
@@ -547,18 +554,18 @@ socket.on("payment-updated", ({ mssv, status }) => {
 
   // 👉 Hiện các ô thanh toán sau khi xác nhận thông tin
   document.getElementById("paymentOptions").style.display = "flex";
-  const expireTime = new Date(Date.now() + 10 * 60 * 1000);
-savedData.expireAt = expireTime;
+  const serverExpireAt = new Date(savedData.expireAt);
+  const serverNow = new Date(savedData.serverTime);
+  const clientNow = new Date();
+  const drift = clientNow - serverNow;
+  const realRemaining = serverExpireAt - clientNow + drift;
 
-  const diffSec = Math.floor((expireTime.getTime() - Date.now()) / 1000);
-  startCountdown(diffSec);
+  startCountdown(Math.floor(realRemaining / 1000));
 
-  const expireTimeFormatted = expireTime.toLocaleTimeString("vi-VN");
-  const expireText = document.getElementById("expireTimeText");
-  if (expireText) {
-    expireText.textContent = `(hết hạn lúc ${expireTimeFormatted})`;
-  }
+  const expireTimeFormatted = serverExpireAt.toLocaleTimeString("vi-VN");
+  document.getElementById("expireTimeText").textContent = `(hết hạn lúc ${expireTimeFormatted})`;
   // 👉 Cập nhật MongoDB với expireAt mới
+
   fetch("/api/update-payment", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

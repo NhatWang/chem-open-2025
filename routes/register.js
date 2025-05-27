@@ -21,14 +21,28 @@ router.post('/register', async (req, res) => {
     );
 
     if (updated) {
-      return res.json({ success: true, message: "✅ Đã cập nhật đơn đăng ký cũ.", data: updated });
+          return res.json({
+      success: true,
+      message: "✅ Đã cập nhật đơn đăng ký cũ.",
+      data: {
+        ...updated.toObject(),
+        serverTime: new Date().toISOString() // Thêm thời gian server để sync
+      }
+    });
     }
 
     // 🎯 Nếu không tìm thấy đơn pending thì tạo mới
     const newEntry = new Registration(data);
     const saved = await newEntry.save();
 
-    return res.json({ success: true, message: "✅ Đã tạo đơn đăng ký mới.", data: saved });
+        return res.json({
+      success: true,
+      message: "✅ Đã tạo đơn đăng ký mới.",
+      data: {
+        ...saved.toObject(),
+        serverTime: new Date().toISOString()
+      }
+    });
   } catch (err) {
     console.error("❌ Lỗi khi đăng ký:", err);
     return res.status(500).json({ success: false, message: 'Server error' });
