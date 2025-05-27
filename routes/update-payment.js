@@ -4,10 +4,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const Registration = require("../models/Registration");
 const path = require("path");
-const generateReceiptPDF = require("../utils/generateReceiptPDF");
 const { protect, requireRole } = require("../middlewares/auth");
-const sendMail = require("../utils/mailer");
-const { buildMainMailOptions, buildPartnerMailOptions } = require("../utils/mailTemplates");
 const sendConfirmationEmail = require("../utils/sendReceipt");
 
 if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM || !process.env.MONGODB_URI) {
@@ -17,7 +14,7 @@ if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM || !process.env.
 mongoose.connect(process.env.MONGODB_URI);
 
 router.put("/update-payment", async (req, res) => {
-  const { paymentStatus, paymentCode } = req.body;
+  const { paymentStatus, paymentCode, expireAt } = req.body;
 
   if (!paymentCode) {
     return res.status(400).json({ success: false, message: "Thiếu mã thanh toán." });
@@ -37,13 +34,23 @@ router.put("/update-payment", async (req, res) => {
 
     const wasPending = existing.paymentStatus === "pending";
 
-    // Cập nhật trạng thái mới
+    const updateFields = { paymentStatus };
+    if (expireAt) {
+      updateFields.expireAt = new Date(expireAt); // xử lý expireAt hợp lệ
+    }
+
+    const updateOps = { $set: updateFields };
+
+    // Nếu không có expireAt nhưng chuyển sang trạng thái "paid", thì xoá expireAt
+    if (!expireAt && paymentStatus === "paid") {
+      updateOps.$unset = { expireAt: "" };
+    }
+
     const updated = await Registration.findOneAndUpdate(
       { paymentCode },
-      { $set: { paymentStatus }, $unset: { expireAt: "" } },
+      updateOps,
       { new: true }
     );
-
     if (!updated) {
       return res.status(404).json({ success: false, message: "Không tìm thấy đơn đăng ký sau khi cập nhật." });
     }

@@ -290,7 +290,6 @@ checkboxes.forEach(checkbox => {
     paymentMethod: selectedPaymentMethod,
     paymentCode,
     paymentStatus: "pending",
-    expireAt: new Date(Date.now() + 10 * 60 * 1000), // 10 phút
     partnerInfo: ["Đôi nam", "Đôi nữ", "Đôi nam nữ"].some(nd => selected.includes(nd))
       ? {
           fullName: formData.get("partnerName"),
@@ -539,7 +538,7 @@ socket.on("payment-updated", ({ mssv, status }) => {
 
   finalBtn.addEventListener("click", () => {
   resultModal.classList.remove("show");
-
+  
   // Chuyển sang trang thanh toán
   document.getElementById("registrationSection").style.display = "none";
   document.getElementById("paymentSection").style.display = "block";
@@ -548,9 +547,35 @@ socket.on("payment-updated", ({ mssv, status }) => {
 
   // 👉 Hiện các ô thanh toán sau khi xác nhận thông tin
   document.getElementById("paymentOptions").style.display = "flex";
+  const expireTime = new Date(Date.now() + 10 * 60 * 1000);
+savedData.expireAt = expireTime;
 
-  // Bắt đầu đếm ngược
-  startCountdown(600);
+  const diffSec = Math.floor((expireTime.getTime() - Date.now()) / 1000);
+  startCountdown(diffSec);
+
+  const expireTimeFormatted = expireTime.toLocaleTimeString("vi-VN");
+  const expireText = document.getElementById("expireTimeText");
+  if (expireText) {
+    expireText.textContent = `(hết hạn lúc ${expireTimeFormatted})`;
+  }
+  // 👉 Cập nhật MongoDB với expireAt mới
+  fetch("/api/update-payment", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      mssv: savedData.mssv,
+      paymentStatus: "pending",
+      paymentCode: savedData.paymentCode,
+      expireAt: savedData.expireAt
+    })
+  })
+    .then(res => res.json())
+    .then(result => {
+      console.log("✅ Cập nhật expireAt thành công:", result);
+    })
+    .catch(err => {
+      console.error("❌ Lỗi khi cập nhật expireAt:", err);
+    });
 });
 
   document.getElementById("cancelBtn").addEventListener("click", async () => {
