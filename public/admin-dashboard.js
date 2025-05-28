@@ -398,9 +398,15 @@ async function renderMatchUpdateTable() {
     matches.forEach((match, index) => {
       const row = document.createElement("tr");
       const formattedTime = formatDateTime(match.time);
+      const d = DateTime.fromISO(match.time, { zone: "utc" }).setZone("Asia/Ho_Chi_Minh");
+      const dateStr = d.toFormat("yyyy-MM-dd");
+      const timeStr = d.toFormat("HH:mm");
       row.innerHTML = `
           <td>${index + 1}</td>
-          <td>${formattedTime}</td>
+          <td>
+            <input type="date" class="form-control form-control-sm" value="${dateStr}" data-field="date">
+            <input type="time" class="form-control form-control-sm mt-1" value="${timeStr}" data-field="time">
+          </td>
           <td><input class="form-control form-control-sm" value="${match.location || ''}" data-field="location"></td>
           <td>${match.event}</td>
           <td>${match.team1}</td>
