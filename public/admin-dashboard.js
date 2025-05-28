@@ -1,6 +1,7 @@
 let paymentChartInstance = null;
 let eventChartInstance = null;
 let departmentChartInstance = null;
+const { DateTime } = luxon;
 
 function logout() {
   fetch("/api/logout", {
@@ -437,7 +438,6 @@ async function renderMatchUpdateTable() {
 }
 
 function formatDateTime(datetimeStr) {
-  const { DateTime } = luxon;
   if (!datetimeStr) return "-";
 
   const dt = DateTime.fromISO(datetimeStr, { zone: "utc" }).setZone("Asia/Ho_Chi_Minh");
