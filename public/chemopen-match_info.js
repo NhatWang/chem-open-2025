@@ -85,7 +85,7 @@ function renderMatchTabs(matchData) {
         html += `
           <tr>
             <td>${i + 1}</td>
-            <td>${matchTime.toLocaleString('vi-VN')}</td>
+            <td>${formatVietnamTime(match.time)}</td>
             <td>${match.location || "-"}</td>
             <td>${match.team1}</td>
             <td>${match.team2}</td>
@@ -137,3 +137,15 @@ fetch("/api/matches", { credentials: "include" })
     console.error("❌ Lỗi khi tải dữ liệu trận đấu:", err);
     tabContents.innerHTML = "<p style='color: red;'>Không thể tải dữ liệu trận đấu từ máy chủ.</p>";
   });
+
+function formatVietnamTime(datetimeStr) {
+  const { DateTime } = luxon;
+  if (!datetimeStr) return "-";
+
+  const dt = DateTime.fromISO(datetimeStr, { zone: "utc" }).setZone("Asia/Ho_Chi_Minh");
+
+  const weekdays = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+  const weekday = weekdays[dt.weekday % 7];
+
+  return `${weekday}, ${dt.toFormat("dd/MM/yyyy - HH:mm")}`;
+}

@@ -397,46 +397,49 @@ async function renderMatchUpdateTable() {
 
     matches.forEach((match, index) => {
       const row = document.createElement("tr");
-      const [datePart, timePart] = match.time?.split(" ") || ["", ""];
+      const formattedTime = formatDateTime(match.time);
       row.innerHTML = `
-        <td>${index + 1}</td>
-        <td>
-    <input type="date" class="form-control form-control-sm" 
-      value="${datePart}" 
-      data-field="date">
-  </td>
-  <td>
-    <input type="time" class="form-control form-control-sm" 
-      value="${timePart}" 
-      data-field="time">
-  </td>
-        <td><input class="form-control form-control-sm" value="${match.location || ''}" data-field="location"></td>
-        <td>${match.event}</td>
-        <td>${match.team1}</td>
-        <td>${match.team2}</td>
-        <td><input class="form-control form-control-sm" value="${match.set1 || ""}" data-field="set1"></td>
-        <td><input class="form-control form-control-sm" value="${match.set2 || ""}" data-field="set2"></td>
-        <td><input class="form-control form-control-sm" value="${match.set3 || ""}" data-field="set3"></td>
-        <td><input class="form-control form-control-sm" value="${match.total || ""}" data-field="total"></td>
-        <td>
-          <select class="form-select form-select-sm" data-field="status">
-            <option${match.status === "Sắp bắt đầu" ? " selected" : ""}>Sắp bắt đầu</option>
-            <option${match.status === "Đang diễn ra" ? " selected" : ""}>Đang diễn ra</option>
-            <option${match.status === "Đã kết thúc" ? " selected" : ""}>Đã kết thúc</option>
-          </select>
-        </td>
-        <td>
-          <button class="btn btn-sm btn-success" onclick="saveMatch('${match._id}', this)">Lưu</button>
-          <button class="btn btn-sm btn-danger ms-1" onclick="deleteMatch('${match._id}')">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </td>
-      `;
+          <td>${index + 1}</td>
+          <td>${formattedTime}</td>
+          <td><input class="form-control form-control-sm" value="${match.location || ''}" data-field="location"></td>
+          <td>${match.event}</td>
+          <td>${match.team1}</td>
+          <td>${match.team2}</td>
+          <td><input class="form-control form-control-sm" value="${match.set1 || ""}" data-field="set1"></td>
+          <td><input class="form-control form-control-sm" value="${match.set2 || ""}" data-field="set2"></td>
+          <td><input class="form-control form-control-sm" value="${match.set3 || ""}" data-field="set3"></td>
+          <td><input class="form-control form-control-sm" value="${match.total || ""}" data-field="total"></td>
+          <td>
+            <select class="form-select form-select-sm" data-field="status">
+              <option${match.status === "Sắp bắt đầu" ? " selected" : ""}>Sắp bắt đầu</option>
+              <option${match.status === "Đang diễn ra" ? " selected" : ""}>Đang diễn ra</option>
+              <option${match.status === "Đã kết thúc" ? " selected" : ""}>Đã kết thúc</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-success" onclick="saveMatch('${match._id}', this)">Lưu</button>
+            <button class="btn btn-sm btn-danger ms-1" onclick="deleteMatch('${match._id}')">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
       tbody.appendChild(row);
     });
   } catch (err) {
     console.error("❌ Lỗi tải dữ liệu trận đấu:", err);
   }
+}
+
+function formatDateTime(datetimeStr) {
+  const { DateTime } = luxon;
+  if (!datetimeStr) return "-";
+
+  const dt = DateTime.fromISO(datetimeStr, { zone: "utc" }).setZone("Asia/Ho_Chi_Minh");
+
+  const weekdays = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+  const weekday = weekdays[dt.weekday % 7]; // Luxon: 1=Monday → %7 để map về đúng chỉ số
+
+  return `${weekday}, ${dt.toFormat("dd/MM/yyyy - HH:mm")}`;
 }
 
 function saveMatch(id, button) {

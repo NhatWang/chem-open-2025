@@ -3,9 +3,10 @@
 <head>
   <link rel="icon" href="images/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
   <link rel="preload" href="images/chemopen/CHEMOPEN.webp" as="image">
   <meta charset="UTF-8">
-  <title>Đăng nhập quản trị</title>
+  <title>THÔNG TIN TRẬN ĐẤU || GIẢI ĐẤU CẦU LÔNG CHEM-OPEN 2025</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
  body {
@@ -18,71 +19,6 @@
   align-items: center;
   height: 100vh;
   flex-direction: column;
-}
-
-#loadingOverlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background-image: url('images/chemopen/CHEMOPEN.webp');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  flex-direction: column;
-  transition: opacity 0.5s ease;
-  opacity: 1;
-  pointer-events: all;
-}
-
-#loadingOverlay.fade-out {
-  opacity: 0;
-  pointer-events: none;
-}
-
-#loadingOverlay .loading-text {
-  font-size: 30px;
-  color: #000;
-  margin-top: 50px;
-  text-align: center;
-  font-weight: 700;
-}
-
-.shuttle-spinner {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-.shuttle {
-  width: 8%;
-  height: auto;
-  animation-duration: 1s;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
-}
-
-.shuttle1, .shuttle3, .shuttle5 { animation-name: bounceRight; }
-.shuttle2, .shuttle4 { animation-name: bounceLeft; }
-
-.shuttle1 { animation-delay: 0s; }
-.shuttle2 { animation-delay: 0.15s; }
-.shuttle3 { animation-delay: 0.3s; }
-.shuttle4 { animation-delay: 0.45s; }
-.shuttle5 { animation-delay: 0.6s; }
-
-@keyframes bounceRight {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-40px) rotate(5deg); }
-}
-
-@keyframes bounceLeft {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-40px) rotate(-5deg); }
 }
 
 .title-container {
@@ -112,7 +48,7 @@
 }
 
 h1 {
-  color: #004aad;
+  color: #000000;
   text-align: center;
   margin-bottom: 25px;
 }
@@ -218,21 +154,12 @@ td.status-finished {
   </style>
 </head>
 <body>
-    <div id="loadingOverlay">
-  <div class="shuttle-spinner">
-    <img src="images/chemopen/badminton.webp" class="shuttle shuttle1" />
-    <img src="images/chemopen/badminton.webp" class="shuttle shuttle2" />
-    <img src="images/chemopen/badminton.webp" class="shuttle shuttle3" />
-    <img src="images/chemopen/badminton.webp" class="shuttle shuttle4" />
-    <img src="images/chemopen/badminton.webp" class="shuttle shuttle5" />
-  </div>
-  <p class="loading-text"></p>
-</div>
   <div class="title-container">
     <img src="images/chemopen/Title.webp" alt="Title" class="title-image">
   </div>
-  <h1>📅 Trận đấu theo nội dung</h1>
+  
   <div class="match-container">
+    <h1>LỊCH THI ĐẤU</h1>
   <div class="tabs" id="tab-buttons"></div>
   <div id="tab-contents"></div>
 </div>
