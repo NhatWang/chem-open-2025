@@ -325,7 +325,6 @@ checkboxes.forEach(checkbox => {
       const drift = clientNow - serverNow;
       const realRemaining = serverExpireAt - clientNow + drift;
 
-      startCountdown(Math.floor(realRemaining / 1000));
     } else {
       console.warn("⚠️ Lưu thất bại:", result.message);
       showToast("Không thể lưu thông tin, vui lòng thử lại.", "error");

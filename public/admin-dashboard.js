@@ -425,7 +425,12 @@ async function renderMatchUpdateTable() {
             <option${match.status === "Đã kết thúc" ? " selected" : ""}>Đã kết thúc</option>
           </select>
         </td>
-        <td><button class="btn btn-sm btn-success" onclick="saveMatch('${match._id}', this)">Lưu</button></td>
+        <td>
+          <button class="btn btn-sm btn-success" onclick="saveMatch('${match._id}', this)">Lưu</button>
+          <button class="btn btn-sm btn-danger ms-1" onclick="deleteMatch('${match._id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
       `;
       tbody.appendChild(row);
     });
@@ -693,6 +698,28 @@ async function createMatch(event) {
     showToast("❌ Lỗi khi tạo trận đấu", "error");
   }
 }
+
+async function deleteMatch(matchId) {
+  if (!confirm("❌ Bạn có chắc muốn xoá trận đấu này không?")) return;
+
+  try {
+    const res = await fetch(`/api/delete-match/${matchId}`, {
+      method: "DELETE",
+      credentials: "include"
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast("✅ Đã xoá trận đấu.", "success");
+      renderMatchUpdateTable(); // Refresh bảng
+    } else {
+      showToast("❌ Không xoá được trận đấu.", "error");
+    }
+  } catch (err) {
+    console.error("❌ Lỗi khi xoá trận đấu:", err);
+    showToast("❌ Lỗi máy chủ khi xoá trận đấu.", "error");
+  }
+}
+
 
 document.getElementById("changePasswordForm").addEventListener("submit", async function (e) {
     e.preventDefault();

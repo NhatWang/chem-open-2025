@@ -52,4 +52,22 @@ router.post("/create-match", protect, requireRole(["admin", "superadmin"]), asyn
   }
 });
 
+// DELETE /api/delete-match/:id - xoá trận đấu
+router.delete("/api/delete-match/:id", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
+  try {
+    const deleted = await Match.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy trận đấu" });
+    }
+
+    const io = req.app.get("io");
+    if (io) io.emit("match-deleted", { id: req.params.id });
+
+    res.json({ success: true, message: "Đã xoá trận đấu" });
+  } catch (err) {
+    console.error("❌ Lỗi xoá trận đấu:", err);
+    res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+});
+
 module.exports = router;
