@@ -205,6 +205,12 @@ body {
   button:hover {
     background: #0056b3;
   }
+
+  button:disabled {
+    background-color: #6c757d; /* màu xám đậm hơn */
+    cursor: not-allowed;
+    opacity: 0.9;
+  }
   
   #msg {
     margin-top: 15px;
