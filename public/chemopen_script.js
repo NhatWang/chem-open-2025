@@ -823,14 +823,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Hàm xử lý khi đến hạn
   function triggerDeadline() {
-    const deadlineModal = document.getElementById("deadlineModal");
-    deadlineModal.style.display = "flex";
+  const deadlineModal = document.getElementById("deadlineModal");
+  deadlineModal.classList.add("active"); // Thêm class active
 
-    // Disable nút và inputs
-    document.getElementById("nextButton").disabled = true;
-    document.getElementById("confirmInfoButton")?.setAttribute("disabled", "true");
-    document.querySelectorAll('input[name="paymentMethod"]').forEach(el => el.disabled = true);
-  }
+  document.getElementById("nextButton").disabled = true;
+  document.getElementById("confirmInfoButton")?.setAttribute("disabled", "true");
+  document.querySelectorAll('input[name="paymentMethod"]').forEach(el => el.disabled = true);
+}
 
   // Tính thời điểm hôm nay 20:00
   const todayDeadline = new Date(
