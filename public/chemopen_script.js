@@ -817,17 +817,3 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-function triggerDeadline() {
-  const deadlineModal = document.getElementById("deadlineModal");
-  if (!deadlineModal) return;
-
-  deadlineModal.classList.add("active");
-
-  const nextBtn = document.getElementById("nextButton");
-  const confirmBtn = document.getElementById("confirmInfoButton");
-
-  if (nextBtn) nextBtn.disabled = true;
-  if (confirmBtn) confirmBtn.setAttribute("disabled", "true");
-
-  document.querySelectorAll('input[name="paymentMethod"]').forEach(el => el.disabled = true);
-}
