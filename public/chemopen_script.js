@@ -817,34 +817,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const deadlineHour = 20; // 20h (8PM)
-  const now = new Date();
-
-  // Hàm xử lý khi đến hạn
-  function triggerDeadline() {
+function triggerDeadline() {
   const deadlineModal = document.getElementById("deadlineModal");
-  deadlineModal.classList.add("active"); // Thêm class active
+  if (!deadlineModal) return;
 
-  document.getElementById("nextButton").disabled = true;
-  document.getElementById("confirmInfoButton")?.setAttribute("disabled", "true");
+  deadlineModal.classList.add("active");
+
+  const nextBtn = document.getElementById("nextButton");
+  const confirmBtn = document.getElementById("confirmInfoButton");
+
+  if (nextBtn) nextBtn.disabled = true;
+  if (confirmBtn) confirmBtn.setAttribute("disabled", "true");
+
   document.querySelectorAll('input[name="paymentMethod"]').forEach(el => el.disabled = true);
 }
-
-  // Tính thời điểm hôm nay 20:00
-  const todayDeadline = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    deadlineHour, 0, 0
-  );
-
-  if (now >= todayDeadline) {
-    // Đã qua 20h => chạy ngay
-    triggerDeadline();
-  } else {
-    // Chưa đến 20h => chờ đến đúng điểm đó
-    const msUntil = todayDeadline - now;
-    setTimeout(triggerDeadline, msUntil);
-  }
-});
