@@ -8,7 +8,7 @@ const drawPool = {
   "Đơn nữ": Array.from({ length: 16 }, (_, i) => `B${i + 1}`),
   "Đôi nam nữ": Array.from({ length: 16 }, (_, i) => `C${i + 1}`),
   "Đôi nam": Array.from({ length: 16 }, (_, i) => `D${i + 1}`),
-  "Đôi nữ": Array.from({ length: 16 }, (_, i) => `E${i + 1}`),
+  "Đôi nữ": Array.from({ length: 8 }, (_, i) => `E${i + 1}`),
 };
 
 // ✅ API kiểm tra trước khi bốc

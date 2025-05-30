@@ -817,3 +817,35 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  const deadlineHour = 20; // 20h (8PM)
+  const now = new Date();
+
+  // Hàm xử lý khi đến hạn
+  function triggerDeadline() {
+    const deadlineModal = document.getElementById("deadlineModal");
+    deadlineModal.style.display = "flex";
+
+    // Disable nút và inputs
+    document.getElementById("nextButton").disabled = true;
+    document.getElementById("confirmInfoButton")?.setAttribute("disabled", "true");
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(el => el.disabled = true);
+  }
+
+  // Tính thời điểm hôm nay 20:00
+  const todayDeadline = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    deadlineHour, 0, 0
+  );
+
+  if (now >= todayDeadline) {
+    // Đã qua 20h => chạy ngay
+    triggerDeadline();
+  } else {
+    // Chưa đến 20h => chờ đến đúng điểm đó
+    const msUntil = todayDeadline - now;
+    setTimeout(triggerDeadline, msUntil);
+  }
+});

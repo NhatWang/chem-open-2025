@@ -826,3 +826,16 @@ select:focus {
 .guide-btn:hover {
   background-color: #fdb700;
 }
+
+.modal-content h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Nội dung văn bản */
+.modal-content p {
+  margin: 1rem 0 2rem;
+  color: #555;
+  line-height: 1.4;
+}
