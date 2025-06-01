@@ -412,6 +412,7 @@ async function renderMatchUpdateTable() {
           <td>
           <select class="form-select form-select-sm" data-field="round">
             <option value="Vòng loại"    ${match.round === "Vòng loại" ? "selected" : ""}>Vòng loại</option>
+            <option value="Vòng tứ kết"  ${match.round === "Vòng tứ kết" ? "selected" : ""}>Vòng tứ kết</option>
             <option value="Vòng bán kết" ${match.round === "Vòng bán kết" ? "selected" : ""}>Vòng bán kết</option>
             <option value="Vòng chung kết" ${match.round === "Vòng chung kết" ? "selected" : ""}>Vòng chung kết</option>
           </select>
