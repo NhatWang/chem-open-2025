@@ -22,21 +22,20 @@
 }
 
 .title-container {
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255, 255, 255, 0.8); /* Tạo nền mờ để không che mất background chính */
-  z-index: 100;                           /* Đảm bảo title luôn nổi trên nội dung */
-  padding-top: 20px;                      /* Có thể điều chỉnh khoảng cách phía trên nếu muốn */
-  padding-bottom: 10px;                   /* Có thể điều chỉnh khoảng cách phía dưới nếu muốn */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  z-index: 1;
+  padding: 0;
+  margin: 0;
 }
 
 .title-image {
   max-width: 45%;
   height: auto;
   display: block;
-  margin-top: 80px;
+  margin-top: 100px;
 }
 
 .match-container {
@@ -46,6 +45,7 @@
   border-radius: 20px;
   padding: 30px 25px;
   box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  margin-top: 20px;
 }
 
 h1 {
@@ -55,6 +55,7 @@ h1 {
 }
 
 /* Tabs layout */
+/* --- Tabs layout --- */
 .tabs {
   display: flex;
   justify-content: space-between;
@@ -84,21 +85,22 @@ h1 {
   font-weight: bold;
 }
 
-/* Tab content box */
+/* --- Tab content box (bỏ max-height và overflow ở đây) --- */
 .tab-content {
   display: none;
   background: white;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   border-radius: 0 0 10px 10px;
-  max-height: 50vh; 
-  overflow-y: auto;
+  /* Đã loại bỏ max-height: 50vh và overflow-y ở đây,
+     vì phần cuộn giờ sẽ được điều khiển bởi <tbody> bên trong bảng */
 }
+
 .tab-content.active {
   display: block;
 }
 
-/* Table formatting */
+/* --- Table formatting --- */
 table {
   font-size: 17px;
   background-color: #ffffffee;
@@ -110,11 +112,36 @@ table {
   overflow: hidden;
 }
 
+/* Giữ phần <thead> cố định */
+.tab-content table thead {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Phần <tbody> chỉ hiển thị 4 dòng, có scroll riêng */
+.tab-content table tbody {
+  display: block;
+  /* Ví dụ: nếu mỗi dòng cao ~56px, 4 dòng = 224px.
+     Điều chỉnh 56px theo thực tế cao dòng của bạn */
+  max-height: calc(4 * 56px);
+  overflow-y: auto;
+  width: 100%;
+}
+
+/* Khi <tbody> là block, cần ép mỗi <tr> thành table-row để đúng layout */
+.tab-content table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
 th, td {
   border: 1px solid #ccc;
   padding: 15px 12px;
   text-align: center;
   font-weight: 500;
+  /* Giữ nguyên padding/border/text-align như trước */
 }
 
 th {
@@ -123,7 +150,7 @@ th {
   font-weight: 600;
 }
 
-/* Status styles */
+/* --- Status styles (4 trạng thái) --- */
 td.status-not-started {
   color: #6b7280;             /* xám đậm */
   font-weight: 700;
@@ -132,48 +159,52 @@ td.status-not-started {
 }
 
 td.status-upcoming {
-  color: #f59e0b;
+  color: #f59e0b;             /* vàng cam */
   font-weight: 700;
-  background-color: #fff7e6;
-  border-radius: 6px;
-}
-td.status-ongoing {
-  color: #1d4ed8;
-  font-weight: 700;
-  background-color: #e0edff;
-  border-radius: 6px;
-}
-td.status-finished {
-  color: #16a34a;
-  font-weight: 700;
-  background-color: #e6f9eb;
+  background-color: #fff7e6;  /* vàng nhạt */
   border-radius: 6px;
 }
 
+td.status-ongoing {
+  color: #1d4ed8;             /* xanh da trời */
+  font-weight: 700;
+  background-color: #e0edff;  /* xanh nhạt */
+  border-radius: 6px;
+}
+
+td.status-finished {
+  color: #16a34a;             /* xanh lục */
+  font-weight: 700;
+  background-color: #e6f9eb;  /* xanh lục nhạt */
+  border-radius: 6px;
+}
+
+/* --- Round (vòng đấu) styles --- */
 td.round-vong-loai {
-  background-color: #f4cccc;   /* Hồng nhạt */
-  color: #000000;              /* Nâu đậm */
+  background-color: #f4cccc;  /* Hồng nhạt */
+  color: #000000;             /* Nâu đậm */
   font-weight: bold;
 }
 
 td.round-tu-ket {
-  background-color: #d0e0e3;   /* Xanh da trời nhạt */
-  color: #000000;              /* Xanh đậm */
+  background-color: #d0e0e3;  /* Xanh da trời nhạt */
+  color: #000000;             /* Xanh đậm */
   font-weight: bold;
 }
 
 td.round-ban-ket {
-  background-color: #b6d7a8;   /* Xanh lục nhạt */
-  color: #000000;              /* Xanh lục đậm */
+  background-color: #b6d7a8;  /* Xanh lục nhạt */
+  color: #000000;             /* Xanh lục đậm */
   font-weight: bold;
 }
 
 td.round-chung-ket {
-  background-color: #ffd966;   /* Vàng nhạt */
-  color: #000000;              /* Vàng đậm */
+  background-color: #ffd966;  /* Vàng nhạt */
+  color: #000000;             /* Vàng đậm */
   font-weight: bold;
 }
 
+/* --- Footer --- */
 .footer {
   position: relative;
   z-index: 2;
