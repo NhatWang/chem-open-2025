@@ -59,6 +59,7 @@ function renderMatchTabs(matchData) {
               <th>STT</th>
               <th>Thời gian</th>
               <th>Địa điểm</th>
+              <th>Vòng đấu</th>
               <th>Đối thủ 1</th>
               <th>Đối thủ 2</th>
               <th>Set 1</th>
@@ -89,6 +90,7 @@ function renderMatchTabs(matchData) {
             <td>${i + 1}</td>
             <td>${formatVietnamTime(match.time)}</td>
             <td>${match.location || "-"}</td>
+            <td>${match.round || "-"}</td>
             <td>${match.team1}</td>
             <td>${match.team2}</td>
             <td>${match.set1 || "-"}</td>
