@@ -409,6 +409,13 @@ async function renderMatchUpdateTable() {
           </td>
           <td><input class="form-control form-control-sm" value="${match.location || ''}" data-field="location"></td>
           <td>${match.event}</td>
+          <td>
+          <select class="form-select form-select-sm" data-field="round">
+            <option value="Vòng loại"    ${match.round === "Vòng loại" ? "selected" : ""}>Vòng loại</option>
+            <option value="Vòng bán kết" ${match.round === "Vòng bán kết" ? "selected" : ""}>Vòng bán kết</option>
+            <option value="Vòng chung kết" ${match.round === "Vòng chung kết" ? "selected" : ""}>Vòng chung kết</option>
+          </select>
+        </td>
           <td>${match.team1}</td>
           <td>${match.team2}</td>
           <td><input class="form-control form-control-sm" value="${match.set1 || ""}" data-field="set1"></td>
@@ -460,6 +467,7 @@ function saveMatch(id, button) {
 
     if (field === "date") dateStr = input.value;
     else if (field === "time") timeStr = input.value;
+    else if (field === "round") body.round = input.value;
     else body[field] = input.value;
   });
 
@@ -710,6 +718,7 @@ async function createMatch(event) {
   // 5. Tạo payload
   const payload = {
     event: data.event,
+    round: data.round,
     time: payloadTime,
     location: data.location,
     team1: data.team1,
