@@ -8,7 +8,11 @@ const matchSchema = new mongoose.Schema({
   },
   time: { type: Date, required: true },
   location: { type: String, default: "" },
-  round: { type: String, default: "" },
+  round: {
+    type: String,
+    required: true,
+    enum: ["Vòng loại", "Vòng bán kết", "Vòng chung kết"]
+  },
   team1: { type: String, required: true },
   team2: { type: String, required: true },
   set1: { type: String, default: "" },

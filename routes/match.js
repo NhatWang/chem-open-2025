@@ -18,10 +18,10 @@ router.get("/api/matches", async (req, res) => {
 router.put("/update-match/:id", protect, requireRole(["collab", "admin", "superadmin"]), async (req, res) => {
   const io = req.app.get("io");
   try {
-    const { set1, set2, set3, total, status, time, location } = req.body;
+    const { set1, set2, set3, total, status, time, location, round } = req.body;
     const updated = await Match.findByIdAndUpdate(
       req.params.id,
-      { set1, set2, set3, total, status, time: time ? new Date(time) : undefined, location },
+      { set1, set2, set3, total, status, time: time ? new Date(time) : undefined, location, round },
       { new: true }
     );
 
@@ -38,8 +38,8 @@ router.put("/update-match/:id", protect, requireRole(["collab", "admin", "supera
 // POST /create-match - tạo trận đấu mới
 router.post("/create-match", protect, requireRole(["admin", "superadmin"]), async (req, res) => {
   try {
-    const { event, time, location, team1, team2 } = req.body;
-    const match = new Match({ event, time, location, team1, team2 });
+    const { event, round, time, location, team1, team2 } = req.body;
+    const match = new Match({ event, round, time, location, team1, team2 });
     await match.save();
 
     const io = req.app.get("io");

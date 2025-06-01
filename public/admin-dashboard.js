@@ -703,6 +703,11 @@ async function createMatch(event) {
     return;
   }
 
+  if (!data.round) {
+    showToast("❌ Bạn phải chọn vòng đấu.", "error");
+    return;
+  }
+
   // 2. Ghép thành ISO 8601 tạm thời (thêm ":00" cho giây)
   const naiveISO = `${data.date}T${data.time}:00`;  
   // ví dụ: "2025-06-07T15:30:00"
