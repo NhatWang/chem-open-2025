@@ -677,8 +677,19 @@ async function createMatch(event) {
   const form = document.getElementById("createMatchForm");
   const formData = new FormData(form);
   const data = Object.fromEntries(formData.entries());
+  // data sẽ chứa { event: "...", date: "2025-06-07", time: "15:30", location: "...", team1: "...", team2: "..." }
 
-  const datetime = `${data.date}T${data.time}`;
+  // 1. Kiểm tra bắt buộc chọn date và time
+  if (!data.date || !data.time) {
+    showToast("❌ Bạn phải chọn cả ngày và giờ thi đấu.", "error");
+    return;
+  }
+
+  // 2. Ghép thành ISO 8601 chuẩn (thêm :00 cho phần giây)
+  //    Ví dụ: "2025-06-07" + "T" + "15:30" + ":00" => "2025-06-07T15:30:00"
+  const datetime = `${data.date}T${data.time}:00`;
+
+  // 3. Tạo payload
   const payload = {
     event: data.event,
     time: datetime,
@@ -695,18 +706,25 @@ async function createMatch(event) {
       body: JSON.stringify(payload)
     });
     const result = await res.json();
+
     if (result.success) {
       showToast("✅ Đã tạo trận đấu", "success");
-      bootstrap.Modal.getInstance(document.getElementById("createMatchModal")).hide();
-      renderMatchUpdateTable(); // Refresh danh sách
+      // Đóng modal
+      bootstrap.Modal
+        .getInstance(document.getElementById("createMatchModal"))
+        .hide();
+      // Làm mới bảng danh sách trận
+      renderMatchUpdateTable();
     } else {
-      showToast("❌ " + result.message, "error");
+      // Nếu server trả về { success: false, message: "..." }
+      showToast("❌ " + (result.message || "Không tạo được trận đấu."), "error");
     }
   } catch (err) {
     console.error("❌ Lỗi tạo trận:", err);
     showToast("❌ Lỗi khi tạo trận đấu", "error");
   }
 }
+
 
 async function deleteMatch(matchId) {
   if (!confirm("❌ Bạn có chắc muốn xoá trận đấu này không?")) return;
