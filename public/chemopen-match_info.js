@@ -70,14 +70,15 @@ function renderMatchTabs(matchData) {
           <tbody>
       `;
       filtered.forEach((match, i) => {
-        const now = new Date();
-        const matchTime = new Date(match.time);
-        let statusClass = "status-upcoming", statusLabel = "Sắp bắt đầu";
+        const now = DateTime.now().setZone("Asia/Ho_Chi_Minh");
+        const matchTime = DateTime.fromISO(match.time).setZone("Asia/Ho_Chi_Minh");
+        const matchEnd = matchTime.plus({ minutes: 45 });
 
-        if (now >= matchTime && now <= new Date(matchTime.getTime() + 45 * 60 * 1000)) {
+        let statusClass = "status-upcoming", statusLabel = "Sắp bắt đầu";
+        if (now >= matchTime && now <= matchEnd) {
           statusClass = "status-ongoing";
           statusLabel = "Đang diễn ra";
-        } else if (now > new Date(matchTime.getTime() + 45 * 60 * 1000)) {
+        } else if (now > matchEnd) {
           statusClass = "status-finished";
           statusLabel = "Đã kết thúc";
         }
@@ -142,7 +143,7 @@ function formatVietnamTime(datetimeStr) {
   const { DateTime } = luxon;
   if (!datetimeStr) return "-";
 
-  const dt = DateTime.fromISO(datetimeStr, { zone: "utc" }).setZone("Asia/Ho_Chi_Minh");
+  const dt = DateTime.fromISO(datetimeStr).setZone("Asia/Ho_Chi_Minh");
 
   const weekdays = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
   const weekday = weekdays[dt.weekday % 7];

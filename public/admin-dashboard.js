@@ -398,8 +398,7 @@ async function renderMatchUpdateTable() {
 
     matches.forEach((match, index) => {
       const row = document.createElement("tr");
-      const formattedTime = formatDateTime(match.time);
-      const d = DateTime.fromISO(match.time, { zone: "utc" }).setZone("Asia/Ho_Chi_Minh");
+      const d = DateTime.fromISO(match.time).setZone("Asia/Ho_Chi_Minh");
       const dateStr = d.toFormat("yyyy-MM-dd");
       const timeStr = d.toFormat("HH:mm");
       row.innerHTML = `
@@ -440,7 +439,7 @@ async function renderMatchUpdateTable() {
 function formatDateTime(datetimeStr) {
   if (!datetimeStr) return "-";
 
-  const dt = DateTime.fromISO(datetimeStr, { zone: "utc" }).setZone("Asia/Ho_Chi_Minh");
+  const dt = DateTime.fromISO(datetimeStr).setZone("Asia/Ho_Chi_Minh");
 
   const weekdays = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
   const weekday = weekdays[dt.weekday % 7]; // Luxon: 1=Monday → %7 để map về đúng chỉ số
@@ -455,6 +454,7 @@ function saveMatch(id, button) {
   const body = {};
   let dateStr = "", timeStr = "";
 
+  // 1) Đọc từng input/select trong cùng hàng
   inputs.forEach(input => {
     const field = input.getAttribute("data-field");
 
@@ -463,10 +463,17 @@ function saveMatch(id, button) {
     else body[field] = input.value;
   });
 
+  // 2) Nếu có date + time, chuyển sang ISO+07:00
   if (dateStr && timeStr) {
-  body.time = `${dateStr} ${timeStr}`; // lưu chuỗi
-}
+    // Ghép thành "YYYY-MM-DDTHH:mm:00"
+    const naiveISO = `${dateStr}T${timeStr}:00`;
+    // Parse vào timezone VN
+    const dtVN = luxon.DateTime.fromISO(naiveISO, { zone: "Asia/Ho_Chi_Minh" });
+    // Xuất string kèm offset +07:00
+    body.time = dtVN.toISO();
+  }
 
+  // 3) Gửi PUT request
   fetch(`/api/update-match/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -477,15 +484,18 @@ function saveMatch(id, button) {
     .then(data => {
       if (data.success) {
         showToast("✅ Đã lưu trận đấu.", "success");
+        // Sau khi thành công, bạn có thể choose load lại dữ liệu
+        renderMatchUpdateTable();
       } else {
         showToast("❌ Lỗi lưu.", "error");
       }
     })
     .catch(err => {
-      console.error("❌ Lỗi gửi request:", err);
+      console.error("❌ Lỗi khi gửi request:", err);
       showToast("❌ Lỗi khi gửi dữ liệu.", "error");
     });
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const tabMatchUpdate = document.querySelector('a[href="#match-update"]');
@@ -677,7 +687,7 @@ async function createMatch(event) {
   const form = document.getElementById("createMatchForm");
   const formData = new FormData(form);
   const data = Object.fromEntries(formData.entries());
-  // data sẽ chứa { event: "...", date: "2025-06-07", time: "15:30", location: "...", team1: "...", team2: "..." }
+  // data chứa { event: "...", date: "2025-06-07", time: "15:30", location: "...", team1: "...", team2: "..." }
 
   // 1. Kiểm tra bắt buộc chọn date và time
   if (!data.date || !data.time) {
@@ -685,14 +695,22 @@ async function createMatch(event) {
     return;
   }
 
-  // 2. Ghép thành ISO 8601 chuẩn (thêm :00 cho phần giây)
-  //    Ví dụ: "2025-06-07" + "T" + "15:30" + ":00" => "2025-06-07T15:30:00"
-  const datetime = `${data.date}T${data.time}:00`;
+  // 2. Ghép thành ISO 8601 tạm thời (thêm ":00" cho giây)
+  const naiveISO = `${data.date}T${data.time}:00`;  
+  // ví dụ: "2025-06-07T15:30:00"
 
-  // 3. Tạo payload
+  // 3. Dùng Luxon để parse vào múi giờ VN
+  const dtVN = luxon.DateTime.fromISO(naiveISO, { zone: "Asia/Ho_Chi_Minh" });
+  // bây giờ dtVN là DateTime đúng theo giờ VN (UTC+7)
+
+  // 4. Xuất chuỗi ISO kèm offset +07:00 để gửi lên backend
+  const payloadTime = dtVN.toISO();  
+  // ví dụ: "2025-06-07T15:30:00.000+07:00"
+
+  // 5. Tạo payload
   const payload = {
     event: data.event,
-    time: datetime,
+    time: payloadTime,
     location: data.location,
     team1: data.team1,
     team2: data.team2
