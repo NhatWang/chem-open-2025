@@ -72,17 +72,48 @@ function renderMatchTabs(matchData) {
           <tbody>
       `;
       filtered.forEach((match, i) => {
+        // Lấy thời điểm hiện tại ở múi giờ Việt Nam
         const now = DateTime.now().setZone("Asia/Ho_Chi_Minh");
-        const matchTime = DateTime.fromISO(match.time).setZone("Asia/Ho_Chi_Minh");
-        const matchEnd = matchTime.plus({ minutes: 45 });
 
-        let statusClass = "status-upcoming", statusLabel = "Sắp bắt đầu";
-        if (now >= matchTime && now <= matchEnd) {
+        // Lấy thời gian bắt đầu trận đã được lưu (cũng phải ở múi giờ VN)
+        const matchTime = DateTime.fromISO(match.time).setZone("Asia/Ho_Chi_Minh");
+
+        // Giờ kết thúc = matchTime + 30 phút
+        const matchEnd = matchTime.plus({ minutes: 30 });
+
+        // "Ngưỡng sắp bắt đầu" = 10 phút trước giờ bắt đầu
+        const warningThreshold = matchTime.minus({ minutes: 10 });
+
+        let statusClass = "";
+        let statusLabel = "";
+
+        if (now < warningThreshold) {
+          // Còn xa hơn 10 phút → "Chưa diễn ra"
+          statusClass = "status-not-started";
+          statusLabel = "Chưa diễn ra";
+        } else if (now >= warningThreshold && now < matchTime) {
+          // Từ 10 phút trước đến đúng giờ bắt đầu → "Sắp bắt đầu"
+          statusClass = "status-upcoming";
+          statusLabel = "Sắp bắt đầu";
+        } else if (now >= matchTime && now <= matchEnd) {
+          // Từ giờ bắt đầu đến giờ kết thúc → "Đang diễn ra"
           statusClass = "status-ongoing";
           statusLabel = "Đang diễn ra";
-        } else if (now > matchEnd) {
+        } else {
+          // Sau giờ kết thúc → "Đã kết thúc"
           statusClass = "status-finished";
           statusLabel = "Đã kết thúc";
+        }
+
+        let roundClass = "";
+        if (match.round === "Vòng loại") {
+          roundClass = "round-vong-loai";
+        } else if (match.round === "Tứ kết") {
+          roundClass = "round-tu-ket";
+        } else if (match.round === "Bán kết") {
+          roundClass = "round-ban-ket";
+        } else if (match.round === "Chung kết") {
+          roundClass = "round-chung-ket";
         }
 
         html += `
@@ -90,7 +121,7 @@ function renderMatchTabs(matchData) {
             <td>${i + 1}</td>
             <td>${formatVietnamTime(match.time)}</td>
             <td>${match.location || "-"}</td>
-            <td>${match.round || "-"}</td>
+            <td class="${roundClass}">${match.round || "-"}</td>
             <td>${match.team1}</td>
             <td>${match.team2}</td>
             <td>${match.set1 || "-"}</td>

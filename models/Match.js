@@ -21,8 +21,8 @@ const matchSchema = new mongoose.Schema({
   total: { type: String, default: "" },
   status: {
     type: String,
-    enum: ["Sắp bắt đầu", "Đang diễn ra", "Đã kết thúc"],
-    default: "Sắp bắt đầu"
+    enum: ["Chưa diễn ra", "Sắp bắt đầu", "Đang diễn ra", "Đã kết thúc"],
+    default: "Chưa diễn ra"
   }
 }, {
   timestamps: true // Tự động thêm createdAt và updatedAt

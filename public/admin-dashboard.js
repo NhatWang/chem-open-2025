@@ -425,6 +425,7 @@ async function renderMatchUpdateTable() {
           <td><input class="form-control form-control-sm" value="${match.total || ""}" data-field="total"></td>
           <td>
             <select class="form-select form-select-sm" data-field="status">
+              <option${match.status === "Chưa diễn ra" ? " selected" : ""}>Chưa diễn ra</option>
               <option${match.status === "Sắp bắt đầu" ? " selected" : ""}>Sắp bắt đầu</option>
               <option${match.status === "Đang diễn ra" ? " selected" : ""}>Đang diễn ra</option>
               <option${match.status === "Đã kết thúc" ? " selected" : ""}>Đã kết thúc</option>
