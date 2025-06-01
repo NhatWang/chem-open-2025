@@ -1,3 +1,4 @@
+const { DateTime } = luxon;
 window.addEventListener("load", () => {
   setTimeout(() => {
     const overlay = document.getElementById("loadingOverlay");
@@ -140,7 +141,6 @@ fetch("/api/matches", { credentials: "include" })
   });
 
 function formatVietnamTime(datetimeStr) {
-  const { DateTime } = luxon;
   if (!datetimeStr) return "-";
 
   const dt = DateTime.fromISO(datetimeStr).setZone("Asia/Ho_Chi_Minh");
