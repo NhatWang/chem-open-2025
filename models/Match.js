@@ -13,10 +13,8 @@ const matchSchema = new mongoose.Schema({
     required: true,
     enum: ["Vòng loại", "Vòng tứ kết", "Vòng bán kết", "Vòng chung kết"]
   },
-  team1Code: { type: String, required: true },    // mã bốc thăm (vd: "A1")
-  team1Name: { type: String, required: true },    // tên thật (vd: "Nguyễn Văn A")
-  team2Code: { type: String, required: true },    // mã bốc thăm (vd: "A2")
-  team2Name: { type: String, required: true },    // tên thật (vd: "Trần Thị B")
+  team1: { type: String, required: true },
+  team2: { type: String, required: true },
   set1: { type: String, default: "" },
   set2: { type: String, default: "" },
   set3: { type: String, default: "" },
