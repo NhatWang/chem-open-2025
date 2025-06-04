@@ -417,8 +417,12 @@ async function renderMatchUpdateTable() {
             <option value="Vòng chung kết" ${match.round === "Vòng chung kết" ? "selected" : ""}>Vòng chung kết</option>
           </select>
         </td>
-          <td>${match.team1}</td>
-          <td>${match.team2}</td>
+           <td>
+           <input class="form-control form-control-sm" value="${match.team1 || ""}" data-field="team1" placeholder="Nhập đội 1">
+        </td>
+        <td>
+          <input class="form-control form-control-sm" value="${match.team2 || ""}" data-field="team2" placeholder="Nhập đội 2">
+        </td>
           <td><input class="form-control form-control-sm" value="${match.set1 || ""}" data-field="set1"></td>
           <td><input class="form-control form-control-sm" value="${match.set2 || ""}" data-field="set2"></td>
           <td><input class="form-control form-control-sm" value="${match.set3 || ""}" data-field="set3"></td>
