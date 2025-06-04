@@ -19,10 +19,10 @@ router.get("/api/matches", async (req, res) => {
 router.put("/update-match/:id", protect, requireRole(["collab", "admin", "superadmin"]), async (req, res) => {
   const io = req.app.get("io");
   try {
-    const { set1, set2, set3, total, status, time, location, round } = req.body;
+    const { team1, team2, set1, set2, set3, total, status, time, location, round } = req.body;
     const updated = await Match.findByIdAndUpdate(
       req.params.id,
-      { set1, set2, set3, total, status, time: time ? new Date(time) : undefined, location, round },
+      { team1, team2, set1, set2, set3, total, status, time: time ? new Date(time) : undefined, location, round },
       { new: true }
     );
 
