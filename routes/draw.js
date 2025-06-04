@@ -5,9 +5,9 @@ console.log("✅ draw.js loaded");
 
 const drawPool = {
   "Đơn nam": Array.from({ length: 32 }, (_, i) => `A${i + 1}`),
-  "Đơn nữ": Array.from({ length: 16 }, (_, i) => `B${i + 1}`),
-  "Đôi nam nữ": Array.from({ length: 16 }, (_, i) => `C${i + 1}`),
-  "Đôi nam": Array.from({ length: 16 }, (_, i) => `D${i + 1}`),
+  "Đơn nữ": Array.from({ length: 6 }, (_, i) => `B${i + 1}`),
+  "Đôi nam nữ": Array.from({ length: 9 }, (_, i) => `C${i + 1}`),
+  "Đôi nam": Array.from({ length: 17 }, (_, i) => `D${i + 1}`),
   "Đôi nữ": Array.from({ length: 8 }, (_, i) => `E${i + 1}`),
 };
 
