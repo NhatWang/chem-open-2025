@@ -110,9 +110,9 @@ function renderMatchTabs(matchData) {
           roundClass = "round-vong-loai";
         } else if (match.round === "Tứ kết") {
           roundClass = "round-tu-ket";
-        } else if (match.round === "Bán kết") {
+        } else if (match.round === "Vòng bán kết") {  // <-- sửa chỗ này
           roundClass = "round-ban-ket";
-        } else if (match.round === "Chung kết") {
+        } else if (match.round === "Vòng chung kết") { // <-- và ở đây
           roundClass = "round-chung-ket";
         }
 
