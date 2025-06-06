@@ -122,8 +122,8 @@ function renderMatchTabs(matchData) {
             <td>${formatVietnamTime(match.time)}</td>
             <td>${match.location || "-"}</td>
             <td class="${roundClass}">${match.round || "-"}</td>
-            <td>${match.team1}</td>
-            <td>${match.team2}</td>
+            <td class="team">${match.team1}</td>
+            <td class="team">${match.team2}</td>
             <td>${match.set1 || "-"}</td>
             <td>${match.set2 || "-"}</td>
             <td>${match.set3 || "-"}</td>
